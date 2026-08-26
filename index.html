@@ -257,17 +257,13 @@ var TABS = [
   { key:"planning", label:"Planning" },
   { key:"ceremony", label:"Cérémonie" },
   { key:"animations", label:"Animations" },
-  { key:"tasks", label:"Tâches" },
   { key:"trousse", label:"Trousse de secours" },
   { key:"demoiselles", label:"Demoiselles d'honneur" },
   { key:"temoins", label:"Témoins" },
   { key:"menu", label:"Menu" },
   { key:"vendors", label:"Prestataires" },
-  { key:"contacts", label:"Contacts" },
-  { key:"moodboard", label:"Moodboard" },
   { key:"tables", label:"Plan de table" },
   { key:"rooms", label:"Chambres" },
-  { key:"documents", label:"Documents" },
   { key:"admin", label:"Administration" }
 ];
 
@@ -336,9 +332,7 @@ function doSearch(q) {
   var out = [];
   if (q) {
     STATE.guests.forEach(function(g){ if (g.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Invité",label:g.nom,sub:g.table?"Table "+g.table:"",tab:"guests"}); });
-    STATE.tasks.forEach(function(t){ if (t.titre.toLowerCase().indexOf(q)>=0) out.push({type:"Tâche",label:t.titre,sub:t.responsable,tab:"tasks"}); });
     STATE.vendors.forEach(function(v){ if ((v.nom+" "+v.categorie).toLowerCase().indexOf(q)>=0) out.push({type:"Prestataire",label:v.nom||v.categorie,sub:v.categorie,tab:"vendors"}); });
-    STATE.contacts.forEach(function(c){ if ((c.nom+" "+c.role).toLowerCase().indexOf(q)>=0) out.push({type:"Contact",label:c.nom||c.role,sub:c.role,tab:"contacts"}); });
     STATE.animations.forEach(function(a){ if (a.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Animation",label:a.nom,sub:a.heure,tab:"animations"}); });
     STATE.tables.forEach(function(t){
       if (t.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Table",label:t.nom,sub:t.occupants.length+" invités",tab:"tables"});
@@ -350,7 +344,6 @@ function doSearch(q) {
     });
     STATE.planning.forEach(function(e){ if (e.titre.toLowerCase().indexOf(q)>=0) out.push({type:"Planning",label:e.titre,sub:e.jour+" "+e.heure,tab:"planning"}); });
     STATE.ceremony.forEach(function(s){ if (s.etape.toLowerCase().indexOf(q)>=0) out.push({type:"Cérémonie",label:s.etape,sub:s.debut,tab:"ceremony"}); });
-    STATE.documents.forEach(function(d){ if (d.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Document",label:d.nom,sub:d.categorie,tab:"documents"}); });
   }
   out = out.slice(0,20);
   document.getElementById("search-results").innerHTML = out.map(function(r){
@@ -1192,4 +1185,3 @@ document.addEventListener("DOMContentLoaded", loadAndStart);
 </script>
 </body>
 </html>
-
