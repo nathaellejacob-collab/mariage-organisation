@@ -392,15 +392,14 @@ function viewDashboard() {
   var absent = guests.filter(function(g){return g.presence==="absent";}).length;
   var totalPersonnes = confirmed.reduce(function(s,g){return s+1+(Number(g.accompagnants)||0);},0);
   var heberges = guests.filter(function(g){return g.hebergement;}).length;
+  var vinHonneur = guests.filter(function(g){return g.vinHonneur;}).length;
+  var brunch = guests.filter(function(g){return g.brunch;}).length;
   var totalSeats = STATE.tables.reduce(function(s,t){return s+t.capacity;},0);
   var totalOcc = STATE.tables.reduce(function(s,t){return s+t.occupants.length;},0);
-  var highlights = [
-    {h:"14h00",t:"Cérémonie civile",l:"Mairie de Saint-Jean-de-Moirans"},
-    {h:"16h30",t:"Cérémonie laïque",l:"Château des Anges"},
-    {h:"17h30",t:"Vin d'honneur",l:"Discours de remerciement"},
-    {h:"20h30",t:"Repas",l:"Entrée, plat, fromage, dessert"},
-    {h:"23h15",t:"Ouverture de bal",l:"Puis soirée dansante"}
-  ];
+  var highlights = STATE.planning
+    .filter(function(e){ return e.jour==="Samedi" && e.important; })
+    .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); })
+    .map(function(e){ return {h:e.heure, t:e.titre, l:e.personnes.join(', ')}; });
   return '<div class="fade">'+
   '<div class="card" style="padding:32px;">'+
     '<div class="flex-between">'+
@@ -425,9 +424,9 @@ function viewDashboard() {
   '<div class="grid2" style="margin-top:16px;">'+
     '<div class="card">'+
       '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Aperçu du jour J</h2><button class="gold" style="font-size:11px;" onclick="go(\'planning\')">Voir tout →</button></div>'+
-      '<div style="margin-top:12px;">'+ highlights.map(function(h){
-        return '<div style="display:flex;gap:10px;"><div class="gold" style="width:44px;font-size:11px;padding-top:2px;flex-shrink:0;">'+h.h+'</div><div style="flex:1;border-left:1px solid var(--border);padding-left:10px;padding-bottom:10px;"><div style="font-size:13px;">'+h.t+'</div><div class="muted" style="font-size:11px;">'+h.l+'</div></div></div>';
-      }).join('') +'</div>'+
+      '<div style="margin-top:12px;">'+ (highlights.length ? highlights.map(function(h){
+        return '<div style="display:flex;gap:10px;"><div class="gold" style="width:44px;font-size:11px;padding-top:2px;flex-shrink:0;">'+esc(h.h)+'</div><div style="flex:1;border-left:1px solid var(--border);padding-left:10px;padding-bottom:10px;"><div style="font-size:13px;">'+esc(h.t)+'</div>'+(h.l?'<div class="muted" style="font-size:11px;">'+esc(h.l)+'</div>':'')+'</div></div>';
+      }).join('') : '<p class="muted" style="font-size:12px;">Aucun grand moment marqué pour le samedi pour le moment.</p>') +'</div>'+
     '</div>'+
     '<div class="card">'+
       '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Invités</h2><button class="gold" style="font-size:11px;" onclick="go(\'guests\')">Gérer →</button></div>'+
@@ -437,6 +436,8 @@ function viewDashboard() {
         '<div class="flex-between"><span class="muted">En attente</span><span>'+attente+'</span></div>'+
         '<div class="flex-between"><span class="muted">Absents</span><span>'+absent+'</span></div>'+
         '<div class="flex-between"><span class="muted">Hébergés</span><span>'+heberges+'</span></div>'+
+        '<div class="flex-between"><span class="muted">Vin d\'honneur uniquement</span><span>'+vinHonneur+'</span></div>'+
+        '<div class="flex-between"><span class="muted">Brunch dimanche</span><span>'+brunch+'</span></div>'+
       '</div>'+
     '</div>'+
   '</div></div>';
@@ -444,17 +445,28 @@ function viewDashboard() {
 
 /* ============ GUESTS ============ */
 var GUEST_CATEGORIES = ["Famille Nathaelle","Famille Jérémy","Amis Nathaelle","Amis Jérémy","Travail Nathaelle","Travail Jérémy"];
+var PRESENCE_STYLE = {
+  confirme: { bg:"#E4EFE3", c:"#5C8A5A" },
+  attente: { bg:"#F6EFE0", c:"#BFA059" },
+  absent: { bg:"#F3E3E1", c:"#B15E56" }
+};
 
 function guestRow(g){
+  var pst = PRESENCE_STYLE[g.presence] || PRESENCE_STYLE.attente;
   return '<tr>'+
     '<td><input value="'+esc(g.nom)+'" onchange="updateGuest('+g.id+',\'nom\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td><select onchange="updateGuest('+g.id+',\'presence\',this.value)" '+(CAN_EDIT?'':'disabled')+'>'+
+    '<td><select style="background:'+pst.bg+';color:'+pst.c+';font-weight:500;border-color:transparent;" onchange="updateGuest('+g.id+',\'presence\',this.value)" '+(CAN_EDIT?'':'disabled')+'>'+
       ['attente','confirme','absent'].map(function(p){return '<option value="'+p+'" '+(g.presence===p?'selected':'')+'>'+({attente:'En attente',confirme:'Confirmé',absent:'Absent'}[p])+'</option>';}).join('')+
+    '</select></td>'+
+    '<td><select onchange="updateGuest('+g.id+',\'groupe\',this.value)" style="min-width:140px;" '+(CAN_EDIT?'':'disabled')+'>'+
+      '<option value="" '+(!g.groupe?'selected':'')+'>—</option>'+
+      GUEST_CATEGORIES.map(function(c){return '<option value="'+esc(c)+'" '+(g.groupe===c?'selected':'')+'>'+c+'</option>';}).join('')+
     '</select></td>'+
     '<td><input type="number" min="0" value="'+g.accompagnants+'" style="width:60px;" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td style="text-align:center;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuest('+g.id+',\'vinHonneur\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td style="text-align:center;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuestVinHonneur('+g.id+',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+((CAN_EDIT&&!g.vinHonneur)?'':'disabled')+'/></td>'+
+    '<td style="text-align:center;"><input type="checkbox" '+(g.brunch?'checked':'')+' onchange="updateGuest('+g.id+',\'brunch\',this.checked)" '+((CAN_EDIT&&!g.vinHonneur)?'':'disabled')+'/></td>'+
     '<td><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td><input value="'+esc(g.notes)+'" onchange="updateGuest('+g.id+',\'notes\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
@@ -462,10 +474,18 @@ function guestRow(g){
   '</tr>';
 }
 function updateGuest(id, field, value){ save('guests', STATE.guests.map(function(g){ if(g.id!==id) return g; return withField(g, field, value); })); }
+function updateGuestVinHonneur(id, checked){
+  save('guests', STATE.guests.map(function(g){
+    if(g.id!==id) return g;
+    var next = withField(g,'vinHonneur',checked);
+    if(checked){ next = withField(next,'hebergement',false); next = withField(next,'brunch',false); }
+    return next;
+  }));
+}
 function removeGuest(id){ save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
   var id=uid(STATE.guests);
-  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,chambre:"",table:"",role:"",notes:""}]));
+  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",notes:""}]));
 }
 function setGuestsSearch(v){ UI.guestsSearch=v; render(); }
 function setGuestsFilter(v){ UI.guestsFilter=v; render(); }
@@ -536,7 +556,7 @@ function viewGuests(){
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
   '</div>'+
   '<div class="card" style="overflow-x:auto;padding:0;">'+
-    '<table style="min-width:900px;"><thead><tr><th>Nom</th><th>Présence</th><th>+Acc.</th><th>Menu</th><th>Vin d\'honneur</th><th>Héb.</th><th>Chambre</th><th>Table</th><th>Notes</th><th></th></tr></thead>'+
+    '<table style="min-width:1050px;"><thead><tr><th>Nom</th><th>Présence</th><th>Catégorie</th><th>+Acc.</th><th>Menu</th><th>Vin d\'honneur</th><th>Héb.</th><th>Brunch</th><th>Chambre</th><th>Table</th><th>Notes</th><th></th></tr></thead>'+
     '<tbody>'+ filtered.map(guestRow).join('') +'</tbody></table>'+
   '</div></div>';
   return html;
@@ -545,7 +565,6 @@ function viewGuests(){
 /* ============ PLANNING ============ */
 function setPlanningMode(m){UI.planningMode=m;render();}
 function setPlanningDay(d){UI.planningDay=d;render();}
-function setPlanningOnlyMajor(v){UI.planningOnlyMajor=v;render();}
 function setPlanningPerson(p){UI.planningPerson=p;render();}
 function updatePlanningEvent(id,patch){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,patch):e;})); }
 function deletePlanningEvent(id){ save('planning', STATE.planning.filter(function(e){return e.id!==id;})); }
@@ -562,7 +581,7 @@ function saveEventEdit(id){
   updatePlanningEvent(id,{heure:val('ev-edit-heure'),titre:val('ev-edit-titre'),personnes:personnes});
   clearEditing();
 }
-function eventCardHtml(e, showStar){
+function eventCardHtml(e, showStar, showPersonnes){
   if(EDITING.type==='event'&&EDITING.id===e.id){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
@@ -574,15 +593,16 @@ function eventCardHtml(e, showStar){
   return '<div class="eventcard"><div class="flex-between">'+
       '<div style="display:flex;gap:8px;">'+ starHtml +
         '<div><div class="title">'+esc(e.titre)+'</div>'+
-        (e.personnes.length?'<div style="margin-top:4px;">'+e.personnes.map(function(p){return '<span class="chip" style="margin-right:4px;">'+esc(p)+'</span>';}).join('')+'</div>':'')+
+        (showPersonnes && e.personnes.length?'<div style="margin-top:4px;">'+e.personnes.map(function(p){return '<span class="chip" style="margin-right:4px;">'+esc(p)+'</span>';}).join('')+'</div>':'')+
         '</div>'+
       '</div>'+
       (CAN_EDIT?'<div class="row-flex"><button class="icon-btn" onclick="setEditing(\'event\','+e.id+')">✎</button><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑</button></div>':'')+
   '</div></div>';
 }
-function timeBlockHtml(group, showStar){
-  return '<div class="timegroup"><div class="time">'+group.heure+'</div><div class="events">'+group.events.map(function(e){return eventCardHtml(e, showStar);}).join('')+'</div></div>';
+function timeBlockHtml(group, showStar, showPersonnes){
+  return '<div class="timegroup"><div class="time">'+group.heure+'</div><div class="events">'+group.events.map(function(e){return eventCardHtml(e, showStar, showPersonnes);}).join('')+'</div></div>';
 }
+var GENERAL_DAY_ORDER = ["Vendredi","Samedi","Dimanche"];
 function viewPlanning(){
   var mode=UI.planningMode||'general';
   var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Planning</h2>'+
@@ -592,20 +612,14 @@ function viewPlanning(){
     '</div></div>';
 
   if(mode==='general'){
-    if(!UI.planningDay) UI.planningDay='Samedi';
-    if(UI.planningOnlyMajor===undefined) UI.planningOnlyMajor=true;
+    if(!UI.planningDay || GENERAL_DAY_ORDER.indexOf(UI.planningDay)<0) UI.planningDay='Samedi';
     var day=UI.planningDay;
-    var showStar = !UI.planningOnlyMajor;
-    html+='<div class="tabbar">'+DAY_ORDER.map(function(d){return '<button class="'+(day===d?'active':'')+'" onclick="setPlanningDay(\''+d+'\')">'+d+'</button>';}).join('')+'</div>';
-    html+='<div class="tabbar">'+
-      '<button class="'+(UI.planningOnlyMajor?'active':'')+'" onclick="setPlanningOnlyMajor(true)">★ Grands moments</button>'+
-      '<button class="'+(!UI.planningOnlyMajor?'active':'')+'" onclick="setPlanningOnlyMajor(false)">Tout le détail</button>'+
-    '</div>';
-    var evs=STATE.planning.filter(function(e){return e.jour===day && (!UI.planningOnlyMajor || e.important);}).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
+    html+='<div class="tabbar">'+GENERAL_DAY_ORDER.map(function(d){return '<button class="'+(day===d?'active':'')+'" onclick="setPlanningDay(\''+d+'\')">'+d+'</button>';}).join('')+'</div>';
+    var evs=STATE.planning.filter(function(e){return e.jour===day && e.important;}).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
     var groups=groupByHeure(evs);
     html+='<div class="card">';
-    if(!evs.length) html+='<p class="muted" style="text-align:center;padding:20px;font-size:13px;">'+(UI.planningOnlyMajor?'Aucun grand moment marqué pour ce jour.':'Aucun événement pour ce jour.')+'</p>';
-    html+=groups.map(function(g){return timeBlockHtml(g, showStar);}).join('');
+    if(!evs.length) html+='<p class="muted" style="text-align:center;padding:20px;font-size:13px;">Aucun grand moment marqué pour ce jour.</p>';
+    html+=groups.map(function(g){return timeBlockHtml(g, false, true);}).join('');
     if(CAN_EDIT){
       html+='<div class="row-flex" style="margin-top:10px;flex-wrap:wrap;">'+
         '<input id="add-ev-heure" placeholder="Heure" style="width:80px;"/>'+
@@ -616,17 +630,17 @@ function viewPlanning(){
     }
     html+='</div>';
   } else {
-    var people=["Tout le monde"].concat(Array.from(new Set(STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[]))).sort());
-    var person=UI.planningPerson||'Tout le monde';
+    var people=Array.from(new Set(STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[]))).sort();
+    var person=UI.planningPerson && people.indexOf(UI.planningPerson)>=0 ? UI.planningPerson : people[0];
     html+='<select style="max-width:280px;border-radius:999px;" onchange="setPlanningPerson(this.value)">'+people.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</select>';
     html+='<div class="card" style="margin-top:12px;">';
     var any=false;
     DAY_ORDER.forEach(function(d){
-      var evs=STATE.planning.filter(function(e){return e.jour===d && (person==='Tout le monde'||e.personnes.indexOf(person)>=0);}).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
+      var evs=STATE.planning.filter(function(e){return e.jour===d && e.personnes.indexOf(person)>=0;}).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
       if(!evs.length) return;
       any=true;
       html+='<div class="gold" style="font-size:11px;text-transform:uppercase;margin:10px 0 6px;">'+d+'</div>';
-      html+=groupByHeure(evs).map(function(g){return timeBlockHtml(g, true);}).join('');
+      html+=groupByHeure(evs).map(function(g){return timeBlockHtml(g, true, false);}).join('');
     });
     if(!any) html+='<p class="muted" style="text-align:center;padding:20px;font-size:13px;">Aucun événement trouvé pour '+esc(person)+'.</p>';
     html+='</div>';
@@ -696,9 +710,8 @@ function viewCeremony(){
 }
 
 /* ============ ANIMATIONS ============ */
-var ANIM_STATUTS={pret:{l:'Prête',dot:'🟢',bg:'#E4EFE3',c:'#5C8A5A'},a_preparer:{l:'À préparer',dot:'🟠',bg:'#F6EFE0',c:'#BFA059'},a_faire:{l:'À faire',dot:'🔴',bg:'#F3E3E1',c:'#B15E56'}};
 function saveAnimEdit(id){
-  var patch={nom:val('an-nom'),heure:val('an-heure'),responsable:val('an-resp'),lieu:val('an-lieu'),statut:val('an-statut'),description:val('an-desc'),personnes:val('an-pers'),materiel:val('an-mat'),musique:val('an-mus'),instructions:val('an-instr')};
+  var patch={nom:val('an-nom'),heure:val('an-heure'),responsable:val('an-resp'),lieu:val('an-lieu'),description:val('an-desc'),personnes:val('an-pers'),materiel:val('an-mat'),musique:val('an-mus'),instructions:val('an-instr')};
   save('animations', STATE.animations.map(function(a){return a.id===id?Object.assign({},a,patch):a;}));
   clearEditing();
 }
@@ -707,17 +720,15 @@ function addAnim(){
   var nom=val('add-an-nom');
   if(!nom.trim()) return;
   var id=uid(STATE.animations);
-  save('animations', STATE.animations.concat([{id:id,nom:nom,heure:val('add-an-heure'),responsable:val('add-an-resp'),lieu:val('add-an-lieu'),description:val('add-an-desc'),personnes:'',materiel:'',musique:'',instructions:'',statut:'a_faire'}]));
+  save('animations', STATE.animations.concat([{id:id,nom:nom,heure:val('add-an-heure'),responsable:val('add-an-resp'),lieu:val('add-an-lieu'),description:val('add-an-desc'),personnes:'',materiel:'',musique:'',instructions:''}]));
   UI.addingAnim=false;
 }
 function animCardHtml(a){
-  var st=ANIM_STATUTS[a.statut]||ANIM_STATUTS.a_faire;
   var open= UI.openAnim===a.id;
   if(EDITING.type==='anim'&&EDITING.id===a.id){
     return '<div class="card">'+
       '<input id="an-nom" value="'+esc(a.nom)+'" placeholder="Nom" style="font-size:15px;"/>'+
-      '<div class="row-flex" style="margin-top:6px;"><input id="an-heure" value="'+esc(a.heure)+'" style="width:70px;" placeholder="Heure"/><input id="an-resp" value="'+esc(a.responsable)+'" placeholder="Responsable" style="flex:1;"/><input id="an-lieu" value="'+esc(a.lieu)+'" placeholder="Lieu" style="flex:1;"/>'+
-      '<select id="an-statut">'+Object.keys(ANIM_STATUTS).map(function(k){return '<option value="'+k+'" '+(a.statut===k?'selected':'')+'>'+ANIM_STATUTS[k].dot+' '+ANIM_STATUTS[k].l+'</option>';}).join('')+'</select></div>'+
+      '<div class="row-flex" style="margin-top:6px;"><input id="an-heure" value="'+esc(a.heure)+'" style="width:70px;" placeholder="Heure"/><input id="an-resp" value="'+esc(a.responsable)+'" placeholder="Responsable" style="flex:1;"/><input id="an-lieu" value="'+esc(a.lieu)+'" placeholder="Lieu" style="flex:1;"/></div>'+
       '<textarea id="an-desc" rows="2" placeholder="Description" style="margin-top:6px;">'+esc(a.description)+'</textarea>'+
       '<input id="an-pers" value="'+esc(a.personnes)+'" placeholder="Personnes impliquées" style="margin-top:6px;"/>'+
       '<input id="an-mat" value="'+esc(a.materiel)+'" placeholder="Matériel" style="margin-top:6px;"/>'+
@@ -728,7 +739,7 @@ function animCardHtml(a){
   }
   return '<div class="card" style="padding:0;overflow:hidden;">'+
     '<button style="width:100%;text-align:left;padding:16px;display:flex;justify-content:space-between;align-items:flex-start;" onclick="UI.openAnim='+(open?'null':a.id)+';render();">'+
-      '<div><div class="row-flex"><span class="display" style="font-size:16px;">'+esc(a.nom)+'</span><span class="chip" style="background:'+st.bg+';color:'+st.c+';">'+st.dot+' '+st.l+'</span></div>'+
+      '<div><div class="row-flex"><span class="display" style="font-size:16px;">'+esc(a.nom)+'</span></div>'+
       '<div class="muted" style="font-size:11px;margin-top:4px;">'+(a.heure?'🕐 '+esc(a.heure)+' ':'')+(a.lieu?'📍 '+esc(a.lieu)+' ':'')+(a.responsable?'· '+esc(a.responsable):'')+'</div></div>'+
       '<span>'+(open?'▲':'▼')+'</span>'+
     '</button>'+
