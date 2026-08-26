@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nathaelle & Jérémy — Espace d'organisation</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Poppins:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Alex+Brush&family=Poppins:wght@300;400;500;600&display=swap');
   :root{
-    --ivory:#FBF7F0; --paper:#FFFFFF; --champagne:#EEE3CE; --champagne-soft:#F6EFE0;
-    --rose:#E7C9C6; --rose-soft:#F5E7E5; --gold:#BFA059; --ink:#3A332B; --ink-soft:#8C8071;
-    --rose-deep:#B8746E; --border:#E2D3B4;
+    --ivory:#FDFBFA; --paper:#FFFFFF; --champagne:#F2E6E4; --champagne-soft:#F8EFED;
+    --rose:#D9A8A2; --rose-soft:#F3E1DE; --gold:#B98A82; --ink:#2B2622; --ink-soft:#8C8071;
+    --rose-deep:#A8645D; --border:#E6D6D2;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--ivory);color:var(--ink);font-family:'Poppins',sans-serif;}
   .display{font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .script{font-family:'Alex Brush',cursive;font-style:normal;line-height:1;}
   a{color:inherit;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
   input,select,textarea{font-family:inherit;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;background:var(--paper);color:var(--ink);width:100%;}
@@ -32,9 +33,14 @@
   #header .row{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
   #brand{flex-shrink:0;}
   #brand{display:flex;align-items:center;gap:10px;}
-  #brand .name{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;line-height:1;}
+  #brand .name{line-height:1;}
   #brand .sub{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--ink-soft);}
-  #nav{display:flex;gap:4px;flex-wrap:wrap;flex:1;justify-content:center;}
+  .nav-toggle{width:100%;text-align:left;background:var(--paper);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font-size:13px;color:var(--ink);}
+  .nav-toggle:hover{border-color:var(--gold);}
+  #nav-panel{position:absolute;left:0;right:0;top:44px;background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:6px;z-index:30;box-shadow:0 8px 24px rgba(43,38,34,.12);max-height:70vh;overflow-y:auto;}
+  .nav-item{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:10px;font-size:13px;color:var(--ink-soft);}
+  .nav-item:hover{background:var(--champagne-soft);}
+  .nav-item.active{background:var(--ink);color:#fff;}
   #nav button{padding:8px 14px;border-radius:999px;font-size:13px;color:var(--ink-soft);}
   #nav button.active{background:var(--ink);color:#fff;}
   #nav button:hover:not(.active){background:var(--champagne-soft);}
@@ -65,7 +71,7 @@
   .quickgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   @media(min-width:600px){.quickgrid{grid-template-columns:repeat(4,1fr);}}
   @media(min-width:900px){.quickgrid{grid-template-columns:repeat(7,1fr);}}
-  .stat .icon{background:var(--champagne-soft);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .stat .icon{background:var(--champagne-soft);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold);font-size:14px;}
   .stat .val{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1;}
   .stat .lbl{font-size:10px;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;}
   .progressbar{height:8px;border-radius:999px;background:var(--champagne-soft);overflow:hidden;}
@@ -82,12 +88,9 @@
   .timegroup .events{flex:1;border-left:1px solid var(--border);padding-left:12px;padding-bottom:12px;}
   .eventcard{background:var(--ivory);border-radius:10px;padding:8px 12px;margin-bottom:6px;}
   .eventcard .title{font-size:13px;}
-  .tlh-wrap{overflow-x:auto;padding-bottom:10px;}
-  .tlh{display:inline-flex;gap:0;position:relative;padding:34px 20px 6px;min-width:100%;}
-  .tlh:before{content:'';position:absolute;left:20px;right:20px;top:52px;height:2px;background:linear-gradient(to right, var(--gold), var(--border) 85%);}
-  .tlh-col{flex:0 0 220px;position:relative;padding:0 12px;display:flex;flex-direction:column;align-items:center;}
-  .tlh-time{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:6px;white-space:nowrap;}
-  .tlh-dot{width:13px;height:13px;border-radius:999px;background:var(--gold);border:3px solid var(--paper);box-shadow:0 0 0 1px var(--gold);margin-bottom:14px;position:relative;z-index:2;flex-shrink:0;}
+  .tl-group{display:flex;gap:12px;}
+  .tl-time{width:52px;flex-shrink:0;font-size:12px;color:var(--gold);font-weight:600;padding-top:11px;text-align:right;}
+  .tl-line{border-left:2px solid var(--border);padding-left:16px;flex:1;padding-bottom:14px;}
   .tl-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;width:100%;}
   .tl-card:last-child{margin-bottom:0;}
   .tl-card .title{font-size:13px;color:var(--ink);}
@@ -203,6 +206,12 @@ function esc(s) {
   if (s === null || s === undefined) return "";
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
+function mapsUrl(place) {
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place);
+}
+function mapsLink(place, label) {
+  return '<a href="'+mapsUrl(place)+'" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;text-decoration-color:var(--border);">'+esc(label||place)+'</a>';
+}
 function uid(arr) { return arr.reduce(function(m,x){ return Math.max(m, x.id||0); }, 0) + 1; }
 function timeToMinutes(t) {
   if (!t) return 0;
@@ -305,9 +314,9 @@ function renderGate() {
 
 function monogramSvg(size) {
   return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100" fill="none">' +
-    '<circle cx="50" cy="50" r="47" stroke="#BFA059" stroke-width="1"/>' +
-    '<circle cx="50" cy="50" r="42" stroke="#BFA059" stroke-width="0.5" opacity="0.5"/>' +
-    '<text x="50" y="58" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="30" fill="#3A332B" font-style="italic">N&amp;J</text>' +
+    '<circle cx="50" cy="50" r="47" stroke="#B98A82" stroke-width="1"/>' +
+    '<circle cx="50" cy="50" r="42" stroke="#B98A82" stroke-width="0.5" opacity="0.5"/>' +
+    '<text x="50" y="58" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="30" fill="#2B2622" font-style="italic">N&amp;J</text>' +
     '</svg>';
 }
 
@@ -330,17 +339,19 @@ var TABS = [
 
 function renderApp() {
   var visibleTabs = CAN_EDIT ? TABS : TABS.filter(function(t){ return t.key !== "admin"; });
+  var currentLabel = (visibleTabs.filter(function(t){ return t.key===CURRENT_TAB; })[0] || visibleTabs[0]).label;
   var html = '';
   if (GATE_NEEDED && !CAN_EDIT) {
     html += '<div class="readonly-banner">🔒 Mode lecture seule — consultation uniquement, aucune modification possible</div>';
   }
   html += '<header id="header"><div class="row">' +
     '<div id="brand">' + monogramSvg(38) +
-      '<div><div class="name">Nathaelle &amp; Jérémy</div><div class="sub">Espace d\'organisation</div></div>' +
+      '<div><div class="name display" style="font-size:19px;">Nathaelle &amp; Jérémy</div><div class="sub">Espace d\'organisation</div></div>' +
     '</div>' +
-    '<nav id="nav">' + visibleTabs.map(function(t){
-      return '<button class="'+(CURRENT_TAB===t.key?'active':'')+'" onclick="go(\''+t.key+'\')">'+t.label+'</button>';
-    }).join('') + '</nav>' +
+    '<div style="position:relative;flex:1;max-width:280px;">' +
+      '<button class="nav-toggle" onclick="toggleNavMenu()">'+ currentLabel +' <span style="float:right;">▾</span></button>' +
+      '<div id="nav-panel" style="display:none;"></div>' +
+    '</div>' +
     '<div style="position:relative;flex-shrink:0;">' +
       '<button class="icon-btn" style="font-size:18px;" onclick="toggleSearch()">🔍</button>' +
       '<div id="search-panel" style="display:none;"></div>' +
@@ -350,6 +361,17 @@ function renderApp() {
   '<footer style="text-align:center;padding:28px;"><div class="muted" style="font-size:11px;">Espace privé d\'organisation — Nathaelle &amp; Jérémy — 19 juin 2027</div></footer>';
 
   document.getElementById("app").innerHTML = html;
+}
+function toggleNavMenu() {
+  var panel = document.getElementById("nav-panel");
+  var open = panel.style.display === "block";
+  panel.style.display = open ? "none" : "block";
+  if (!open) {
+    var visibleTabs = CAN_EDIT ? TABS : TABS.filter(function(t){ return t.key !== "admin"; });
+    panel.innerHTML = visibleTabs.map(function(t){
+      return '<button class="nav-item'+(CURRENT_TAB===t.key?' active':'')+'" onclick="go(\''+t.key+'\');toggleNavMenu();">'+t.label+'</button>';
+    }).join('');
+  }
 }
 var UI = {};
 var EDITING = { type: null, id: null };
@@ -447,20 +469,12 @@ function viewFor(tab) {
 function stat(icon, label, value, sub, tab) {
   return '<button class="stat" onclick="go(\''+tab+'\')"><div class="icon">'+icon+'</div><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
 }
-var QUICK_ACCESS = [
-  { tab:"ceremony", icon:"💒", label:"Cérémonie" },
-  { tab:"animations", icon:"🎉", label:"Animations" },
-  { tab:"trousse", icon:"✨", label:"Trousse de secours" },
-  { tab:"demoiselles", icon:"🌸", label:"Demoiselles d'honneur" },
-  { tab:"temoins", icon:"💍", label:"Témoins" },
-  { tab:"menu", icon:"🍽️", label:"Menu" },
-  { tab:"vendors", icon:"📞", label:"Prestataires" }
-];
 function viewDashboard() {
   var now = new Date();
   var diff = WEDDING_DATE.getTime() - now.getTime();
   var days = Math.max(0, Math.floor(diff/(1000*60*60*24)));
   var hours = Math.max(0, Math.floor((diff/(1000*60*60))%24));
+  var minutes = Math.max(0, Math.floor((diff/(1000*60))%60));
   var isWeddingDay = now.toDateString() === WEDDING_DATE.toDateString();
   var guests = STATE.guests;
   var confirmed = guests.filter(function(g){return g.presence==="confirme";});
@@ -479,27 +493,28 @@ function viewDashboard() {
   return '<div class="fade">'+
   '<div class="card" style="padding:32px;">'+
     (isWeddingDay ?
-      '<div style="text-align:center;"><div class="display" style="font-size:32px;">💍 C\'est aujourd\'hui !</div><div class="muted" style="font-size:13px;margin-top:6px;">Nathaelle &amp; Jérémy se marient — que la fête commence !</div></div>'
+      '<div style="text-align:center;"><div class="display" style="font-size:32px;">C\'est aujourd\'hui</div><div class="muted" style="font-size:13px;margin-top:6px;">Nathaelle &amp; Jérémy se marient — que la fête commence !</div></div>'
     :
       '<div class="flex-between">'+
         '<div><div class="eyebrow">19 juin 2027</div><h1 class="display" style="font-size:34px;margin:0;">Nathaelle &amp; Jérémy</h1></div>'+
         '<div style="display:flex;gap:16px;">'+
           '<div style="text-align:center;"><div class="display" style="font-size:40px;">'+days+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">jours</div></div>'+
           '<div style="text-align:center;border-left:1px solid var(--border);padding-left:16px;"><div class="display" style="font-size:40px;">'+hours+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">heures</div></div>'+
+          '<div style="text-align:center;border-left:1px solid var(--border);padding-left:16px;"><div class="display" style="font-size:40px;">'+minutes+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">minutes</div></div>'+
         '</div>'+
       '</div>'
     )+
     '<div style="height:1px;background:linear-gradient(to right, transparent, var(--gold), transparent);margin:14px 0;"></div>'+
     '<div class="grid2">'+
-      '<div style="font-size:13px;">📍 Mairie de Saint-Jean-de-Moirans — 14h00</div>'+
-      '<div style="font-size:13px;">📍 Cérémonie laïque — Château des Anges — 16h30</div>'+
+      '<div style="font-size:13px;">'+mapsLink('Mairie de Saint-Jean-de-Moirans', 'Mairie de Saint-Jean-de-Moirans')+' — 14h00</div>'+
+      '<div style="font-size:13px;">Cérémonie laïque — '+mapsLink('Château des Anges', 'Château des Anges')+' — 16h30</div>'+
     '</div>'+
   '</div>'+
   '<div class="statgrid" style="margin-top:16px;">'+
-    stat('👥', 'Invités', guests.length, totalPersonnes+' personnes si confirmés', 'guests')+
-    stat('✅', 'Confirmés', confirmed.length, attente+' en attente', 'guests')+
-    stat('🛏️', 'Hébergés', heberges, guests.length?heberges+' / '+guests.length:'', 'rooms')+
-    stat('🪑', 'Plan de table', totalOcc+'/'+totalSeats, 'places occupées', 'tables')+
+    stat('✦', 'Invités', guests.length, totalPersonnes+' personnes si confirmés', 'guests')+
+    stat('✦', 'Confirmés', confirmed.length, attente+' en attente', 'guests')+
+    stat('✦', 'Hébergés', heberges, guests.length?heberges+' / '+guests.length:'', 'rooms')+
+    stat('✦', 'Plan de table', totalOcc+'/'+totalSeats, 'places occupées', 'tables')+
   '</div>'+
   '<div class="grid2" style="margin-top:16px;">'+
     '<button class="card clickcard" onclick="go(\'planning\')">'+
@@ -520,12 +535,6 @@ function viewDashboard() {
         '<div class="flex-between"><span class="muted">Brunch dimanche</span><span>'+brunch+'</span></div>'+
       '</div>'+
     '</button>'+
-  '</div>'+
-  '<div class="card" style="margin-top:16px;">'+
-    '<div class="eyebrow" style="margin-bottom:10px;">Accès rapide</div>'+
-    '<div class="quickgrid">'+
-      QUICK_ACCESS.map(function(q){ return '<button class="quicktile" onclick="go(\''+q.tab+'\')"><span class="emoji">'+q.icon+'</span><span class="label">'+q.label+'</span></button>'; }).join('')+
-    '</div>'+
   '</div></div>';
 }
 
@@ -550,8 +559,6 @@ function guestRow(g){
       '<option value="" '+(!g.groupe?'selected':'')+'>—</option>'+
       GUEST_CATEGORIES.map(function(c){return '<option value="'+esc(c)+'" '+(g.groupe===c?'selected':'')+'>'+c+'</option>';}).join('')+
     '</select></td>'+
-    (vin ? dash : '<td><input type="number" min="0" value="'+g.accompagnants+'" style="width:60px;" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></td>')+
-    (vin ? dash : '<td><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
     '<td style="text-align:center;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuestVinHonneur('+g.id+',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     (vin ? dash : '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
     (vin ? dash : '<td style="text-align:center;"><input type="checkbox" '+(g.brunch?'checked':'')+' onchange="updateGuest('+g.id+',\'brunch\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
@@ -656,10 +663,6 @@ function guestCardMobile(g){
       (!vin?'<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.brunch?'checked':'')+' onchange="updateGuest('+g.id+',\'brunch\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Brunch</label>':'')+
     '</div>'+
     (!vin ? '<div class="mrow">'+
-      '<div style="flex:1;"><label class="mlbl">Menu</label><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
-      '<div style="width:56px;"><label class="mlbl">+Acc.</label><input type="number" min="0" value="'+g.accompagnants+'" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></div>'+
-    '</div>' : '')+
-    (!vin ? '<div class="mrow">'+
       '<div style="flex:1;"><label class="mlbl">Chambre</label><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
       '<div style="flex:1;"><label class="mlbl">Table</label><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
     '</div>' : '')+
@@ -702,8 +705,8 @@ function viewGuests(){
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
   '</div>'+
   '<div class="card desktop-table-wrap" style="overflow-x:auto;padding:0;">'+
-    '<table style="min-width:1050px;"><thead><tr>'+
-      sortableTh('Nom','nom')+sortableTh('Présence','presence')+sortableTh('Catégorie','groupe')+sortableTh('+Acc.','accompagnants')+sortableTh('Menu','menu')+
+    '<table style="min-width:900px;"><thead><tr>'+
+      sortableTh('Nom','nom')+sortableTh('Présence','presence')+sortableTh('Catégorie','groupe')+
       '<th>Vin d\'honneur</th><th>Héb.</th><th>Brunch</th>'+sortableTh('Chambre','chambre')+sortableTh('Table','table')+'<th>Notes</th><th></th>'+
     '</tr></thead>'+
     '<tbody>'+ filtered.map(guestRow).join('') +'</tbody></table>'+
@@ -735,21 +738,21 @@ function eventCardHtml(e){
   if(EDITING.type==='event'&&EDITING.id===e.id){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
-      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
   return '<div class="tl-card"><div class="flex-between">'+
       '<div class="title">'+esc(e.titre)+'</div>'+
-      (CAN_EDIT?'<div class="row-flex" style="flex-shrink:0;"><button class="icon-btn" onclick="setEditing(\'event\','+e.id+')">✎</button><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑</button></div>':'')+
+      (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
   '</div></div>';
 }
 function timelineHtml(groups){
   if(!groups.length) return '';
-  return '<div class="tlh-wrap"><div class="tlh">'+groups.map(function(g){
-    return '<div class="tlh-col"><span class="tlh-time">'+esc(g.heure)+'</span><span class="tlh-dot"></span>'+
+  return groups.map(function(g){
+    return '<div class="tl-group"><div class="tl-time">'+esc(g.heure)+'</div><div class="tl-line">'+
       g.events.map(function(e){ return eventCardHtml(e); }).join('') +
-    '</div>';
-  }).join('') + '</div></div>';
+    '</div></div>';
+  }).join('');
 }
 function viewPlanning(){
   var people=Array.from(new Set(STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[]))).sort();
@@ -821,7 +824,7 @@ function ceremonyStepHtml(s, idx, total){
       '<input id="cer-etape" value="'+esc(s.etape)+'" placeholder="Étape" style="margin-top:6px;"/>'+
       '<textarea id="cer-details" rows="2" placeholder="Détails" style="margin-top:6px;">'+esc(s.details)+'</textarea>'+
       '<input id="cer-musique" value="'+esc(s.musique)+'" placeholder="Musique" style="margin-top:6px;"/>'+
-      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveCeremonyEdit('+s.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deleteCeremonyStep('+s.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveCeremonyEdit('+s.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
   return '<div style="display:flex;gap:14px;">'+
@@ -831,7 +834,7 @@ function ceremonyStepHtml(s, idx, total){
       (CAN_EDIT?'<div class="row-flex">'+
         (idx>0?'<button class="icon-btn" onclick="moveCeremonyStep('+idx+',-1)">↑</button>':'')+
         (idx<total-1?'<button class="icon-btn" onclick="moveCeremonyStep('+idx+',1)">↓</button>':'')+
-        '<button class="icon-btn" onclick="setEditing(\'ceremony\','+s.id+')">✎</button><button class="icon-btn danger" onclick="deleteCeremonyStep('+s.id+')">🗑</button></div>':'')+
+        '<button class="icon-btn" onclick="setEditing(\'ceremony\','+s.id+')">✎</button></div>':'')+
       '</div>'+
       (s.details?'<p style="font-size:13px;margin:8px 0 0;">'+esc(s.details)+'</p>':'')+
       (s.musique?'<div class="muted" style="font-size:12px;margin-top:6px;">🎵 '+esc(s.musique)+'</div>':'')+
@@ -840,7 +843,7 @@ function ceremonyStepHtml(s, idx, total){
 }
 function viewCeremony(){
   var html='<div class="fade"><h2 class="display" style="font-size:28px;">Cérémonie laïque</h2>'+
-    '<p class="muted" style="font-size:12px;">Château des Anges — '+(STATE.ceremony[0]?esc(STATE.ceremony[0].debut):'')+' à '+(STATE.ceremony.length?esc(STATE.ceremony[STATE.ceremony.length-1].fin):'')+'</p>'+
+    '<p class="muted" style="font-size:12px;">'+mapsLink('Château des Anges')+' — '+(STATE.ceremony[0]?esc(STATE.ceremony[0].debut):'')+' à '+(STATE.ceremony.length?esc(STATE.ceremony[STATE.ceremony.length-1].fin):'')+'</p>'+
     '<div style="margin-top:14px;">'+
     STATE.ceremony.map(function(s,i){return ceremonyStepHtml(s,i,STATE.ceremony.length);}).join('');
   if(CAN_EDIT){
@@ -880,7 +883,7 @@ function animCardHtml(a){
       '<input id="an-mat" value="'+esc(a.materiel)+'" placeholder="Matériel" style="margin-top:6px;"/>'+
       '<input id="an-mus" value="'+esc(a.musique)+'" placeholder="Musique" style="margin-top:6px;"/>'+
       '<textarea id="an-instr" rows="3" placeholder="Instructions" style="margin-top:6px;">'+esc(a.instructions)+'</textarea>'+
-      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveAnimEdit('+a.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" style="font-size:11px;" onclick="deleteAnim('+a.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveAnimEdit('+a.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
   return '<div class="card" style="padding:0;overflow:hidden;">'+
@@ -890,12 +893,13 @@ function animCardHtml(a){
       '<span>'+(open?'▲':'▼')+'</span>'+
     '</button>'+
     (open?'<div style="padding:0 16px 16px;border-top:1px solid var(--border);font-size:13px;">'+
+      (a.lieu?'<p>📍 '+mapsLink(a.lieu)+'</p>':'')+
       (a.description?'<p>'+esc(a.description)+'</p>':'')+
       (a.personnes?'<p><span class="muted">Personnes impliquées : </span>'+esc(a.personnes)+'</p>':'')+
       (a.materiel?'<p><span class="muted">Matériel : </span>'+esc(a.materiel)+'</p>':'')+
       (a.musique?'<p style="color:var(--rose-deep);">🎵 '+esc(a.musique)+'</p>':'')+
       (a.instructions?'<p><span class="muted">Instructions : </span>'+esc(a.instructions).replace(/\n/g,'<br>')+'</p>':'')+
-      (CAN_EDIT?'<div class="row-flex"><button class="icon-btn" style="font-size:11px;" onclick="setEditing(\'anim\','+a.id+')">✎ Modifier</button><button class="icon-btn danger" style="font-size:11px;" onclick="deleteAnim('+a.id+')">🗑 Supprimer</button></div>':'')+
+      (CAN_EDIT?'<div class="row-flex"><button class="icon-btn" style="font-size:11px;" onclick="setEditing(\'anim\','+a.id+')">✎ Modifier</button></div>':'')+
     '</div>':'')+
   '</div>';
 }
@@ -1092,17 +1096,17 @@ function vendorRowHtml(v){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="vd-cat" value="'+esc(v.categorie)+'" placeholder="Catégorie" style="width:140px;"/><input id="vd-nom" value="'+esc(v.nom)+'" placeholder="Nom" style="flex:1;"/></div>'+
       '<div class="row-flex" style="margin-top:6px;"><input id="vd-tel" value="'+esc(v.telephone)+'" placeholder="Téléphone" style="flex:1;"/><input id="vd-email" value="'+esc(v.email)+'" placeholder="Email" style="flex:1;"/></div>'+
-      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveVendorEdit('+v.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deleteVendor('+v.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveVendorEdit('+v.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
   return '<div class="listrow">'+
     '<div style="flex:1;min-width:0;">'+
       '<div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+'</div>'+
-      '<div style="font-size:13px;">'+(v.nom?esc(v.nom):'<span class="muted" style="font-style:italic;">à renseigner</span>')+'</div>'+
+      '<div style="font-size:13px;">'+(v.nom?(v.categorie==='Lieu'?mapsLink(v.nom):esc(v.nom)):'<span class="muted" style="font-style:italic;">à renseigner</span>')+'</div>'+
       (v.email?'<div class="muted" style="font-size:11px;">'+esc(v.email)+'</div>':'')+
     '</div>'+
     (v.telephone?'<a class="chip" href="tel:'+esc(v.telephone)+'" style="background:var(--champagne-soft);color:var(--gold);flex-shrink:0;">📞 '+esc(v.telephone)+'</a>':'<span class="muted" style="font-size:11px;flex-shrink:0;">pas de numéro</span>')+
-    (CAN_EDIT?'<div class="row-flex" style="flex-shrink:0;"><button class="icon-btn" onclick="setEditing(\'vendor\','+v.id+')">✎</button><button class="icon-btn danger" onclick="deleteVendor('+v.id+')">🗑</button></div>':'')+
+    (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'vendor\','+v.id+')">✎</button>':'')+
   '</div>';
 }
 function viewVendors(){
@@ -1390,6 +1394,7 @@ function viewAdmin(){
 
 
 document.addEventListener("DOMContentLoaded", loadAndStart);
+setInterval(function(){ if (CURRENT_TAB === "dashboard") render(); }, 60000);
 </script>
 </body>
 </html>
