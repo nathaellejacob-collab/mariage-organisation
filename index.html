@@ -54,7 +54,8 @@
   .tabbar button.active{background:var(--gold);color:#fff;border-color:var(--gold);}
   .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media(min-width:700px){.statgrid{grid-template-columns:repeat(4,1fr);}}
-  .stat{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;}
+  .stat{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s;}
+  .stat:hover{border-color:var(--gold);transform:translateY(-1px);}
   .stat .icon{background:var(--champagne-soft);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .stat .val{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1;}
   .stat .lbl{font-size:10px;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;}
@@ -377,8 +378,8 @@ function viewFor(tab) {
 }
 
 /* ============ DASHBOARD ============ */
-function stat(label, value, sub) {
-  return '<div class="stat"><div class="icon">✦</div><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></div>';
+function stat(icon, label, value, sub, tab) {
+  return '<button class="stat" onclick="go(\''+tab+'\')"><div class="icon">'+icon+'</div><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
 }
 function viewDashboard() {
   var now = new Date();
@@ -391,6 +392,8 @@ function viewDashboard() {
   var absent = guests.filter(function(g){return g.presence==="absent";}).length;
   var totalPersonnes = confirmed.reduce(function(s,g){return s+1+(Number(g.accompagnants)||0);},0);
   var heberges = guests.filter(function(g){return g.hebergement;}).length;
+  var totalSeats = STATE.tables.reduce(function(s,t){return s+t.capacity;},0);
+  var totalOcc = STATE.tables.reduce(function(s,t){return s+t.occupants.length;},0);
   var highlights = [
     {h:"14h00",t:"Cérémonie civile",l:"Mairie de Saint-Jean-de-Moirans"},
     {h:"16h30",t:"Cérémonie laïque",l:"Château des Anges"},
@@ -414,10 +417,10 @@ function viewDashboard() {
     '</div>'+
   '</div>'+
   '<div class="statgrid" style="margin-top:16px;">'+
-    stat('Invités', guests.length, totalPersonnes+' personnes si confirmés')+
-    stat('Confirmés', confirmed.length, '')+
-    stat('En attente', attente, absent+' absent(s)')+
-    stat('Hébergés', heberges, '')+
+    stat('👥', 'Invités', guests.length, totalPersonnes+' personnes si confirmés', 'guests')+
+    stat('✅', 'Confirmés', confirmed.length, attente+' en attente', 'guests')+
+    stat('🛏️', 'Hébergés', heberges, guests.length?heberges+' / '+guests.length:'', 'rooms')+
+    stat('🪑', 'Plan de table', totalOcc+'/'+totalSeats, 'places occupées', 'tables')+
   '</div>'+
   '<div class="grid2" style="margin-top:16px;">'+
     '<div class="card">'+
