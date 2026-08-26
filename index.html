@@ -62,7 +62,7 @@
   @media(min-width:700px){.statgrid{grid-template-columns:repeat(4,1fr);}}
   .stat{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s;}
   .stat:hover{border-color:var(--gold);transform:translateY(-1px);}
-  .clickcard{cursor:pointer;transition:border-color .15s,transform .15s;display:block;width:100%;text-align:left;}
+  .clickcard{cursor:pointer;transition:border-color .15s,transform .15s;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;width:100%;text-align:left;}
   .clickcard:hover{border-color:var(--gold);transform:translateY(-1px);}
   .quicktile{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;transition:border-color .15s,transform .15s;width:100%;}
   .quicktile:hover{border-color:var(--gold);transform:translateY(-1px);}
@@ -116,13 +116,10 @@
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:9px 20px;border-radius:999px;font-size:12px;font-family:'Poppins',sans-serif;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:200;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .selected-guest{box-shadow:0 0 0 2px var(--gold) !important;}
-  .mobile-guest-list{display:none;}
-  .desktop-table-wrap{display:block;}
-  @media(max-width:760px){
-    .desktop-table-wrap{display:none;}
-    .mobile-guest-list{display:block;}
-  }
-  .guest-mcard{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;}
+  .guest-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+  @media(min-width:820px){.guest-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:1300px){.guest-grid{grid-template-columns:repeat(3,1fr);}}
+  .guest-mcard{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:14px 16px;}
   .guest-mcard .mrow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;}
   .guest-mcard label.mlbl{font-size:10px;color:var(--ink-soft);display:block;margin-bottom:2px;}
   @media print{
@@ -330,7 +327,6 @@ var TABS = [
   { key:"trousse", label:"Trousse de secours" },
   { key:"demoiselles", label:"Demoiselles d'honneur" },
   { key:"temoins", label:"Témoins" },
-  { key:"menu", label:"Menu" },
   { key:"vendors", label:"Prestataires" },
   { key:"tables", label:"Plan de table" },
   { key:"rooms", label:"Chambres" },
@@ -546,28 +542,6 @@ var PRESENCE_STYLE = {
   absent: { bg:"#F3E3E1", c:"#B15E56" }
 };
 
-function guestRow(g){
-  var pst = PRESENCE_STYLE[g.presence] || PRESENCE_STYLE.attente;
-  var vin = !!g.vinHonneur;
-  var dash = '<td style="text-align:center;color:var(--ink-soft);">—</td>';
-  return '<tr>'+
-    '<td><input value="'+esc(g.nom)+'" onchange="updateGuest('+g.id+',\'nom\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td><select style="background:'+pst.bg+';color:'+pst.c+';font-weight:500;border-color:transparent;" onchange="updateGuest('+g.id+',\'presence\',this.value)" '+(CAN_EDIT?'':'disabled')+'>'+
-      ['attente','confirme','absent'].map(function(p){return '<option value="'+p+'" '+(g.presence===p?'selected':'')+'>'+({attente:'En attente',confirme:'Confirmé',absent:'Absent'}[p])+'</option>';}).join('')+
-    '</select></td>'+
-    '<td><select onchange="updateGuest('+g.id+',\'groupe\',this.value)" style="min-width:140px;" '+(CAN_EDIT?'':'disabled')+'>'+
-      '<option value="" '+(!g.groupe?'selected':'')+'>—</option>'+
-      GUEST_CATEGORIES.map(function(c){return '<option value="'+esc(c)+'" '+(g.groupe===c?'selected':'')+'>'+c+'</option>';}).join('')+
-    '</select></td>'+
-    '<td style="text-align:center;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuestVinHonneur('+g.id+',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    (vin ? dash : '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
-    (vin ? dash : '<td style="text-align:center;"><input type="checkbox" '+(g.brunch?'checked':'')+' onchange="updateGuest('+g.id+',\'brunch\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
-    (vin ? dash : '<td><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>')+
-    (vin ? dash : '<td><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>')+
-    '<td><input value="'+esc(g.notes)+'" onchange="updateGuest('+g.id+',\'notes\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td>'+(CAN_EDIT?'<button class="icon-btn danger" onclick="removeGuest('+g.id+')">✕</button>':'')+'</td>'+
-  '</tr>';
-}
 function updateGuest(id, field, value){ save('guests', STATE.guests.map(function(g){ if(g.id!==id) return g; return withField(g, field, value); })); }
 function updateGuestVinHonneur(id, checked){
   save('guests', STATE.guests.map(function(g){
@@ -584,63 +558,6 @@ function addGuest(){
 }
 function setGuestsSearch(v){ UI.guestsSearch=v; render(); }
 function setGuestsFilter(v){ UI.guestsFilter=v; render(); }
-function setGuestsView(v){ UI.guestsView=v; render(); }
-function onDragStartGuestForCat(e, guestId){ DRAG={guestId:guestId}; e.dataTransfer.setData('text/plain','x'); }
-function onDropCategory(e, cat){
-  e.preventDefault(); e.currentTarget.classList.remove('dragover');
-  if(!DRAG || !DRAG.guestId) return;
-  updateGuest(DRAG.guestId, 'groupe', cat);
-  DRAG=null;
-}
-function onDropCategoryPool(e){
-  e.preventDefault(); e.currentTarget.classList.remove('dragover');
-  if(!DRAG || !DRAG.guestId) return;
-  updateGuest(DRAG.guestId, 'groupe', '');
-  DRAG=null;
-}
-function categoriesViewHtml(){
-  var unclassified = STATE.guests.filter(function(g){ return !g.groupe; });
-  var html = '<div class="grid3">';
-  GUEST_CATEGORIES.forEach(function(cat){
-    var members = STATE.guests.filter(function(g){ return g.groupe===cat; });
-    html += '<div class="card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropCategory(event,\''+cat+'\')">'+
-      '<div class="display" style="font-size:15px;margin-bottom:8px;">'+cat+' <span class="muted" style="font-size:11px;">('+members.length+')</span></div>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;">'+
-      members.map(function(g){ return '<div class="pool-chip" draggable="'+(CAN_EDIT?'true':'false')+'" ondragstart="onDragStartGuestForCat(event,'+g.id+')">'+esc(g.nom)+'</div>'; }).join('') +
-      (members.length===0?'<span class="muted" style="font-size:11px;">Glissez ici</span>':'') +
-      '</div></div>';
-  });
-  html += '</div>';
-  html += '<div class="pool" style="margin-top:14px;" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropCategoryPool(event)">'+
-    '<b style="font-size:13px;">Non classés ('+unclassified.length+')</b>'+
-    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">'+
-    unclassified.map(function(g){ return '<div class="pool-chip" draggable="'+(CAN_EDIT?'true':'false')+'" ondragstart="onDragStartGuestForCat(event,'+g.id+')">'+esc(g.nom)+'</div>'; }).join('') +
-    (unclassified.length===0?'<span class="muted" style="font-size:11px;">Tout le monde est classé 🎉</span>':'') +
-    '</div></div>';
-  return html;
-}
-var PRESENCE_ORDER = { confirme:0, attente:1, absent:2 };
-function setGuestsSort(key){
-  if(UI.guestsSort && UI.guestsSort.key===key){ UI.guestsSort = { key:key, dir:-UI.guestsSort.dir }; }
-  else { UI.guestsSort = { key:key, dir:1 }; }
-  render();
-}
-function cmpGuests(a,b,key,dir){
-  var av,bv;
-  if(key==='presence'){ av=PRESENCE_ORDER[a.presence]; bv=PRESENCE_ORDER[b.presence]; return (av-bv)*dir; }
-  if(key==='accompagnants'){ av=Number(a.accompagnants)||0; bv=Number(b.accompagnants)||0; return (av-bv)*dir; }
-  av=(a[key]||'').toString().toLowerCase();
-  bv=(b[key]||'').toString().toLowerCase();
-  if(key==='groupe'){ if(!av&&bv) return 1; if(av&&!bv) return -1; }
-  if(av<bv) return -1*dir;
-  if(av>bv) return 1*dir;
-  return 0;
-}
-function sortableTh(label, key){
-  var active = UI.guestsSort && UI.guestsSort.key===key;
-  var arrow = active ? (UI.guestsSort.dir===1?' ▲':' ▼') : '';
-  return '<th style="cursor:pointer;user-select:none;'+(active?'color:var(--gold);':'')+'" onclick="setGuestsSort(\''+key+'\')">'+label+arrow+'</th>';
-}
 function guestCardMobile(g){
   var pst = PRESENCE_STYLE[g.presence] || PRESENCE_STYLE.attente;
   var vin = !!g.vinHonneur;
@@ -671,18 +588,9 @@ function guestCardMobile(g){
   '</div>';
 }
 function viewGuests(){
-  var view = UI.guestsView||'liste';
   var html = '<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Invités</h2>'+
-    '<div class="row-flex">'+
-    (view==='liste' && CAN_EDIT?'<button class="btn" onclick="addGuest()">+ Ajouter un invité</button>':'')+
-    '<div style="background:var(--champagne-soft);border-radius:999px;padding:4px;display:inline-flex;">'+
-      '<button style="border-radius:999px;padding:7px 14px;font-size:12px;'+(view==='liste'?'background:var(--ink);color:#fff;':'color:var(--ink-soft);')+'" onclick="setGuestsView(\'liste\')">Liste</button>'+
-      '<button style="border-radius:999px;padding:7px 14px;font-size:12px;'+(view==='categories'?'background:var(--ink);color:#fff;':'color:var(--ink-soft);')+'" onclick="setGuestsView(\'categories\')">Catégories</button>'+
-    '</div></div></div>';
-
-  if (view==='categories') {
-    return html + categoriesViewHtml() + '</div>';
-  }
+    (CAN_EDIT?'<button class="btn" onclick="addGuest()">+ Ajouter un invité</button>':'')+
+  '</div>';
 
   var search=(UI.guestsSearch||'').toLowerCase();
   var filter=UI.guestsFilter||'tous';
@@ -695,23 +603,13 @@ function viewGuests(){
     if(filter==='vin'&&!g.vinHonneur) return false;
     return true;
   });
-  if(UI.guestsSort && UI.guestsSort.key){
-    filtered = filtered.slice().sort(function(a,b){ return cmpGuests(a,b,UI.guestsSort.key,UI.guestsSort.dir); });
-  }
   var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés'],['vin',"Vin d'honneur"]];
-  html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés · clique un titre de colonne pour trier</p>';
+  html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés</p>';
   html += '<div class="row-flex" style="margin:12px 0;">'+
     '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
   '</div>'+
-  '<div class="card desktop-table-wrap" style="overflow-x:auto;padding:0;">'+
-    '<table style="min-width:900px;"><thead><tr>'+
-      sortableTh('Nom','nom')+sortableTh('Présence','presence')+sortableTh('Catégorie','groupe')+
-      '<th>Vin d\'honneur</th><th>Héb.</th><th>Brunch</th>'+sortableTh('Chambre','chambre')+sortableTh('Table','table')+'<th>Notes</th><th></th>'+
-    '</tr></thead>'+
-    '<tbody>'+ filtered.map(guestRow).join('') +'</tbody></table>'+
-  '</div>'+
-  '<div class="mobile-guest-list">'+ filtered.map(guestCardMobile).join('') +'</div>'+
+  '<div class="guest-grid">'+ filtered.map(guestCardMobile).join('') +'</div>'+
   '</div>';
   return html;
 }
