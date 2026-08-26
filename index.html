@@ -443,6 +443,8 @@ function viewDashboard() {
 }
 
 /* ============ GUESTS ============ */
+var GUEST_CATEGORIES = ["Famille Nathaelle","Famille Jérémy","Amis Nathaelle","Amis Jérémy","Travail Nathaelle","Travail Jérémy"];
+
 function guestRow(g){
   return '<tr>'+
     '<td><input value="'+esc(g.nom)+'" onchange="updateGuest('+g.id+',\'nom\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
@@ -451,7 +453,7 @@ function guestRow(g){
     '</select></td>'+
     '<td><input type="number" min="0" value="'+g.accompagnants+'" style="width:60px;" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td><input value="'+esc(g.allergies)+'" onchange="updateGuest('+g.id+',\'allergies\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td style="text-align:center;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuest('+g.id+',\'vinHonneur\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
@@ -463,11 +465,59 @@ function updateGuest(id, field, value){ save('guests', STATE.guests.map(function
 function removeGuest(id){ save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
   var id=uid(STATE.guests);
-  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",allergies:"",hebergement:false,chambre:"",table:"",role:"",notes:""}]));
+  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,chambre:"",table:"",role:"",notes:""}]));
 }
 function setGuestsSearch(v){ UI.guestsSearch=v; render(); }
 function setGuestsFilter(v){ UI.guestsFilter=v; render(); }
+function setGuestsView(v){ UI.guestsView=v; render(); }
+function onDragStartGuestForCat(e, guestId){ DRAG={guestId:guestId}; e.dataTransfer.setData('text/plain','x'); }
+function onDropCategory(e, cat){
+  e.preventDefault(); e.currentTarget.classList.remove('dragover');
+  if(!DRAG || !DRAG.guestId) return;
+  updateGuest(DRAG.guestId, 'groupe', cat);
+  DRAG=null;
+}
+function onDropCategoryPool(e){
+  e.preventDefault(); e.currentTarget.classList.remove('dragover');
+  if(!DRAG || !DRAG.guestId) return;
+  updateGuest(DRAG.guestId, 'groupe', '');
+  DRAG=null;
+}
+function categoriesViewHtml(){
+  var unclassified = STATE.guests.filter(function(g){ return !g.groupe; });
+  var html = '<div class="grid3">';
+  GUEST_CATEGORIES.forEach(function(cat){
+    var members = STATE.guests.filter(function(g){ return g.groupe===cat; });
+    html += '<div class="card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropCategory(event,\''+cat+'\')">'+
+      '<div class="display" style="font-size:15px;margin-bottom:8px;">'+cat+' <span class="muted" style="font-size:11px;">('+members.length+')</span></div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;min-height:34px;">'+
+      members.map(function(g){ return '<div class="pool-chip" draggable="'+(CAN_EDIT?'true':'false')+'" ondragstart="onDragStartGuestForCat(event,'+g.id+')">'+esc(g.nom)+'</div>'; }).join('') +
+      (members.length===0?'<span class="muted" style="font-size:11px;">Glissez ici</span>':'') +
+      '</div></div>';
+  });
+  html += '</div>';
+  html += '<div class="pool" style="margin-top:14px;" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropCategoryPool(event)">'+
+    '<b style="font-size:13px;">Non classés ('+unclassified.length+')</b>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">'+
+    unclassified.map(function(g){ return '<div class="pool-chip" draggable="'+(CAN_EDIT?'true':'false')+'" ondragstart="onDragStartGuestForCat(event,'+g.id+')">'+esc(g.nom)+'</div>'; }).join('') +
+    (unclassified.length===0?'<span class="muted" style="font-size:11px;">Tout le monde est classé 🎉</span>':'') +
+    '</div></div>';
+  return html;
+}
 function viewGuests(){
+  var view = UI.guestsView||'liste';
+  var html = '<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Invités</h2>'+
+    '<div class="row-flex">'+
+    (view==='liste' && CAN_EDIT?'<button class="btn" onclick="addGuest()">+ Ajouter un invité</button>':'')+
+    '<div style="background:var(--champagne-soft);border-radius:999px;padding:4px;display:inline-flex;">'+
+      '<button style="border-radius:999px;padding:7px 14px;font-size:12px;'+(view==='liste'?'background:var(--ink);color:#fff;':'color:var(--ink-soft);')+'" onclick="setGuestsView(\'liste\')">Liste</button>'+
+      '<button style="border-radius:999px;padding:7px 14px;font-size:12px;'+(view==='categories'?'background:var(--ink);color:#fff;':'color:var(--ink-soft);')+'" onclick="setGuestsView(\'categories\')">Catégories</button>'+
+    '</div></div></div>';
+
+  if (view==='categories') {
+    return html + categoriesViewHtml() + '</div>';
+  }
+
   var search=(UI.guestsSearch||'').toLowerCase();
   var filter=UI.guestsFilter||'tous';
   var filtered = STATE.guests.filter(function(g){
@@ -476,21 +526,20 @@ function viewGuests(){
     if(filter==='attente'&&g.presence!=='attente') return false;
     if(filter==='absent'&&g.presence!=='absent') return false;
     if(filter==='heberges'&&!g.hebergement) return false;
+    if(filter==='vin'&&!g.vinHonneur) return false;
     return true;
   });
-  var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés']];
-  return '<div class="fade">'+
-  '<div class="flex-between"><h2 class="display" style="font-size:28px;">Invités <span class="muted" style="font-size:13px;">('+filtered.length+'/'+STATE.guests.length+')</span></h2>'+
-    (CAN_EDIT?'<button class="btn" onclick="addGuest()">+ Ajouter un invité</button>':'')+
-  '</div>'+
-  '<div class="row-flex" style="margin:12px 0;">'+
+  var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés'],['vin',"Vin d'honneur"]];
+  html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés</p>';
+  html += '<div class="row-flex" style="margin:12px 0;">'+
     '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
   '</div>'+
   '<div class="card" style="overflow-x:auto;padding:0;">'+
-    '<table style="min-width:900px;"><thead><tr><th>Nom</th><th>Présence</th><th>+Acc.</th><th>Menu</th><th>Allergies</th><th>Héb.</th><th>Chambre</th><th>Table</th><th>Notes</th><th></th></tr></thead>'+
+    '<table style="min-width:900px;"><thead><tr><th>Nom</th><th>Présence</th><th>+Acc.</th><th>Menu</th><th>Vin d\'honneur</th><th>Héb.</th><th>Chambre</th><th>Table</th><th>Notes</th><th></th></tr></thead>'+
     '<tbody>'+ filtered.map(guestRow).join('') +'</tbody></table>'+
   '</div></div>';
+  return html;
 }
 
 /* ============ PLANNING ============ */
@@ -845,7 +894,7 @@ function saveMenuField(key,value){ save('menu', withField(STATE.menu,key,value))
 function viewMenu(){
   var m=STATE.menu, guests=STATE.guests;
   var byMenu={}; guests.forEach(function(g){ var k=(g.menu||'').trim()||'Non renseigné'; byMenu[k]=(byMenu[k]||0)+1; });
-  var allergies=guests.filter(function(g){return (g.allergies||'').trim();}).length;
+  var vinHonneur=guests.filter(function(g){return g.vinHonneur;}).length;
   var sections=[
     {section:'Cocktail',fields:[['cocktailPieces','Pièces cocktail'],['cocktailBoissons','Boissons'],['cocktailInfos','Informations particulières']]},
     {section:'Repas',fields:[['entree','Entrée'],['plat','Plat'],['accompagnement','Accompagnement'],['fromage','Fromage'],['dessert','Dessert']]},
@@ -855,7 +904,7 @@ function viewMenu(){
   '<div class="card" style="margin:12px 0;"><div class="eyebrow">Compteurs automatiques (depuis Invités)</div><div class="row-flex">'+
     '<span class="chip" style="background:var(--champagne-soft);color:var(--ink);">'+guests.length+' invités</span>'+
     Object.keys(byMenu).map(function(k){return '<span class="chip">'+byMenu[k]+' '+esc(k)+'</span>';}).join('')+
-    (allergies>0?'<span class="chip" style="background:var(--champagne-soft);color:var(--ink);">'+allergies+' avec allergie/régime</span>':'')+
+    (vinHonneur>0?'<span class="chip" style="background:var(--champagne-soft);color:var(--ink);">'+vinHonneur+' au vin d\'honneur uniquement</span>':'')+
   '</div></div>';
   sections.forEach(function(sec){
     html+='<div class="card" style="margin-bottom:12px;"><div class="display" style="font-size:19px;margin-bottom:10px;">'+sec.section+'</div><div class="grid2">'+
