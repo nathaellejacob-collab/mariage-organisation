@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nathaelle & Jérémy — Espace d'organisation</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='47' fill='%23FDFBFA' stroke='%23B98A82' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='42' stroke='%23B98A82' stroke-width='1' opacity='0.5'/%3E%3Ctext x='50' y='60' text-anchor='middle' font-family='Georgia, serif' font-size='32' fill='%232B2622' font-style='italic'%3EN%26J%3C/text%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Alex+Brush&family=Poppins:wght@300;400;500;600&display=swap');
   :root{
@@ -587,6 +588,17 @@ function guestCardMobile(g){
     (CAN_EDIT?'<div style="text-align:right;margin-top:6px;"><button class="icon-btn danger" style="font-size:11px;" onclick="removeGuest('+g.id+')">🗑 Supprimer</button></div>':'')+
   '</div>';
 }
+var PRESENCE_ORDER = { confirme:0, attente:1, absent:2 };
+function setGuestsSortKey(v){ UI.guestsSortKey=v; render(); }
+function cmpGuests(a,b,key){
+  if(key==='presence'){ return PRESENCE_ORDER[a.presence]-PRESENCE_ORDER[b.presence]; }
+  var av=(a[key]||'').toString().toLowerCase();
+  var bv=(b[key]||'').toString().toLowerCase();
+  if(key==='groupe'){ if(!av&&bv) return 1; if(av&&!bv) return -1; }
+  if(av<bv) return -1;
+  if(av>bv) return 1;
+  return 0;
+}
 function viewGuests(){
   var html = '<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Invités</h2>'+
     (CAN_EDIT?'<button class="btn" onclick="addGuest()">+ Ajouter un invité</button>':'')+
@@ -594,6 +606,7 @@ function viewGuests(){
 
   var search=(UI.guestsSearch||'').toLowerCase();
   var filter=UI.guestsFilter||'tous';
+  var sortKey=UI.guestsSortKey||'nom';
   var filtered = STATE.guests.filter(function(g){
     if(search && g.nom.toLowerCase().indexOf(search)<0) return false;
     if(filter==='confirme'&&g.presence!=='confirme') return false;
@@ -602,12 +615,16 @@ function viewGuests(){
     if(filter==='heberges'&&!g.hebergement) return false;
     if(filter==='vin'&&!g.vinHonneur) return false;
     return true;
-  });
+  }).slice().sort(function(a,b){ return cmpGuests(a,b,sortKey); });
   var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés'],['vin',"Vin d'honneur"]];
+  var sortOptions=[['nom','Nom'],['presence','Présence'],['groupe','Catégorie']];
   html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés</p>';
   html += '<div class="row-flex" style="margin:12px 0;">'+
     '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
+    '<select onchange="setGuestsSortKey(this.value)" style="max-width:170px;border-radius:999px;margin-left:auto;">'+
+      sortOptions.map(function(s){return '<option value="'+s[0]+'" '+(sortKey===s[0]?'selected':'')+'>Trier par '+s[1]+'</option>';}).join('')+
+    '</select>'+
   '</div>'+
   '<div class="guest-grid">'+ filtered.map(guestCardMobile).join('') +'</div>'+
   '</div>';
