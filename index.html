@@ -453,6 +453,8 @@ var PRESENCE_STYLE = {
 
 function guestRow(g){
   var pst = PRESENCE_STYLE[g.presence] || PRESENCE_STYLE.attente;
+  var vin = !!g.vinHonneur;
+  var dash = '<td style="text-align:center;color:var(--ink-soft);">—</td>';
   return '<tr>'+
     '<td><input value="'+esc(g.nom)+'" onchange="updateGuest('+g.id+',\'nom\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td><select style="background:'+pst.bg+';color:'+pst.c+';font-weight:500;border-color:transparent;" onchange="updateGuest('+g.id+',\'presence\',this.value)" '+(CAN_EDIT?'':'disabled')+'>'+
@@ -462,13 +464,13 @@ function guestRow(g){
       '<option value="" '+(!g.groupe?'selected':'')+'>—</option>'+
       GUEST_CATEGORIES.map(function(c){return '<option value="'+esc(c)+'" '+(g.groupe===c?'selected':'')+'>'+c+'</option>';}).join('')+
     '</select></td>'+
-    '<td><input type="number" min="0" value="'+g.accompagnants+'" style="width:60px;" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    (vin ? dash : '<td><input type="number" min="0" value="'+g.accompagnants+'" style="width:60px;" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></td>')+
+    (vin ? dash : '<td><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
     '<td style="text-align:center;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuestVinHonneur('+g.id+',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+((CAN_EDIT&&!g.vinHonneur)?'':'disabled')+'/></td>'+
-    '<td style="text-align:center;"><input type="checkbox" '+(g.brunch?'checked':'')+' onchange="updateGuest('+g.id+',\'brunch\',this.checked)" '+((CAN_EDIT&&!g.vinHonneur)?'':'disabled')+'/></td>'+
-    '<td><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
-    '<td><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    (vin ? dash : '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
+    (vin ? dash : '<td style="text-align:center;"><input type="checkbox" '+(g.brunch?'checked':'')+' onchange="updateGuest('+g.id+',\'brunch\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>')+
+    (vin ? dash : '<td><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>')+
+    (vin ? dash : '<td><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>')+
     '<td><input value="'+esc(g.notes)+'" onchange="updateGuest('+g.id+',\'notes\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
     '<td>'+(CAN_EDIT?'<button class="icon-btn danger" onclick="removeGuest('+g.id+')">✕</button>':'')+'</td>'+
   '</tr>';
