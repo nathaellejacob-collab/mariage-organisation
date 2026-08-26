@@ -29,11 +29,12 @@
   .chip{display:inline-flex;align-items:center;gap:4px;background:var(--rose-soft);color:var(--rose-deep);border-radius:999px;padding:3px 10px;font-size:11px;}
   .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:6px;}
   #header{background:var(--paper);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;}
-  #header .row{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  #header .row{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  #brand{flex-shrink:0;}
   #brand{display:flex;align-items:center;gap:10px;}
   #brand .name{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;line-height:1;}
   #brand .sub{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--ink-soft);}
-  #nav{display:flex;gap:4px;flex-wrap:wrap;}
+  #nav{display:flex;gap:4px;flex-wrap:wrap;flex:1;justify-content:center;}
   #nav button{padding:8px 14px;border-radius:999px;font-size:13px;color:var(--ink-soft);}
   #nav button.active{background:var(--ink);color:#fff;}
   #nav button:hover:not(.active){background:var(--champagne-soft);}
@@ -280,7 +281,7 @@ function renderApp() {
     '<nav id="nav">' + visibleTabs.map(function(t){
       return '<button class="'+(CURRENT_TAB===t.key?'active':'')+'" onclick="go(\''+t.key+'\')">'+t.label+'</button>';
     }).join('') + '</nav>' +
-    '<div style="position:relative;">' +
+    '<div style="position:relative;flex-shrink:0;">' +
       '<button class="icon-btn" style="font-size:18px;" onclick="toggleSearch()">🔍</button>' +
       '<div id="search-panel" style="display:none;"></div>' +
     '</div>' +
