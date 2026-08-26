@@ -101,6 +101,24 @@
   ::-webkit-scrollbar{height:6px;width:6px;}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
   .mono{width:44px;height:44px;flex-shrink:0;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:9px 20px;border-radius:999px;font-size:12px;font-family:'Poppins',sans-serif;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:200;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .selected-guest{box-shadow:0 0 0 2px var(--gold) !important;}
+  .mobile-guest-list{display:none;}
+  .desktop-table-wrap{display:block;}
+  @media(max-width:760px){
+    .desktop-table-wrap{display:none;}
+    .mobile-guest-list{display:block;}
+  }
+  .guest-mcard{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px;}
+  .guest-mcard .mrow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;}
+  .guest-mcard label.mlbl{font-size:10px;color:var(--ink-soft);display:block;margin-bottom:2px;}
+  @media print{
+    #header,.pool,.readonly-banner,footer,.btn,.quickgrid,#search-panel{display:none !important;}
+    body{background:#fff;}
+    .card{border:1px solid #ccc;break-inside:avoid;}
+    #main{padding:0;max-width:100%;}
+  }
 </style>
 </head>
 <body>
@@ -142,6 +160,15 @@ var CAN_EDIT = true;
 var GATE_NEEDED = false;
 var CURRENT_TAB = "dashboard";
 var DRAG = null;
+function selectGuestForDrag(e, guestId, label) {
+  e.stopPropagation();
+  if (DRAG && DRAG.guestId === guestId && DRAG.label === label) { DRAG = null; }
+  else { DRAG = { guestId: guestId || null, label: label }; }
+  render();
+}
+function isSelected(guestId, label) {
+  return DRAG && DRAG.guestId === guestId && DRAG.label === label;
+}
 
 /* ============ API CLIENT ============ */
 var api = {
@@ -189,7 +216,21 @@ function save(key, value) {
   if (!CAN_EDIT) return;
   STATE[key] = value;
   api.set(key, value);
+  showToast('✓ Enregistré');
   render();
+}
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.className = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.className = 'toast show';
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(function(){ el.className = 'toast'; }, 1600);
 }
 function go(tab) { CURRENT_TAB = tab; window.scrollTo(0,0); render(); }
 
@@ -338,6 +379,13 @@ function toggleSearch() {
     document.getElementById("search-input").focus();
   }
 }
+function highlightMatch(text, q) {
+  var t = String(text);
+  if (!q) return esc(t);
+  var idx = t.toLowerCase().indexOf(q.toLowerCase());
+  if (idx < 0) return esc(t);
+  return esc(t.slice(0,idx)) + '<mark style="background:var(--rose-soft);color:var(--rose-deep);padding:0 1px;border-radius:2px;">' + esc(t.slice(idx, idx+q.length)) + '</mark>' + esc(t.slice(idx+q.length));
+}
 function doSearch(q) {
   q = q.trim().toLowerCase();
   var out = [];
@@ -358,7 +406,7 @@ function doSearch(q) {
   }
   out = out.slice(0,20);
   document.getElementById("search-results").innerHTML = out.map(function(r){
-    return '<button class="search-result" onclick="go(\''+r.tab+'\');toggleSearch();"><div><div style="font-size:13px;">'+esc(r.label)+'</div><div class="muted" style="font-size:10px;">'+esc(r.sub||'')+'</div></div><span class="gold" style="font-size:10px;">'+r.type+'</span></button>';
+    return '<button class="search-result" onclick="go(\''+r.tab+'\');toggleSearch();"><div><div style="font-size:13px;">'+highlightMatch(r.label,q)+'</div><div class="muted" style="font-size:10px;">'+esc(r.sub||'')+'</div></div><span class="gold" style="font-size:10px;">'+r.type+'</span></button>';
   }).join('') || (q ? '<p class="muted" style="font-size:12px;text-align:center;padding:10px;">Aucun résultat.</p>' : '');
 }
 
@@ -404,6 +452,7 @@ function viewDashboard() {
   var diff = WEDDING_DATE.getTime() - now.getTime();
   var days = Math.max(0, Math.floor(diff/(1000*60*60*24)));
   var hours = Math.max(0, Math.floor((diff/(1000*60*60))%24));
+  var isWeddingDay = now.toDateString() === WEDDING_DATE.toDateString();
   var guests = STATE.guests;
   var confirmed = guests.filter(function(g){return g.presence==="confirme";});
   var attente = guests.filter(function(g){return g.presence==="attente";}).length;
@@ -420,13 +469,17 @@ function viewDashboard() {
     .map(function(e){ return {h:e.heure, t:e.titre, l:e.personnes.join(', ')}; });
   return '<div class="fade">'+
   '<div class="card" style="padding:32px;">'+
-    '<div class="flex-between">'+
-      '<div><div class="eyebrow">19 juin 2027</div><h1 class="display" style="font-size:34px;margin:0;">Nathaelle &amp; Jérémy</h1></div>'+
-      '<div style="display:flex;gap:16px;">'+
-        '<div style="text-align:center;"><div class="display" style="font-size:40px;">'+days+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">jours</div></div>'+
-        '<div style="text-align:center;border-left:1px solid var(--border);padding-left:16px;"><div class="display" style="font-size:40px;">'+hours+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">heures</div></div>'+
-      '</div>'+
-    '</div>'+
+    (isWeddingDay ?
+      '<div style="text-align:center;"><div class="display" style="font-size:32px;">💍 C\'est aujourd\'hui !</div><div class="muted" style="font-size:13px;margin-top:6px;">Nathaelle &amp; Jérémy se marient — que la fête commence !</div></div>'
+    :
+      '<div class="flex-between">'+
+        '<div><div class="eyebrow">19 juin 2027</div><h1 class="display" style="font-size:34px;margin:0;">Nathaelle &amp; Jérémy</h1></div>'+
+        '<div style="display:flex;gap:16px;">'+
+          '<div style="text-align:center;"><div class="display" style="font-size:40px;">'+days+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">jours</div></div>'+
+          '<div style="text-align:center;border-left:1px solid var(--border);padding-left:16px;"><div class="display" style="font-size:40px;">'+hours+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">heures</div></div>'+
+        '</div>'+
+      '</div>'
+    )+
     '<div style="height:1px;background:linear-gradient(to right, transparent, var(--gold), transparent);margin:14px 0;"></div>'+
     '<div class="grid2">'+
       '<div style="font-size:13px;">📍 Mairie de Saint-Jean-de-Moirans — 14h00</div>'+
@@ -572,6 +625,39 @@ function sortableTh(label, key){
   var arrow = active ? (UI.guestsSort.dir===1?' ▲':' ▼') : '';
   return '<th style="cursor:pointer;user-select:none;'+(active?'color:var(--gold);':'')+'" onclick="setGuestsSort(\''+key+'\')">'+label+arrow+'</th>';
 }
+function guestCardMobile(g){
+  var pst = PRESENCE_STYLE[g.presence] || PRESENCE_STYLE.attente;
+  var vin = !!g.vinHonneur;
+  return '<div class="guest-mcard">'+
+    '<div class="row-flex"><input value="'+esc(g.nom)+'" onchange="updateGuest('+g.id+',\'nom\',this.value)" style="flex:1;font-weight:500;" '+(CAN_EDIT?'':'disabled')+'/>'+
+      '<span class="chip" style="background:'+pst.bg+';color:'+pst.c+';flex-shrink:0;">'+({attente:'En attente',confirme:'Confirmé',absent:'Absent'}[g.presence])+'</span>'+
+    '</div>'+
+    '<div class="mrow">'+
+      '<div style="flex:1;"><label class="mlbl">Présence</label><select onchange="updateGuest('+g.id+',\'presence\',this.value)" '+(CAN_EDIT?'':'disabled')+'>'+
+        ['attente','confirme','absent'].map(function(p){return '<option value="'+p+'" '+(g.presence===p?'selected':'')+'>'+({attente:'En attente',confirme:'Confirmé',absent:'Absent'}[p])+'</option>';}).join('')+
+      '</select></div>'+
+      '<div style="flex:1;"><label class="mlbl">Catégorie</label><select onchange="updateGuest('+g.id+',\'groupe\',this.value)" '+(CAN_EDIT?'':'disabled')+'>'+
+        '<option value="" '+(!g.groupe?'selected':'')+'>—</option>'+
+        GUEST_CATEGORIES.map(function(c){return '<option value="'+esc(c)+'" '+(g.groupe===c?'selected':'')+'>'+c+'</option>';}).join('')+
+      '</select></div>'+
+    '</div>'+
+    '<div class="mrow">'+
+      '<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuestVinHonneur('+g.id+',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Vin d\'honneur</label>'+
+      (!vin?'<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Hébergé</label>':'')+
+      (!vin?'<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.brunch?'checked':'')+' onchange="updateGuest('+g.id+',\'brunch\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Brunch</label>':'')+
+    '</div>'+
+    (!vin ? '<div class="mrow">'+
+      '<div style="flex:1;"><label class="mlbl">Menu</label><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
+      '<div style="width:56px;"><label class="mlbl">+Acc.</label><input type="number" min="0" value="'+g.accompagnants+'" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></div>'+
+    '</div>' : '')+
+    (!vin ? '<div class="mrow">'+
+      '<div style="flex:1;"><label class="mlbl">Chambre</label><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
+      '<div style="flex:1;"><label class="mlbl">Table</label><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
+    '</div>' : '')+
+    '<div class="mrow"><div style="flex:1;"><label class="mlbl">Notes</label><input value="'+esc(g.notes)+'" onchange="updateGuest('+g.id+',\'notes\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div></div>'+
+    (CAN_EDIT?'<div style="text-align:right;margin-top:6px;"><button class="icon-btn danger" style="font-size:11px;" onclick="removeGuest('+g.id+')">🗑 Supprimer</button></div>':'')+
+  '</div>';
+}
 function viewGuests(){
   var view = UI.guestsView||'liste';
   var html = '<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Invités</h2>'+
@@ -606,13 +692,15 @@ function viewGuests(){
     '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
   '</div>'+
-  '<div class="card" style="overflow-x:auto;padding:0;">'+
+  '<div class="card desktop-table-wrap" style="overflow-x:auto;padding:0;">'+
     '<table style="min-width:1050px;"><thead><tr>'+
       sortableTh('Nom','nom')+sortableTh('Présence','presence')+sortableTh('Catégorie','groupe')+sortableTh('+Acc.','accompagnants')+sortableTh('Menu','menu')+
       '<th>Vin d\'honneur</th><th>Héb.</th><th>Brunch</th>'+sortableTh('Chambre','chambre')+sortableTh('Table','table')+'<th>Notes</th><th></th>'+
     '</tr></thead>'+
     '<tbody>'+ filtered.map(guestRow).join('') +'</tbody></table>'+
-  '</div></div>';
+  '</div>'+
+  '<div class="mobile-guest-list">'+ filtered.map(guestCardMobile).join('') +'</div>'+
+  '</div>';
   return html;
 }
 
@@ -1121,8 +1209,10 @@ function tableCardHtml(t){
     seatsHtml+='<div class="seat" style="left:'+x+'%;top:'+y+'%;width:'+seatSize+'%;">';
     if(occ){
       var gid = occ.guestId===null||occ.guestId===undefined?'null':occ.guestId;
-      seatsHtml+='<div class="seat-chip" '+(CAN_EDIT?'draggable="true" ondragstart="onDragStartOccupant(event,'+gid+',\''+esc(occ.label).replace(/\047/g,"\\'")+'\')"':'')+' title="'+esc(occ.label)+'">'+esc(occ.label)+
-        (CAN_EDIT?'<span onclick="removeTableOccupant('+t.id+','+i+')" style="position:absolute;top:-4px;right:-4px;background:#fff;border-radius:999px;width:13px;height:13px;font-size:9px;line-height:13px;text-align:center;border:1px solid var(--border);cursor:pointer;">✕</span>':'')+
+      var glabel = esc(occ.label).replace(/\047/g,"\\'");
+      var sel = isSelected(occ.guestId||null, occ.label);
+      seatsHtml+='<div class="seat-chip'+(sel?' selected-guest':'')+'" '+(CAN_EDIT?'draggable="true" ondragstart="onDragStartOccupant(event,'+gid+',\''+glabel+'\')" onclick="selectGuestForDrag(event,'+gid+',\''+glabel+'\')"':'')+' title="'+esc(occ.label)+'">'+esc(occ.label)+
+        (CAN_EDIT?'<span onclick="event.stopPropagation();removeTableOccupant('+t.id+','+i+')" style="position:absolute;top:-4px;right:-4px;background:#fff;border-radius:999px;width:13px;height:13px;font-size:9px;line-height:13px;text-align:center;border:1px solid var(--border);cursor:pointer;">✕</span>':'')+
       '</div>';
     } else {
       seatsHtml+='<div class="seat-empty">·</div>';
@@ -1132,15 +1222,15 @@ function tableCardHtml(t){
   var over=filled>cap, full=filled===cap&&cap>0;
   var badgeColor= over?'#B15E56':full?'#5C8A5A':'#BFA059';
   var badgeBg= over?'#F3E3E1':full?'#E4EFE3':'#F6EFE0';
-  return '<div class="table-card card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropTable(event,'+t.id+')">'+
+  return '<div class="table-card card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropTable(event,'+t.id+')" onclick="onDropTable(event,'+t.id+')">'+
     '<div class="table-round" style="position:relative;">'+seatsHtml+
-      '<div class="table-center">'+
+      '<div class="table-center" onclick="event.stopPropagation()">'+
         (CAN_EDIT? '<input value="'+esc(t.nom)+'" onchange="renameTable('+t.id+',this.value)" style="border:none;background:transparent;text-align:center;font-family:\'Cormorant Garamond\',serif;font-style:italic;padding:0;font-size:13px;"/>' : '<div class="display" style="font-size:13px;">'+esc(t.nom)+'</div>')+
         '<span class="chip" style="background:'+badgeBg+';color:'+badgeColor+';margin-top:4px;">'+filled+'/'+cap+'</span>'+
         (CAN_EDIT?'<div class="row-flex" style="margin-top:6px;"><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',-1)">–</button><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',1)">+</button></div>':'')+
       '</div>'+
     '</div>'+
-    (CAN_EDIT?'<div style="text-align:center;margin-top:8px;"><button class="icon-btn danger" style="font-size:11px;" onclick="deleteTable('+t.id+')">🗑 Supprimer</button></div>':'')+
+    (CAN_EDIT?'<div style="text-align:center;margin-top:8px;" onclick="event.stopPropagation()"><button class="icon-btn danger" style="font-size:11px;" onclick="deleteTable('+t.id+')">🗑 Supprimer</button></div>':'')+
   '</div>';
 }
 function viewTables(){
@@ -1151,14 +1241,15 @@ function viewTables(){
   var totalSeats=STATE.tables.reduce(function(s,t){return s+t.capacity;},0);
   var totalOcc=STATE.tables.reduce(function(s,t){return s+t.occupants.length;},0);
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Plan de table</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalSeats+' places occupées</p></div>'+
-    (CAN_EDIT?'<button class="btn" onclick="addTable()">+ Ajouter une table</button>':'')+
+    '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addTable()">+ Ajouter une table</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
   '</div>'+
+  (DRAG?'<p class="muted" style="font-size:12px;margin:6px 0;">👆 <b>'+esc(DRAG.label)+'</b> sélectionné — touchez une table pour le placer, ou touchez-le à nouveau pour annuler.</p>':(CAN_EDIT?'<p class="muted" style="font-size:11px;margin:6px 0;">Astuce mobile : touchez un invité pour le sélectionner, puis touchez une table.</p>':''))+
   '<div class="grid2" style="margin-top:14px;align-items:start;">'+
     '<div class="grid2">'+ STATE.tables.map(tableCardHtml).join('') +'</div>'+
-    '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolTables(event)">'+
+    '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolTables(event)" onclick="onDropPoolTables(event)">'+
       '<b style="font-size:13px;">Non placés ('+unplaced.length+')</b>'+
-      '<input id="tables-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.tablesSearch||'')+'" oninput="UI.tablesSearch=this.value;render();"/>'+
-      unplaced.map(function(g){return '<div class="pool-chip" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+esc(g.nom).replace(/\047/g,"\\'")+'\')">'+esc(g.nom)+'</div>';}).join('') +
+      '<input id="tables-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.tablesSearch||'')+'" oninput="UI.tablesSearch=this.value;render();" onclick="event.stopPropagation()"/>'+
+      unplaced.map(function(g){var gl=esc(g.nom).replace(/\047/g,"\\'"); var sel=isSelected(g.id,g.nom); return '<div class="pool-chip'+(sel?' selected-guest':'')+'" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+gl+'\')" onclick="selectGuestForDrag(event,'+g.id+',\''+gl+'\')">'+esc(g.nom)+'</div>';}).join('') +
       (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé 🎉</p>':'')+
     '</div>'+
   '</div></div>';
@@ -1193,17 +1284,22 @@ function roomCardHtml(r){
   var dot= over?'🔴':full?'🟢':'🟠';
   var badgeColor= over?'#B15E56':full?'#5C8A5A':'#BFA059';
   var badgeBg= over?'#F3E3E1':full?'#E4EFE3':'#F6EFE0';
-  return '<div class="room-card card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropRoom(event,'+r.id+')">'+
-    '<div class="flex-between">'+
+  return '<div class="room-card card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropRoom(event,'+r.id+')" onclick="onDropRoom(event,'+r.id+')">'+
+    '<div class="flex-between" onclick="event.stopPropagation()">'+
       (CAN_EDIT?'<input value="'+esc(r.nom)+'" onchange="renameRoom('+r.id+',this.value)" style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:16px;border:none;flex:1;padding:0;"/>':'<div class="display" style="font-size:16px;">'+esc(r.nom)+'</div>')+
       (CAN_EDIT?'<button class="icon-btn danger" onclick="deleteRoom('+r.id+')">🗑</button>':'')+
     '</div>'+
-    '<div class="row-flex" style="margin:8px 0;">'+
+    '<div class="row-flex" style="margin:8px 0;" onclick="event.stopPropagation()">'+
       '<span class="chip" style="background:'+badgeBg+';color:'+badgeColor+';">'+dot+' '+filled+'/'+cap+' places</span>'+
       (CAN_EDIT?'<div class="row-flex" style="margin-left:auto;"><button class="btn-outline" style="padding:2px 8px;" onclick="roomCapacity('+r.id+',-1)">–</button><button class="btn-outline" style="padding:2px 8px;" onclick="roomCapacity('+r.id+',1)">+</button></div>':'')+
     '</div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;">'+
-      r.occupants.map(function(o,idx){ return '<div class="pool-chip" draggable="'+(CAN_EDIT?'true':'false')+'" ondragstart="onDragStartOccupant(event,'+(o.guestId===null||o.guestId===undefined?'null':o.guestId)+',\''+esc(o.label).replace(/\047/g,"\\'")+'\')">'+esc(o.label)+(CAN_EDIT?' <span onclick="removeRoomOccupant('+r.id+','+idx+')" style="margin-left:4px;cursor:pointer;">✕</span>':'')+'</div>'; }).join('') +
+      r.occupants.map(function(o,idx){
+        var gid = o.guestId===null||o.guestId===undefined?'null':o.guestId;
+        var glabel = esc(o.label).replace(/\047/g,"\\'");
+        var sel = isSelected(o.guestId||null, o.label);
+        return '<div class="pool-chip'+(sel?' selected-guest':'')+'" draggable="'+(CAN_EDIT?'true':'false')+'" ondragstart="onDragStartOccupant(event,'+gid+',\''+glabel+'\')" onclick="selectGuestForDrag(event,'+gid+',\''+glabel+'\')">'+esc(o.label)+(CAN_EDIT?' <span onclick="event.stopPropagation();removeRoomOccupant('+r.id+','+idx+')" style="margin-left:4px;cursor:pointer;">✕</span>':'')+'</div>';
+      }).join('') +
       (r.occupants.length===0?'<span class="muted" style="font-size:12px;">Glissez des invités ici</span>':'')+
     '</div>'+
   '</div>';
@@ -1216,14 +1312,15 @@ function viewRooms(){
   var totalCap=STATE.rooms.reduce(function(s,r){return s+r.capacity;},0);
   var totalOcc=STATE.rooms.reduce(function(s,r){return s+r.occupants.length;},0);
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Chambres</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalCap+' places occupées</p></div>'+
-    (CAN_EDIT?'<button class="btn" onclick="addRoom()">+ Ajouter une chambre</button>':'')+
+    '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addRoom()">+ Ajouter une chambre</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
   '</div>'+
+  (DRAG?'<p class="muted" style="font-size:12px;margin:6px 0;">👆 <b>'+esc(DRAG.label)+'</b> sélectionné — touchez une chambre pour le placer, ou touchez-le à nouveau pour annuler.</p>':(CAN_EDIT?'<p class="muted" style="font-size:11px;margin:6px 0;">Astuce mobile : touchez un invité pour le sélectionner, puis touchez une chambre.</p>':''))+
   '<div class="grid2" style="margin-top:14px;align-items:start;">'+
     '<div class="grid2">'+ STATE.rooms.map(roomCardHtml).join('') +'</div>'+
-    '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolRooms(event)">'+
+    '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolRooms(event)" onclick="onDropPoolRooms(event)">'+
       '<b style="font-size:13px;">Non hébergés ('+unplaced.length+')</b>'+
-      '<input id="rooms-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.roomsSearch||'')+'" oninput="UI.roomsSearch=this.value;render();"/>'+
-      unplaced.map(function(g){return '<div class="pool-chip" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+esc(g.nom).replace(/\047/g,"\\'")+'\')">'+esc(g.nom)+'</div>';}).join('') +
+      '<input id="rooms-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.roomsSearch||'')+'" oninput="UI.roomsSearch=this.value;render();" onclick="event.stopPropagation()"/>'+
+      unplaced.map(function(g){var gl=esc(g.nom).replace(/\047/g,"\\'"); var sel=isSelected(g.id,g.nom); return '<div class="pool-chip'+(sel?' selected-guest':'')+'" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+gl+'\')" onclick="selectGuestForDrag(event,'+g.id+',\''+gl+'\')">'+esc(g.nom)+'</div>';}).join('') +
       (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé 🎉</p>':'')+
     '</div>'+
   '</div></div>';
