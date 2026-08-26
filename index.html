@@ -56,6 +56,15 @@
   @media(min-width:700px){.statgrid{grid-template-columns:repeat(4,1fr);}}
   .stat{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s;}
   .stat:hover{border-color:var(--gold);transform:translateY(-1px);}
+  .clickcard{cursor:pointer;transition:border-color .15s,transform .15s;display:block;width:100%;text-align:left;}
+  .clickcard:hover{border-color:var(--gold);transform:translateY(-1px);}
+  .quicktile{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;transition:border-color .15s,transform .15s;width:100%;}
+  .quicktile:hover{border-color:var(--gold);transform:translateY(-1px);}
+  .quicktile .emoji{font-size:22px;}
+  .quicktile .label{font-size:11px;color:var(--ink);}
+  .quickgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  @media(min-width:600px){.quickgrid{grid-template-columns:repeat(4,1fr);}}
+  @media(min-width:900px){.quickgrid{grid-template-columns:repeat(7,1fr);}}
   .stat .icon{background:var(--champagne-soft);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .stat .val{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1;}
   .stat .lbl{font-size:10px;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;}
@@ -381,6 +390,15 @@ function viewFor(tab) {
 function stat(icon, label, value, sub, tab) {
   return '<button class="stat" onclick="go(\''+tab+'\')"><div class="icon">'+icon+'</div><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
 }
+var QUICK_ACCESS = [
+  { tab:"ceremony", icon:"💒", label:"Cérémonie" },
+  { tab:"animations", icon:"🎉", label:"Animations" },
+  { tab:"trousse", icon:"✨", label:"Trousse de secours" },
+  { tab:"demoiselles", icon:"🌸", label:"Demoiselles d'honneur" },
+  { tab:"temoins", icon:"💍", label:"Témoins" },
+  { tab:"menu", icon:"🍽️", label:"Menu" },
+  { tab:"vendors", icon:"📞", label:"Prestataires" }
+];
 function viewDashboard() {
   var now = new Date();
   var diff = WEDDING_DATE.getTime() - now.getTime();
@@ -422,14 +440,14 @@ function viewDashboard() {
     stat('🪑', 'Plan de table', totalOcc+'/'+totalSeats, 'places occupées', 'tables')+
   '</div>'+
   '<div class="grid2" style="margin-top:16px;">'+
-    '<div class="card">'+
-      '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Aperçu du jour J</h2><button class="gold" style="font-size:11px;" onclick="go(\'planning\')">Voir tout →</button></div>'+
+    '<button class="card clickcard" onclick="go(\'planning\')">'+
+      '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Aperçu du jour J</h2><span class="gold" style="font-size:11px;">Voir tout →</span></div>'+
       '<div style="margin-top:12px;">'+ (highlights.length ? highlights.map(function(h){
         return '<div style="display:flex;gap:10px;"><div class="gold" style="width:44px;font-size:11px;padding-top:2px;flex-shrink:0;">'+esc(h.h)+'</div><div style="flex:1;border-left:1px solid var(--border);padding-left:10px;padding-bottom:10px;"><div style="font-size:13px;">'+esc(h.t)+'</div>'+(h.l?'<div class="muted" style="font-size:11px;">'+esc(h.l)+'</div>':'')+'</div></div>';
       }).join('') : '<p class="muted" style="font-size:12px;">Aucun grand moment marqué pour le samedi pour le moment.</p>') +'</div>'+
-    '</div>'+
-    '<div class="card">'+
-      '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Invités</h2><button class="gold" style="font-size:11px;" onclick="go(\'guests\')">Gérer →</button></div>'+
+    '</button>'+
+    '<button class="card clickcard" onclick="go(\'guests\')">'+
+      '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Invités</h2><span class="gold" style="font-size:11px;">Gérer →</span></div>'+
       '<div style="margin-top:12px;font-size:13px;">'+
         '<div class="flex-between"><span class="muted">Confirmés</span><span>'+confirmed.length+' / '+guests.length+'</span></div>'+
         '<div class="progressbar" style="margin:6px 0 10px;"><div class="fill" style="width:'+(guests.length?Math.round(confirmed.length/guests.length*100):0)+'%;"></div></div>'+
@@ -439,6 +457,12 @@ function viewDashboard() {
         '<div class="flex-between"><span class="muted">Vin d\'honneur uniquement</span><span>'+vinHonneur+'</span></div>'+
         '<div class="flex-between"><span class="muted">Brunch dimanche</span><span>'+brunch+'</span></div>'+
       '</div>'+
+    '</button>'+
+  '</div>'+
+  '<div class="card" style="margin-top:16px;">'+
+    '<div class="eyebrow" style="margin-bottom:10px;">Accès rapide</div>'+
+    '<div class="quickgrid">'+
+      QUICK_ACCESS.map(function(q){ return '<button class="quicktile" onclick="go(\''+q.tab+'\')"><span class="emoji">'+q.icon+'</span><span class="label">'+q.label+'</span></button>'; }).join('')+
     '</div>'+
   '</div></div>';
 }
@@ -526,6 +550,28 @@ function categoriesViewHtml(){
     '</div></div>';
   return html;
 }
+var PRESENCE_ORDER = { confirme:0, attente:1, absent:2 };
+function setGuestsSort(key){
+  if(UI.guestsSort && UI.guestsSort.key===key){ UI.guestsSort = { key:key, dir:-UI.guestsSort.dir }; }
+  else { UI.guestsSort = { key:key, dir:1 }; }
+  render();
+}
+function cmpGuests(a,b,key,dir){
+  var av,bv;
+  if(key==='presence'){ av=PRESENCE_ORDER[a.presence]; bv=PRESENCE_ORDER[b.presence]; return (av-bv)*dir; }
+  if(key==='accompagnants'){ av=Number(a.accompagnants)||0; bv=Number(b.accompagnants)||0; return (av-bv)*dir; }
+  av=(a[key]||'').toString().toLowerCase();
+  bv=(b[key]||'').toString().toLowerCase();
+  if(key==='groupe'){ if(!av&&bv) return 1; if(av&&!bv) return -1; }
+  if(av<bv) return -1*dir;
+  if(av>bv) return 1*dir;
+  return 0;
+}
+function sortableTh(label, key){
+  var active = UI.guestsSort && UI.guestsSort.key===key;
+  var arrow = active ? (UI.guestsSort.dir===1?' ▲':' ▼') : '';
+  return '<th style="cursor:pointer;user-select:none;'+(active?'color:var(--gold);':'')+'" onclick="setGuestsSort(\''+key+'\')">'+label+arrow+'</th>';
+}
 function viewGuests(){
   var view = UI.guestsView||'liste';
   var html = '<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Invités</h2>'+
@@ -551,14 +597,20 @@ function viewGuests(){
     if(filter==='vin'&&!g.vinHonneur) return false;
     return true;
   });
+  if(UI.guestsSort && UI.guestsSort.key){
+    filtered = filtered.slice().sort(function(a,b){ return cmpGuests(a,b,UI.guestsSort.key,UI.guestsSort.dir); });
+  }
   var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés'],['vin',"Vin d'honneur"]];
-  html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés</p>';
+  html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés · clique un titre de colonne pour trier</p>';
   html += '<div class="row-flex" style="margin:12px 0;">'+
     '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
   '</div>'+
   '<div class="card" style="overflow-x:auto;padding:0;">'+
-    '<table style="min-width:1050px;"><thead><tr><th>Nom</th><th>Présence</th><th>Catégorie</th><th>+Acc.</th><th>Menu</th><th>Vin d\'honneur</th><th>Héb.</th><th>Brunch</th><th>Chambre</th><th>Table</th><th>Notes</th><th></th></tr></thead>'+
+    '<table style="min-width:1050px;"><thead><tr>'+
+      sortableTh('Nom','nom')+sortableTh('Présence','presence')+sortableTh('Catégorie','groupe')+sortableTh('+Acc.','accompagnants')+sortableTh('Menu','menu')+
+      '<th>Vin d\'honneur</th><th>Héb.</th><th>Brunch</th>'+sortableTh('Chambre','chambre')+sortableTh('Table','table')+'<th>Notes</th><th></th>'+
+    '</tr></thead>'+
     '<tbody>'+ filtered.map(guestRow).join('') +'</tbody></table>'+
   '</div></div>';
   return html;
@@ -575,19 +627,16 @@ function addPlanningEvent(){
   var titre=val('add-ev-titre');
   if(!titre.trim()) return;
   var id=uid(STATE.planning);
-  var personnes=val('add-ev-personnes').split(',').map(function(s){return s.trim();}).filter(Boolean);
-  save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,personnes:personnes,important:false}]));
+  save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,personnes:[],important:false}]));
 }
 function saveEventEdit(id){
-  var personnes=val('ev-edit-personnes').split(',').map(function(s){return s.trim();}).filter(Boolean);
-  updatePlanningEvent(id,{heure:val('ev-edit-heure'),titre:val('ev-edit-titre'),personnes:personnes});
+  updatePlanningEvent(id,{heure:val('ev-edit-heure'),titre:val('ev-edit-titre')});
   clearEditing();
 }
 function eventCardHtml(e, showStar, showPersonnes){
   if(EDITING.type==='event'&&EDITING.id===e.id){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
-      '<input id="ev-edit-personnes" value="'+esc(e.personnes.join(', '))+'" placeholder="Personnes (virgules)" style="margin-top:6px;"/>'+
       '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
     '</div>';
   }
@@ -626,7 +675,6 @@ function viewPlanning(){
       html+='<div class="row-flex" style="margin-top:10px;flex-wrap:wrap;">'+
         '<input id="add-ev-heure" placeholder="Heure" style="width:80px;"/>'+
         '<input id="add-ev-titre" placeholder="Titre" style="flex:1;min-width:140px;"/>'+
-        '<input id="add-ev-personnes" placeholder="Personnes (virgules)" style="flex:1;min-width:160px;"/>'+
         '<button class="btn" onclick="addPlanningEvent()">+ Ajouter</button>'+
       '</div>';
     }
@@ -931,7 +979,7 @@ function viewMenu(){
 
 /* ============ VENDORS ============ */
 function saveVendorEdit(id){
-  var patch={categorie:val('vd-cat'),nom:val('vd-nom'),entreprise:val('vd-ent'),telephone:val('vd-tel'),email:val('vd-email'),site:val('vd-site'),montant:val('vd-montant'),acompte:val('vd-acompte'),solde:val('vd-solde'),horaires:val('vd-horaires'),notes:val('vd-notes')};
+  var patch={categorie:val('vd-cat'),nom:val('vd-nom'),telephone:val('vd-tel'),email:val('vd-email')};
   save('vendors', STATE.vendors.map(function(v){return v.id===id?Object.assign({},v,patch):v;}));
   clearEditing();
 }
@@ -940,46 +988,35 @@ function addVendor(){
   var cat=val('add-vd-cat');
   if(!cat.trim()) return;
   var id=uid(STATE.vendors);
-  save('vendors', STATE.vendors.concat([{id:id,categorie:cat,nom:val('add-vd-nom'),entreprise:'',telephone:'',email:'',site:'',montant:'',acompte:'',solde:'',horaires:'',notes:''}]));
+  save('vendors', STATE.vendors.concat([{id:id,categorie:cat,nom:val('add-vd-nom'),telephone:'',email:''}]));
   UI.addingVendor=false;
 }
-function vendorCardHtml(v){
-  var open=UI.openVendor===v.id;
+function vendorRowHtml(v){
   if(EDITING.type==='vendor'&&EDITING.id===v.id){
-    return '<div class="card">'+
-      '<div class="row-flex"><input id="vd-cat" value="'+esc(v.categorie)+'" placeholder="Catégorie" style="width:120px;"/><input id="vd-nom" value="'+esc(v.nom)+'" placeholder="Nom" style="flex:1;"/></div>'+
-      '<input id="vd-ent" value="'+esc(v.entreprise)+'" placeholder="Entreprise" style="margin-top:6px;"/>'+
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+      '<div class="row-flex"><input id="vd-cat" value="'+esc(v.categorie)+'" placeholder="Catégorie" style="width:140px;"/><input id="vd-nom" value="'+esc(v.nom)+'" placeholder="Nom" style="flex:1;"/></div>'+
       '<div class="row-flex" style="margin-top:6px;"><input id="vd-tel" value="'+esc(v.telephone)+'" placeholder="Téléphone" style="flex:1;"/><input id="vd-email" value="'+esc(v.email)+'" placeholder="Email" style="flex:1;"/></div>'+
-      '<input id="vd-site" value="'+esc(v.site)+'" placeholder="Site" style="margin-top:6px;"/>'+
-      '<div class="row-flex" style="margin-top:6px;"><input id="vd-montant" value="'+esc(v.montant)+'" placeholder="Montant" style="flex:1;"/><input id="vd-acompte" value="'+esc(v.acompte)+'" placeholder="Acompte" style="flex:1;"/><input id="vd-solde" value="'+esc(v.solde)+'" placeholder="Solde" style="flex:1;"/></div>'+
-      '<input id="vd-horaires" value="'+esc(v.horaires)+'" placeholder="Horaires" style="margin-top:6px;"/>'+
-      '<textarea id="vd-notes" rows="2" placeholder="Notes" style="margin-top:6px;">'+esc(v.notes)+'</textarea>'+
       '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveVendorEdit('+v.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
     '</div>';
   }
-  return '<div class="card" style="padding:0;overflow:hidden;">'+
-    '<button style="width:100%;text-align:left;padding:14px;display:flex;justify-content:space-between;" onclick="UI.openVendor='+(open?'null':v.id)+';render();">'+
-      '<div><div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+'</div><div class="display" style="font-size:16px;">'+(v.nom?esc(v.nom):'<span class="muted" style="font-style:normal;font-size:13px;">à renseigner</span>')+'</div></div><span>'+(open?'▲':'▼')+'</span>'+
-    '</button>'+
-    (open?'<div style="padding:0 14px 14px;border-top:1px solid var(--border);font-size:12px;">'+
-      (v.entreprise?'<div>'+esc(v.entreprise)+'</div>':'')+
-      (v.telephone?'<div>📞 '+esc(v.telephone)+'</div>':'')+
-      (v.email?'<div>'+esc(v.email)+'</div>':'')+
-      (v.site?'<div class="gold">'+esc(v.site)+'</div>':'')+
-      ((v.montant||v.acompte||v.solde)?'<div style="margin-top:4px;">'+(v.montant?'Montant : '+esc(v.montant)+' ':'')+(v.acompte?'Acompte : '+esc(v.acompte)+' ':'')+(v.solde?'Solde : '+esc(v.solde):'')+'</div>':'')+
-      (v.horaires?'<div>Horaires : '+esc(v.horaires)+'</div>':'')+
-      (v.notes?'<div class="muted" style="margin-top:4px;">'+esc(v.notes)+'</div>':'')+
-      (CAN_EDIT?'<div class="row-flex" style="margin-top:8px;"><button class="icon-btn" onclick="setEditing(\'vendor\','+v.id+')">✎ Modifier</button><button class="icon-btn danger" onclick="deleteVendor('+v.id+')">🗑 Supprimer</button></div>':'')+
-    '</div>':'')+
+  return '<div class="listrow">'+
+    '<div style="flex:1;min-width:0;">'+
+      '<div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+'</div>'+
+      '<div style="font-size:13px;">'+(v.nom?esc(v.nom):'<span class="muted" style="font-style:italic;">à renseigner</span>')+'</div>'+
+      (v.email?'<div class="muted" style="font-size:11px;">'+esc(v.email)+'</div>':'')+
+    '</div>'+
+    (v.telephone?'<a class="chip" href="tel:'+esc(v.telephone)+'" style="background:var(--champagne-soft);color:var(--gold);flex-shrink:0;">📞 '+esc(v.telephone)+'</a>':'<span class="muted" style="font-size:11px;flex-shrink:0;">pas de numéro</span>')+
+    (CAN_EDIT?'<div class="row-flex" style="flex-shrink:0;"><button class="icon-btn" onclick="setEditing(\'vendor\','+v.id+')">✎</button><button class="icon-btn danger" onclick="deleteVendor('+v.id+')">🗑</button></div>':'')+
   '</div>';
 }
 function viewVendors(){
   var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Prestataires</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingVendor=true;render();">+ Ajouter</button>':'')+'</div>'+
-  '<div class="grid2" style="margin-top:14px;">'+STATE.vendors.map(vendorCardHtml).join('')+'</div>';
+  '<div style="margin-top:14px;">'+STATE.vendors.map(vendorRowHtml).join('');
   if(UI.addingVendor){
-    html+='<div class="card" style="margin-top:10px;"><div class="row-flex"><input id="add-vd-cat" placeholder="Catégorie" style="width:140px;"/><input id="add-vd-nom" placeholder="Nom" style="flex:1;"/></div><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addVendor()">✓</button><button class="btn-outline" onclick="UI.addingVendor=false;render();">✕</button></div></div>';
+    html+='<div class="listrow" style="flex-direction:column;align-items:stretch;"><div class="row-flex"><input id="add-vd-cat" placeholder="Catégorie" style="width:140px;"/><input id="add-vd-nom" placeholder="Nom" style="flex:1;"/></div><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addVendor()">✓</button><button class="btn-outline" onclick="UI.addingVendor=false;render();">✕</button></div></div>';
   }
-  return html+'</div>';
+  if(!STATE.vendors.length && !UI.addingVendor) html+='<p class="muted" style="text-align:center;padding:20px;">Aucun prestataire.</p>';
+  return html+'</div></div>';
 }
 
 /* ============ CONTACTS ============ */
