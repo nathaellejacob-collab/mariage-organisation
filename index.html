@@ -82,12 +82,13 @@
   .timegroup .events{flex:1;border-left:1px solid var(--border);padding-left:12px;padding-bottom:12px;}
   .eventcard{background:var(--ivory);border-radius:10px;padding:8px 12px;margin-bottom:6px;}
   .eventcard .title{font-size:13px;}
-  .tl{position:relative;padding-left:64px;}
-  .tl:before{content:'';position:absolute;left:29px;top:4px;bottom:4px;width:2px;background:linear-gradient(to bottom, var(--gold), var(--border) 90%);}
-  .tl-group{position:relative;margin-bottom:16px;}
-  .tl-dot{position:absolute;left:-40px;top:6px;width:12px;height:12px;border-radius:999px;background:var(--gold);border:2px solid var(--paper);box-shadow:0 0 0 1px var(--gold);z-index:2;}
-  .tl-time{position:absolute;left:-64px;top:-1px;width:52px;text-align:right;font-size:11px;color:var(--gold);font-weight:600;}
-  .tl-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;}
+  .tlh-wrap{overflow-x:auto;padding-bottom:10px;}
+  .tlh{display:inline-flex;gap:0;position:relative;padding:34px 20px 6px;min-width:100%;}
+  .tlh:before{content:'';position:absolute;left:20px;right:20px;top:52px;height:2px;background:linear-gradient(to right, var(--gold), var(--border) 85%);}
+  .tlh-col{flex:0 0 220px;position:relative;padding:0 12px;display:flex;flex-direction:column;align-items:center;}
+  .tlh-time{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:6px;white-space:nowrap;}
+  .tlh-dot{width:13px;height:13px;border-radius:999px;background:var(--gold);border:3px solid var(--paper);box-shadow:0 0 0 1px var(--gold);margin-bottom:14px;position:relative;z-index:2;flex-shrink:0;}
+  .tl-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;width:100%;}
   .tl-card:last-child{margin-bottom:0;}
   .tl-card .title{font-size:13px;color:var(--ink);}
   .table-round{position:relative;width:100%;max-width:280px;aspect-ratio:1/1;margin:0 auto;}
@@ -718,40 +719,37 @@ function setPlanningPerson(p){UI.planningPerson=p;render();}
 function updatePlanningEvent(id,patch){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,patch):e;})); }
 function deletePlanningEvent(id){ save('planning', STATE.planning.filter(function(e){return e.id!==id;})); }
 function toggleImportant(id){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,{important:!e.important}):e;})); }
-function addPlanningEvent(){
+function addPlanningEvent(person){
   var titre=val('add-ev-titre');
   if(!titre.trim()) return;
   var id=uid(STATE.planning);
-  save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,personnes:[],important:true}]));
+  var personnes = (person && person!=="Tout le monde") ? [person] : [];
+  var important = !person || person==="Tout le monde";
+  save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,personnes:personnes,important:important}]));
 }
 function saveEventEdit(id){
   updatePlanningEvent(id,{heure:val('ev-edit-heure'),titre:val('ev-edit-titre')});
   clearEditing();
 }
-function eventCardHtml(e, showStar, showPersonnes){
+function eventCardHtml(e){
   if(EDITING.type==='event'&&EDITING.id===e.id){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
       '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
     '</div>';
   }
-  var starHtml = showStar ? '<button class="icon-btn" style="color:'+(e.important?'var(--gold)':'#D8CDBB')+';font-size:14px;flex-shrink:0;" onclick="toggleImportant('+e.id+')">★</button>' : '';
   return '<div class="tl-card"><div class="flex-between">'+
-      '<div style="display:flex;gap:8px;align-items:flex-start;">'+ starHtml +
-        '<div><div class="title">'+esc(e.titre)+'</div>'+
-        (showPersonnes && e.personnes.length?'<div style="margin-top:4px;">'+e.personnes.map(function(p){return '<span class="chip" style="margin-right:4px;">'+esc(p)+'</span>';}).join('')+'</div>':'')+
-        '</div>'+
-      '</div>'+
+      '<div class="title">'+esc(e.titre)+'</div>'+
       (CAN_EDIT?'<div class="row-flex" style="flex-shrink:0;"><button class="icon-btn" onclick="setEditing(\'event\','+e.id+')">✎</button><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑</button></div>':'')+
   '</div></div>';
 }
-function timelineHtml(groups, showStar, showPersonnes){
+function timelineHtml(groups){
   if(!groups.length) return '';
-  return '<div class="tl">'+groups.map(function(g){
-    return '<div class="tl-group"><span class="tl-dot"></span><span class="tl-time">'+esc(g.heure)+'</span>'+
-      g.events.map(function(e){ return eventCardHtml(e, showStar, showPersonnes); }).join('') +
+  return '<div class="tlh-wrap"><div class="tlh">'+groups.map(function(g){
+    return '<div class="tlh-col"><span class="tlh-time">'+esc(g.heure)+'</span><span class="tlh-dot"></span>'+
+      g.events.map(function(e){ return eventCardHtml(e); }).join('') +
     '</div>';
-  }).join('') + '</div>';
+  }).join('') + '</div></div>';
 }
 function viewPlanning(){
   var people=Array.from(new Set(STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[]))).sort();
@@ -762,7 +760,7 @@ function viewPlanning(){
   var day = UI.planningDay;
 
   var html='<div class="fade"><div class="flex-between">'+
-    '<div><h2 class="display" style="font-size:28px;margin:0;">Planning</h2><p class="muted" style="font-size:12px;margin-top:2px;">'+(onlyMajor?"Trame du grand jour":"Planning détaillé de "+esc(person))+'</p></div>'+
+    '<div><h2 class="display" style="font-size:28px;margin:0;">Planning</h2><p class="muted" style="font-size:12px;margin-top:2px;">'+(onlyMajor?"Déroulé de la journée":"Planning détaillé de "+esc(person))+'</p></div>'+
   '</div>';
 
   html+='<select style="max-width:280px;border-radius:999px;margin-top:12px;" onchange="setPlanningPerson(this.value)">'+
@@ -781,15 +779,15 @@ function viewPlanning(){
 
   html+='<div class="card">';
   if(!evs.length){
-    html+='<p class="muted" style="text-align:center;padding:24px;font-size:13px;">'+(onlyMajor?'Aucun grand moment marqué pour ce jour.':'Rien de prévu pour '+esc(person)+' ce jour-là.')+'</p>';
+    html+='<p class="muted" style="text-align:center;padding:24px;font-size:13px;">'+(onlyMajor?'Rien de prévu pour ce jour.':'Rien de prévu pour '+esc(person)+' ce jour-là.')+'</p>';
   } else {
-    html += timelineHtml(groups, !onlyMajor, onlyMajor);
+    html += timelineHtml(groups);
   }
-  if(CAN_EDIT && onlyMajor){
+  if(CAN_EDIT){
     html+='<div class="row-flex" style="margin-top:14px;flex-wrap:wrap;">'+
       '<input id="add-ev-heure" placeholder="Heure" style="width:80px;"/>'+
       '<input id="add-ev-titre" placeholder="Titre" style="flex:1;min-width:140px;"/>'+
-      '<button class="btn" onclick="addPlanningEvent()">+ Ajouter un grand moment</button>'+
+      '<button class="btn" onclick="addPlanningEvent(\''+esc(person).replace(/\047/g,"\\'")+'\')">+ Ajouter'+(onlyMajor?'':' pour '+esc(person))+'</button>'+
     '</div>';
   }
   html+='</div>';
