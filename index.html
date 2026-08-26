@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nathaelle & Jérémy — Espace d'organisation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Poppins:wght@300;400;500;600&display=swap');
+  :root{
+    --ivory:#FBF7F0; --paper:#FFFFFF; --champagne:#EEE3CE; --champagne-soft:#F6EFE0;
+    --rose:#E7C9C6; --rose-soft:#F5E7E5; --gold:#BFA059; --ink:#3A332B; --ink-soft:#8C8071;
+    --rose-deep:#B8746E; --border:#E2D3B4;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ivory);color:var(--ink);font-family:'Poppins',sans-serif;}
+  .display{font-family:'Cormorant Garamond',serif;font-style:italic;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  input,select,textarea{font-family:inherit;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;background:var(--paper);color:var(--ink);width:100%;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);}
+  .pill{border-radius:999px;}
+  .btn{background:var(--gold);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;display:inline-flex;align-items:center;gap:6px;}
+  .btn:hover{opacity:.9;}
+  .btn-outline{background:var(--paper);color:var(--ink-soft);border:1px solid var(--border);padding:8px 16px;border-radius:999px;font-size:13px;}
+  .btn-outline:hover{border-color:var(--gold);}
+  .card{background:var(--paper);border:1px solid var(--border);border-radius:18px;padding:20px;}
+  .muted{color:var(--ink-soft);}
+  .gold{color:var(--gold);}
+  .chip{display:inline-flex;align-items:center;gap:4px;background:var(--rose-soft);color:var(--rose-deep);border-radius:999px;padding:3px 10px;font-size:11px;}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:6px;}
+  #header{background:var(--paper);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;}
+  #header .row{max-width:1100px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  #brand{display:flex;align-items:center;gap:10px;}
+  #brand .name{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;line-height:1;}
+  #brand .sub{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--ink-soft);}
+  #nav{display:flex;gap:4px;flex-wrap:wrap;}
+  #nav button{padding:8px 14px;border-radius:999px;font-size:13px;color:var(--ink-soft);}
+  #nav button.active{background:var(--ink);color:#fff;}
+  #nav button:hover:not(.active){background:var(--champagne-soft);}
+  #main{max-width:1100px;margin:0 auto;padding:24px 20px 60px;}
+  .grid2{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media(min-width:700px){.grid2{grid-template-columns:1fr 1fr;}}
+  .grid3{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media(min-width:700px){.grid3{grid-template-columns:1fr 1fr;}}
+  @media(min-width:1000px){.grid3{grid-template-columns:1fr 1fr 1fr;}}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:var(--champagne-soft);text-transform:uppercase;font-size:10px;letter-spacing:.06em;color:var(--ink-soft);text-align:left;padding:9px 8px;font-weight:500;}
+  td{padding:6px 8px;border-top:1px solid var(--border);}
+  tr:nth-child(even) td{background:var(--ivory);}
+  .row-flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .tabbar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 0;}
+  .tabbar button{padding:8px 14px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--ink-soft);background:var(--paper);}
+  .tabbar button.active{background:var(--gold);color:#fff;border-color:var(--gold);}
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(min-width:700px){.statgrid{grid-template-columns:repeat(4,1fr);}}
+  .stat{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;}
+  .stat .icon{background:var(--champagne-soft);border-radius:999px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .stat .val{font-family:'Cormorant Garamond',serif;font-size:28px;line-height:1;}
+  .stat .lbl{font-size:10px;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;}
+  .progressbar{height:8px;border-radius:999px;background:var(--champagne-soft);overflow:hidden;}
+  .progressbar .fill{height:100%;background:var(--gold);}
+  .flex-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .icon-btn{color:var(--ink-soft);padding:4px;}
+  .icon-btn:hover{color:var(--gold);}
+  .icon-btn.danger:hover{color:var(--rose-deep);}
+  .listrow{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;}
+  .listrow input,.listrow select{font-size:12px;padding:5px 8px;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:5px;}
+  .timegroup{display:flex;gap:12px;}
+  .timegroup .time{width:48px;flex-shrink:0;font-size:12px;color:var(--gold);padding-top:10px;font-weight:500;}
+  .timegroup .events{flex:1;border-left:1px solid var(--border);padding-left:12px;padding-bottom:12px;}
+  .eventcard{background:var(--ivory);border-radius:10px;padding:8px 12px;margin-bottom:6px;}
+  .eventcard .title{font-size:13px;}
+  .table-round{position:relative;width:100%;max-width:280px;aspect-ratio:1/1;margin:0 auto;}
+  .seat{position:absolute;transform:translate(-50%,-50%);}
+  .seat-chip{width:100%;aspect-ratio:1/1;border-radius:999px;background:var(--rose-soft);color:var(--rose-deep);border:1px solid rgba(184,116,110,.35);display:flex;align-items:center;justify-content:center;text-align:center;font-size:8px;line-height:1.1;padding:2px;cursor:grab;}
+  .seat-empty{width:100%;aspect-ratio:1/1;border-radius:999px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:9px;}
+  .table-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44%;height:44%;border-radius:999px;background:var(--champagne-soft);border:1px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6%;}
+  .pool{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:14px;}
+  .pool.dragover, .table-card.dragover, .room-card.dragover{border-color:var(--gold);box-shadow:0 0 0 3px rgba(191,160,89,.15);}
+  .pool-chip{display:flex;align-items:center;gap:6px;background:var(--champagne-soft);border-radius:999px;padding:6px 10px;font-size:12px;margin-bottom:6px;cursor:grab;}
+  #gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  #gate .box{background:var(--paper);border:1px solid var(--border);border-radius:24px;padding:32px;max-width:360px;width:100%;text-align:center;}
+  #search-panel{position:absolute;right:0;top:44px;width:320px;max-width:85vw;background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:12px;box-shadow:0 8px 24px rgba(58,50,41,.14);z-index:30;}
+  .search-result{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;text-align:left;width:100%;}
+  .search-result:hover{background:var(--champagne-soft);}
+  .readonly-banner{background:var(--champagne-soft);text-align:center;padding:5px;font-size:11px;color:var(--ink-soft);}
+  .fade{animation:fadein .25s ease-out;}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  ::-webkit-scrollbar{height:6px;width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .mono{width:44px;height:44px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============ CONFIG ============ */
+var CONFIG = {
+  // Colle ici l'URL de ton déploiement Apps Script (se termine par /exec)
+  API_URL: "https://script.google.com/macros/s/AKfycbyRxwOLeVFCiK2pbELBWKvYSq1ZEt3b87x2AuGLrPfPVU_8hS-OV-Mh5MADJUB4eI8/exec"
+};
+
+var WEDDING_DATE = new Date("2027-06-19T14:00:00");
+var DAY_ORDER = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+
+/* ============ SEEDS ============ */
+var SEEDS = {
+  guests: [{"id":1,"nom":"Marie Pellerin","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":2,"nom":"Killiam","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":3,"nom":"Sylvain Guiot","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":4,"nom":"Épouse Sylvain","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":5,"nom":"Alexandra","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":6,"nom":"Époux Alexandra","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":7,"nom":"Alliom","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":8,"nom":"Épouse Alliom","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":9,"nom":"Antoine","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":10,"nom":"Pauline","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":11,"nom":"Carole","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":12,"nom":"Époux Carole","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":13,"nom":"Cécile","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":14,"nom":"Époux Cécile","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":15,"nom":"Céline Giroux","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":16,"nom":"Homme Céline","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":17,"nom":"Thomas Morvant","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":18,"nom":"Lana","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":19,"nom":"Yohan","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":20,"nom":"Manon Debond","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":21,"nom":"Ugo Louis","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":22,"nom":"Nathalie Gimenez","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":23,"nom":"Jean-Paul Gimenez","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":24,"nom":"Sandra Sella","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":25,"nom":"Jean-Michel Sella","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":26,"nom":"M. Racim","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":27,"nom":"Virginie Marzocca","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":28,"nom":"Anine","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":29,"nom":"Pierre Vetter","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":30,"nom":"Kalista","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":31,"nom":"Robin Rippert","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":32,"nom":"Eva","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":33,"nom":"Romane Teixeira","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":34,"nom":"Aymeric","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":35,"nom":"Théo Leveque","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":36,"nom":"Malvina","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":37,"nom":"Valentin Domingues","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":38,"nom":"Laetitia Domingues","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":39,"nom":"Caroline Boehm","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":40,"nom":"Denis BOEHM","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":41,"nom":"Clara BOEHM","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":42,"nom":"Gerald Boehm","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":43,"nom":"Amanda Da Silva Boehm","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":44,"nom":"Lydia","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":45,"nom":"Jean Lou","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":46,"nom":"Fred","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":47,"nom":"Melissa BOEHM","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":48,"nom":"Christelle","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":49,"nom":"Époux Christelle","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":50,"nom":"Cyril Noel","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":51,"nom":"Priscilla Noel","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":52,"nom":"Dune","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":53,"nom":"Mari Dune","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":54,"nom":"Marie Té Gallon","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":55,"nom":"Mari Marie Té","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":56,"nom":"Patrick Yaiel","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":57,"nom":"Cecile Yaiel","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":58,"nom":"Romain Mangin","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":59,"nom":"Femme Romain","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":60,"nom":"Aurore Vernet","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":61,"nom":"Stéphane Vernet","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":62,"nom":"Clément Vernet","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":63,"nom":"Chloé Vernet","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":64,"nom":"Bertrand","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":65,"nom":"Sandra","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":66,"nom":"Lisa","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":67,"nom":"Christine Bouvier","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":68,"nom":"Michel Mosca","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":69,"nom":"Daniel Locatelli","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":70,"nom":"Dominique Locatelli","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":71,"nom":"Edwige Durand","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":72,"nom":"Pierre Durand","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":73,"nom":"Elliane Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":74,"nom":"Maurice Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":75,"nom":"Guillaume Jacob","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":76,"nom":"Janine","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":77,"nom":"Gwenael Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":78,"nom":"Marion Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":79,"nom":"Florent Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":80,"nom":"Fabien Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":81,"nom":"Ingrid Paturelle","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":82,"nom":"Romuald Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":83,"nom":"Maelys Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":84,"nom":"Evan Cézard","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":85,"nom":"+1 Evan","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":86,"nom":"Julian JACOB","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":87,"nom":"Léna","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":88,"nom":"Martine","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":89,"nom":"Pierre","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":90,"nom":"Mathias Durand","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":91,"nom":"Maud Locatelli","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":92,"nom":"Nadine Chluba","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":93,"nom":"Christophe Chluba","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":94,"nom":"Nilla Pontonnier","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":95,"nom":"Bernard Pontonnier","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":96,"nom":"Raymonde Ferro","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":97,"nom":"Gerard Ferro","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":98,"nom":"Romain Locatelli","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":99,"nom":"Laura","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":100,"nom":"Sandra JACOB","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":101,"nom":"Matthieu JACOB","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":102,"nom":"Thierry Pontonnier","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""},{"id":103,"nom":"Copine Thierry","groupe":"","presence":"attente","accompagnants":0,"menu":"","allergies":"","hebergement":false,"chambre":"","table":"","role":"","notes":""}],
+  planning: [{"id":1,"jour":"Lundi","heure":"11h15","titre":"Préparation de la valise","personnes":["Nathaelle"]},{"id":2,"jour":"Lundi","heure":"12h00","titre":"Déjeuner","personnes":["Nathaelle"]},{"id":3,"jour":"Lundi","heure":"14h00","titre":"Contacter les prestataires pour confiramations finale","personnes":["Nathaelle"]},{"id":4,"jour":"Lundi","heure":"14h45","titre":"Relancer les invités","personnes":["Nathaelle"]},{"id":5,"jour":"Lundi","heure":"15h00","titre":"Relecture du planning","personnes":["Nathaelle"]},{"id":6,"jour":"Lundi","heure":"15h30","titre":"Plan de table","personnes":["Nathaelle"]},{"id":7,"jour":"Lundi","heure":"16h15","titre":"Répétition de danse","personnes":["Nathaelle"]},{"id":8,"jour":"Mardi","heure":"12h00","titre":"Déjeuner","personnes":["Nathaelle"]},{"id":9,"jour":"Mardi","heure":"14h00","titre":"Préparation des paiements","personnes":["Nathaelle"]},{"id":10,"jour":"Mardi","heure":"14h45","titre":"Répétition de danse","personnes":["Nathaelle"]},{"id":11,"jour":"Mercredi","heure":"12h15","titre":"Départ vers Lyon","personnes":["Nathaelle","Sandra"]},{"id":12,"jour":"Mercredi","heure":"14h00","titre":"Ongles","personnes":["Nathaelle","Sandra"]},{"id":13,"jour":"Mercredi","heure":"15h15","titre":"Aller chercher la robe","personnes":["Nathaelle","Sandra"]},{"id":14,"jour":"Mercredi","heure":"17h00","titre":"Retour de  Lyon","personnes":["Nathaelle","Sandra"]},{"id":15,"jour":"Mercredi","heure":"18h45","titre":"Répétition de danse","personnes":["Nathaelle"]},{"id":16,"jour":"Jeudi","heure":"10h00","titre":"dernier cheak valise","personnes":["Nathaelle"]},{"id":17,"jour":"Jeudi","heure":"10h45","titre":"Répétition de danse","personnes":["Nathaelle"]},{"id":18,"jour":"Jeudi","heure":"12h00","titre":"Déjeuner (Chez les parents)","personnes":["Nathaelle"]},{"id":19,"jour":"Jeudi","heure":"12h45","titre":"Préparation cocktails","personnes":["Nathaelle"]},{"id":20,"jour":"Jeudi","heure":"13h30","titre":"Valider la cheakliste","personnes":["Nathaelle"]},{"id":21,"jour":"Jeudi","heure":"14h15","titre":"Charger la voiture","personnes":["Nathaelle"]},{"id":22,"jour":"Vendredi","heure":"12h15","titre":"Déjeuner","personnes":["Nathaelle"]},{"id":23,"jour":"Vendredi","heure":"13h15","titre":"Finir de charger la voiture","personnes":["Nathaelle"]},{"id":24,"jour":"Vendredi","heure":"14h00","titre":"Départ vers le château des anges","personnes":["Nathaelle"]},{"id":25,"jour":"Vendredi","heure":"15h00","titre":"Décharger la voiture","personnes":["Nathaelle"]},{"id":26,"jour":"Vendredi","heure":"15h15","titre":"Mise en place des tables (interieur, exetrieur)","personnes":["Nathaelle"]},{"id":27,"jour":"Vendredi","heure":"15h45","titre":"Mise en place des napes","personnes":["Nathaelle","Sandra","Mémé"]},{"id":28,"jour":"Vendredi","heure":"15h45","titre":"Mise en place des chaises Cérémonie civile","personnes":["Jeremy","Julian","Léna"]},{"id":29,"jour":"Vendredi","heure":"16h00","titre":"Faire les tables (assiettes, couverts, bougies, verres)","personnes":["Nathaelle","Sandra"]},{"id":30,"jour":"Vendredi","heure":"16h00","titre":"Mettre dans les paniers : les ombrelles, les décos voiture","personnes":["Jeremy"]},{"id":31,"jour":"Vendredi","heure":"16h00","titre":"Nœuds sur voiture","personnes":["Julian"]},{"id":32,"jour":"Vendredi","heure":"16h00","titre":"Faire les tables","personnes":["Mémé"]},{"id":33,"jour":"Vendredi","heure":"16h00","titre":"Faire la table d'accueuil","personnes":["Léna"]},{"id":34,"jour":"Vendredi","heure":"16h15","titre":"Mise en places des nœud chaises","personnes":["Nathaelle","Sandra","Mémé"]},{"id":35,"jour":"Vendredi","heure":"16h15","titre":"Faire les lits","personnes":["Jeremy","Julian","Léna"]},{"id":36,"jour":"Vendredi","heure":"16h30","titre":"Nœud panneau d'accueil","personnes":["Nathaelle","Sandra"]},{"id":37,"jour":"Vendredi","heure":"16h30","titre":"sortir le costume de sa housse","personnes":["Jeremy"]},{"id":38,"jour":"Vendredi","heure":"16h45","titre":"Sortir la robe de la housse","personnes":["Nathaelle"]},{"id":39,"jour":"Vendredi","heure":"17h00","titre":"Détente","personnes":["Nathaelle"]},{"id":40,"jour":"Vendredi","heure":"19h15","titre":"Pizza","personnes":["Nathaelle"]},{"id":41,"jour":"Vendredi","heure":"20h15","titre":"Répétition de danse","personnes":["Nathaelle"]},{"id":42,"jour":"Samedi","heure":"07h00","titre":"Accueil coiffeuse","personnes":["Sandra"]},{"id":43,"jour":"Samedi","heure":"07h00","titre":"Arrivée","personnes":["Coiffeuse"]},{"id":44,"jour":"Samedi","heure":"07h15","titre":"Coiffure/Maquillage","personnes":["Sandra"]},{"id":45,"jour":"Samedi","heure":"07h15","titre":"Habillage","personnes":["Mémé"]},{"id":46,"jour":"Samedi","heure":"07h15","titre":"Sandra (Maquillage/Coiffure)","personnes":["Coiffeuse"]},{"id":47,"jour":"Samedi","heure":"07h30","titre":"Petit Déjeuner","personnes":["Nathaelle","Mémé"]},{"id":48,"jour":"Samedi","heure":"08h00","titre":"Préparatifs","personnes":["Nathaelle"]},{"id":49,"jour":"Samedi","heure":"08h00","titre":"Préparatifs Nathaelle","personnes":["Sandra","Mémé"]},{"id":50,"jour":"Samedi","heure":"08h00","titre":"Nathaelle (Maquillage/Coiffure)","personnes":["Coiffeuse"]},{"id":51,"jour":"Samedi","heure":"09h00","titre":"Petit Déjeuner","personnes":["Julian","Matthieu","Léna"]},{"id":52,"jour":"Samedi","heure":"09h30","titre":"Petit Déjeuner","personnes":["Jeremy"]},{"id":53,"jour":"Samedi","heure":"09h30","titre":"Dernières installations                                                                                  (panneau d'accueil, cadeaux invités,)","personnes":["Sandra"]},{"id":54,"jour":"Samedi","heure":"09h30","titre":"Dernières installations (panneau d'accueil, cadeaux invités)","personnes":["Julian","Matthieu","Léna"]},{"id":55,"jour":"Samedi","heure":"09h30","titre":"Dernières installations (Fleurs, panneau d'accueil, cadeaux invités, nappes)","personnes":["Lisa","Lana","Manon"]},{"id":56,"jour":"Samedi","heure":"10h00","titre":"Préparatifs","personnes":["Jeremy"]},{"id":57,"jour":"Samedi","heure":"10h00","titre":"Préparatifs Jérémy","personnes":["Julian"]},{"id":58,"jour":"Samedi","heure":"10h00","titre":"Habillage","personnes":["Matthieu","Léna","Lisa","Lana","Manon"]},{"id":59,"jour":"Samedi","heure":"10h15","titre":"Accueil photographe/Vidéaste","personnes":["Sandra"]},{"id":60,"jour":"Samedi","heure":"10h15","titre":"Arrivée","personnes":["Photographe"]},{"id":61,"jour":"Samedi","heure":"10h30","titre":"Préparatifs Nathaelle","personnes":["Sandra"]},{"id":62,"jour":"Samedi","heure":"10h30","titre":"Coiffure","personnes":["Lisa"]},{"id":63,"jour":"Samedi","heure":"10h30","titre":"Lisa (Coiffure)","personnes":["Coiffeuse"]},{"id":64,"jour":"Samedi","heure":"10h30","titre":"Préparatifs Nathaelle (10H30-11H00)","personnes":["Photographe"]},{"id":65,"jour":"Samedi","heure":"11h00","titre":"Coiffure","personnes":["Mémé"]},{"id":66,"jour":"Samedi","heure":"11h00","titre":"Mémé (Coiffure)","personnes":["Coiffeuse"]},{"id":67,"jour":"Samedi","heure":"11h00","titre":"Préparatifs Jérémy (11H00-11H15)","personnes":["Photographe"]},{"id":68,"jour":"Samedi","heure":"11h15","titre":"Découverte de la mariée","personnes":["Nathaelle"],"important":true},{"id":69,"jour":"Samedi","heure":"11h15","titre":"Découverte des mariés (11H15-11H30)","personnes":["Photographe"]},{"id":70,"jour":"Samedi","heure":"11h30","titre":"Photos de couples","personnes":["Nathaelle"]},{"id":71,"jour":"Samedi","heure":"11h30","titre":"Dernières verification","personnes":["Sandra"]},{"id":72,"jour":"Samedi","heure":"11h30","titre":"Coiffure","personnes":["Julian"]},{"id":73,"jour":"Samedi","heure":"11h30","titre":"Julian (Coiffure)","personnes":["Coiffeuse"]},{"id":74,"jour":"Samedi","heure":"11h30","titre":"Photos de couples (11H30-12H15)","personnes":["Photographe"]},{"id":75,"jour":"Samedi","heure":"11h45","titre":"Habillage","personnes":["Julian"]},{"id":76,"jour":"Samedi","heure":"11h45","titre":"Coiffure","personnes":["Léna"]},{"id":77,"jour":"Samedi","heure":"11h45","titre":"Léna (Coiffure)","personnes":["Coiffeuse"]},{"id":78,"jour":"Samedi","heure":"12h00","titre":"Préparation petit déjeuner","personnes":["Sandra"]},{"id":79,"jour":"Samedi","heure":"12h00","titre":"Préparation Déjeuner","personnes":["Matthieu"]},{"id":80,"jour":"Samedi","heure":"12h15","titre":"Déjeuner","personnes":["Nathaelle","Lisa","Photographe"]},{"id":81,"jour":"Samedi","heure":"12h30","titre":"Départ vers la mairie","personnes":["Jeremy","Mémé"]},{"id":82,"jour":"Samedi","heure":"12h30","titre":"Départ vers la mairie (12H30-13H30)","personnes":["Photographe"]},{"id":83,"jour":"Samedi","heure":"12h45","titre":"Départ vers la mairie","personnes":["Nathaelle","Julian"]},{"id":84,"jour":"Samedi","heure":"13h30","titre":"Saluer les invités","personnes":["Jeremy"]},{"id":85,"jour":"Samedi","heure":"13h30","titre":"Nomination place","personnes":["Mémé"]},{"id":86,"jour":"Samedi","heure":"13h45","titre":"mise en place de ma traine","personnes":["Nathaelle","Manon"]},{"id":87,"jour":"Samedi","heure":"13h45","titre":"Installer les invités","personnes":["Jeremy","Sandra","Melissa"]},{"id":88,"jour":"Samedi","heure":"13h45","titre":"Garer la voiture","personnes":["Julian"]},{"id":89,"jour":"Samedi","heure":"13h45","titre":"au bras de la mariée","personnes":["Matthieu"]},{"id":90,"jour":"Samedi","heure":"13h45","titre":"Sorti de la voiture","personnes":["Photographe"]},{"id":91,"jour":"Samedi","heure":"14h00","titre":"entrée de la mariée","personnes":["Nathaelle"],"important":true},{"id":92,"jour":"Samedi","heure":"14h00","titre":"Entrée de la mariée","personnes":["Photographe"]},{"id":93,"jour":"Samedi","heure":"14h15","titre":"Cérémonie civile","personnes":["Nathaelle"],"important":true},{"id":94,"jour":"Samedi","heure":"14h15","titre":"Cérémonie Civile (14H00-14H30)","personnes":["Photographe"]},{"id":95,"jour":"Samedi","heure":"14h45","titre":"Saluer les invités","personnes":["Nathaelle","Matthieu"]},{"id":96,"jour":"Samedi","heure":"14h45","titre":"Diriger les invité vers les mariés","personnes":["Lisa"]},{"id":97,"jour":"Samedi","heure":"15h00","titre":"Départ vers la sortie A9","personnes":["Nathaelle"]},{"id":98,"jour":"Samedi","heure":"15h00","titre":"Arrivée","personnes":["DJ"]},{"id":99,"jour":"Samedi","heure":"15h00","titre":"Départ vers le château des anges (15H00-16H00)","personnes":["Photographe"]},{"id":100,"jour":"Samedi","heure":"15h15","titre":"Installation","personnes":["DJ"]},{"id":101,"jour":"Samedi","heure":"15h30","titre":"Départ vers le château","personnes":["Nathaelle"]},{"id":102,"jour":"Samedi","heure":"15h45","titre":"Installation de la citronnade","personnes":["Traiteur"]},{"id":103,"jour":"Samedi","heure":"16h00","titre":"Photos entonoire","personnes":["Nathaelle"]},{"id":104,"jour":"Samedi","heure":"16h00","titre":"Parking","personnes":["Sandra"]},{"id":105,"jour":"Samedi","heure":"16h00","titre":"Citronnade","personnes":["Julian","Matthieu"]},{"id":106,"jour":"Samedi","heure":"16h00","titre":"Photos entonoire (16H00-16H30)","personnes":["Photographe"]},{"id":107,"jour":"Samedi","heure":"16h15","titre":"Chambre invités","personnes":["Matthieu"]},{"id":108,"jour":"Samedi","heure":"16h15","titre":"16H15-16H30 : Installation invités cérémonie laïque (I just Called To Say I Love You : Stevie wonder)","personnes":["DJ"]},{"id":109,"jour":"Samedi","heure":"16h30","titre":"Cérémonie Laique","personnes":["Nathaelle"],"important":true},{"id":110,"jour":"Samedi","heure":"17h15","titre":"Installation du vin d'honneure","personnes":["Traiteur"]},{"id":111,"jour":"Samedi","heure":"17h30","titre":"Discours de remerciements des Mariés + ouverture du vin d'honneur (17H30-17H40)","personnes":["Nathaelle","DJ"],"important":true},{"id":112,"jour":"Samedi","heure":"17h30","titre":"ouverture du vin d'honneur (17H30-17H40)","personnes":["Photographe"]},{"id":113,"jour":"Samedi","heure":"17h45","titre":"Anecdote invitée (17H40)","personnes":["Nathaelle"]},{"id":114,"jour":"Samedi","heure":"17h45","titre":"17H40 : Lancer l'annimation des anecdotes","personnes":["DJ"]},{"id":115,"jour":"Samedi","heure":"18h00","titre":"Phiotos coup de cœur (17H40-18H10)","personnes":["Nathaelle"]},{"id":116,"jour":"Samedi","heure":"18h00","titre":"Photos coup de cœur (17H40-18H10)","personnes":["Photographe"]},{"id":117,"jour":"Samedi","heure":"18h30","titre":"Ravioles (18H30-19H15)","personnes":["Nathaelle","Traiteur"]},{"id":118,"jour":"Samedi","heure":"19h00","titre":"Jeu de la bouteille (19H00-19H15)","personnes":["Nathaelle"],"important":true},{"id":119,"jour":"Samedi","heure":"19h00","titre":"19H00 : Annocncer le jeu de la bouteille (Guillaume Tell, Ouvert : Massimo Campigli, Orchestra Del Teatro Alla Scala, Milano)","personnes":["DJ"]},{"id":120,"jour":"Samedi","heure":"19h15","titre":"Espuma (19H15-20H00)","personnes":["Nathaelle","Traiteur"]},{"id":121,"jour":"Samedi","heure":"19h30","titre":"Lancer de bouquet (19H40-19H55)","personnes":["Nathaelle"],"important":true},{"id":122,"jour":"Samedi","heure":"19h30","titre":"19H40 : Annoncer le lancer de bouquet (Gimme! Gimme! Gimme! : ABBA)","personnes":["DJ"]},{"id":123,"jour":"Samedi","heure":"19h45","titre":"Discours Matthieu (19H55-20H00)","personnes":["Nathaelle"]},{"id":124,"jour":"Samedi","heure":"20h00","titre":"Au revoir","personnes":["Nathaelle","Matthieu"]},{"id":125,"jour":"Samedi","heure":"20h00","titre":"s'assurer que les convives soit installé","personnes":["Sandra"]},{"id":126,"jour":"Samedi","heure":"20h00","titre":"Aller chercher les serviettes","personnes":["Julian","Léna"]},{"id":127,"jour":"Samedi","heure":"20h00","titre":"20H00 : Faire mettre les convives debouts + tourner des serviettes","personnes":["DJ"]},{"id":128,"jour":"Samedi","heure":"20h15","titre":"entrée des mariés","personnes":["Nathaelle"],"important":true},{"id":129,"jour":"Samedi","heure":"20h15","titre":"Entrée des mariés","personnes":["Léna"]},{"id":130,"jour":"Samedi","heure":"20h15","titre":"20H15 : (Feel This Moment : pitbull)","personnes":["DJ"]},{"id":131,"jour":"Samedi","heure":"20h15","titre":"Entrée des mariés (20H15-20H30)","personnes":["Photographe"]},{"id":132,"jour":"Samedi","heure":"20h30","titre":"Entrée (20H30-21H15)","personnes":["Nathaelle","Photographe","Traiteur"],"important":true},{"id":133,"jour":"Samedi","heure":"21h15","titre":"Surprise (21H15-21H30)","personnes":["Photographe"]},{"id":134,"jour":"Samedi","heure":"21h30","titre":"Plat (21H30-22H15)","personnes":["Nathaelle","Photographe","Traiteur"]},{"id":135,"jour":"Samedi","heure":"22h15","titre":"12 mois","personnes":["Nathaelle"]},{"id":136,"jour":"Samedi","heure":"22h15","titre":"12 mois (22H15-22H30)","personnes":["Photographe"]},{"id":137,"jour":"Samedi","heure":"22h30","titre":"Fromage (22H30-23H15)","personnes":["Nathaelle","Photographe","Traiteur"]},{"id":138,"jour":"Samedi","heure":"23h15","titre":"Ouverture de balle","personnes":["Nathaelle"],"important":true},{"id":139,"jour":"Samedi","heure":"23h15","titre":"23H15 : Annonce de l'ouverture de balle (Beauty and the Beast : Ariana Grande, John Legend)","personnes":["DJ"]},{"id":140,"jour":"Samedi","heure":"23h15","titre":"Ouverture de balle (23H15-23H45)","personnes":["Photographe"]},{"id":141,"jour":"Samedi","heure":"23h30","titre":"23H30 : Slow d'ouverture soirée dansante (Ti amo : Umberto Tozzi)","personnes":["DJ"]},{"id":142,"jour":"Samedi","heure":"23h45","titre":"Pièce montée / Fontaine de champagne","personnes":["Nathaelle"],"important":true},{"id":143,"jour":"Samedi","heure":"23h45","titre":"23H45 : Annonce de l'arrivé de la piece montée (He's a Pirate : Klaus Badelt)","personnes":["DJ"]},{"id":144,"jour":"Samedi","heure":"23h45","titre":"Pièce montée / Fontaine de champagne (23H45-00H00)","personnes":["Photographe"]},{"id":145,"jour":"Samedi","heure":"00h00","titre":"Dessert","personnes":["Nathaelle","Traiteur"]},{"id":146,"jour":"Samedi","heure":"00h00","titre":"00H00 : Fontaine de champagne (The final countdown : Europe)","personnes":["DJ"]},{"id":147,"jour":"Samedi","heure":"00h45","titre":"Surprise","personnes":["Nathaelle"]},{"id":148,"jour":"Samedi","heure":"00h45","titre":"00:45 : (Sexy and i know it : LMFAO)","personnes":["DJ"]},{"id":149,"jour":"Samedi","heure":"01h00","titre":"Soirée dansante","personnes":["Nathaelle","DJ"],"important":true},{"id":150,"jour":"Dimanche","heure":"10h15","titre":"Récèption du brunch","personnes":["Sandra","Matthieu"]},{"id":151,"jour":"Dimanche","heure":"10h30","titre":"Mise en place du brunch","personnes":["Sandra"]},{"id":152,"jour":"Dimanche","heure":"11h00","titre":"Brunch","personnes":["Nathaelle"],"important":true}],
+  tables: [{"id":1,"nom":"Table 1","forme":"ronde","capacity":10,"occupants":[{"guestId":76,"label":"Janine"},{"guestId":75,"label":"Guillaume Jacob"},{"guestId":88,"label":"Martine"},{"guestId":67,"label":"Christine Bouvier"},{"guestId":68,"label":"Michel Mosca"},{"guestId":64,"label":"Bertrand"},{"guestId":66,"label":"Lisa"},{"guestId":65,"label":"Sandra"},{"guestId":89,"label":"Pierre"}]},{"id":2,"nom":"Table 2","forme":"ronde","capacity":12,"occupants":[{"guestId":22,"label":"Nathalie Gimenez"},{"guestId":23,"label":"Jean-Paul Gimenez"},{"guestId":24,"label":"Sandra Sella"},{"guestId":25,"label":"Jean-Michel Sella"},{"guestId":42,"label":"Gerald Boehm"},{"guestId":43,"label":"Amanda Da Silva Boehm"},{"guestId":27,"label":"Virginie Marzocca"},{"guestId":28,"label":"Anine"},{"guestId":31,"label":"Robin Rippert"},{"guestId":32,"label":"Eva"},{"guestId":17,"label":"Thomas Morvant"}]},{"id":3,"nom":"Table 3","forme":"ronde","capacity":10,"occupants":[{"guestId":60,"label":"Aurore Vernet"},{"guestId":90,"label":"Mathias Durand"},{"guestId":84,"label":"Evan Cézard"},{"guestId":83,"label":"Maelys Cézard"},{"guestId":79,"label":"Florent Cézard"},{"guestId":80,"label":"Fabien Cézard"},{"guestId":null,"label":"DJs"},{"guestId":98,"label":"Romain Locatelli"},{"guestId":99,"label":"Laura"}]},{"id":4,"nom":"Table d'honneur","forme":"ronde","capacity":12,"occupants":[{"guestId":26,"label":"M. Racim"},{"guestId":47,"label":"Melissa BOEHM"},{"guestId":41,"label":"Clara BOEHM"},{"guestId":40,"label":"Denis BOEHM"},{"guestId":87,"label":"Léna"},{"guestId":39,"label":"Caroline Boehm"},{"guestId":null,"label":"Jérémy (marié)"},{"guestId":null,"label":"Nathaelle Jacob"},{"guestId":100,"label":"Sandra JACOB"},{"guestId":101,"label":"Matthieu JACOB"},{"guestId":86,"label":"Julian JACOB"}]},{"id":5,"nom":"Table 4","forme":"ronde","capacity":12,"occupants":[{"guestId":18,"label":"Lana"},{"guestId":19,"label":"Yohan"},{"guestId":20,"label":"Manon Debond"},{"guestId":21,"label":"Ugo Louis"},{"guestId":33,"label":"Romane Teixeira"},{"guestId":34,"label":"Aymeric"},{"guestId":35,"label":"Théo Leveque"},{"guestId":36,"label":"Malvina"},{"guestId":29,"label":"Pierre Vetter"},{"guestId":30,"label":"Kalista"}]},{"id":6,"nom":"Table 5","forme":"ronde","capacity":10,"occupants":[{"guestId":null,"label":"Meme"},{"guestId":96,"label":"Raymonde Ferro"},{"guestId":97,"label":"Gerard Ferro"},{"guestId":74,"label":"Maurice Cézard"},{"guestId":73,"label":"Elliane Cézard"},{"guestId":69,"label":"Daniel Locatelli"},{"guestId":70,"label":"Dominique Locatelli"},{"guestId":null,"label":"Videaste"},{"guestId":null,"label":"Photographe"}]},{"id":7,"nom":"Table 6","forme":"ronde","capacity":12,"occupants":[{"guestId":93,"label":"Christophe Chluba"},{"guestId":92,"label":"Nadine Chluba"},{"guestId":82,"label":"Romuald Cézard"},{"guestId":81,"label":"Ingrid Paturelle"},{"guestId":null,"label":"+1"},{"guestId":91,"label":"Maud Locatelli"},{"guestId":77,"label":"Gwenael Cézard"},{"guestId":78,"label":"Marion Cézard"},{"guestId":71,"label":"Edwige Durand"},{"guestId":72,"label":"Pierre Durand"}]}]
+,
+  rooms: [{"id":1,"nom":"Dortoir - Box 1","capacity":5,"occupants":[]},{"id":2,"nom":"Dortoir - Box 2","capacity":5,"occupants":[]},{"id":3,"nom":"Dortoir - Box 3","capacity":5,"occupants":[]},{"id":4,"nom":"Dortoir - Box 4","capacity":5,"occupants":[]},{"id":5,"nom":"Dortoir - Box 5","capacity":5,"occupants":[]},{"id":6,"nom":"Dortoir - Box 6","capacity":5,"occupants":[]},{"id":7,"nom":"Chambre 1","capacity":4,"occupants":[]},{"id":8,"nom":"Chambre 2","capacity":4,"occupants":[]},{"id":9,"nom":"Chambre 3","capacity":4,"occupants":[]},{"id":10,"nom":"Chambre 4","capacity":4,"occupants":[]},{"id":11,"nom":"Chambre 5","capacity":4,"occupants":[]},{"id":12,"nom":"Chambre 6","capacity":4,"occupants":[]},{"id":13,"nom":"Chambre 7","capacity":3,"occupants":[]},{"id":14,"nom":"Suite nuptiale","capacity":2,"occupants":[{"guestId":null,"label":"Nathaelle (mariée)"},{"guestId":null,"label":"Jérémy (marié)"}]},{"id":15,"nom":"Gîte 1","capacity":6,"occupants":[{"guestId":null,"label":"Mémé"},{"guestId":97,"label":"Gerard Ferro"},{"guestId":96,"label":"Raymonde Ferro"},{"guestId":94,"label":"Nilla Pontonnier"},{"guestId":95,"label":"Bernard Pontonnier"}]},{"id":16,"nom":"Gîte 2","capacity":6,"occupants":[{"guestId":67,"label":"Christine Bouvier"},{"guestId":68,"label":"Michel Mosca"},{"guestId":74,"label":"Maurice Cezard"},{"guestId":73,"label":"Elliane Cezard"},{"guestId":69,"label":"Daniel Locatelli"},{"guestId":70,"label":"Dominique Locatelli"}]}],
+  ceremony: [{"id":1,"debut":"16h15","fin":"16h30","etape":"Installation des invités","duree":"15 min","details":"Musique d'ambiance, accueil, placement des familles, annonce à 16h27","musique":"I Just Called To Say I Love You ; Isn't She Lovely – Stevie Wonder"},{"id":2,"debut":"16h30","fin":"16h40","etape":"Cortège","duree":"10 min","details":"Marié + mère, témoins, garçons d'honneur, demoiselles d'honneur, puis entrée de la mariée avec son père sur une autre musique","musique":"Beautiful Things, Violinia Zhanna Stelmakh ; Talking to the Moon, Violinia Zhanna Stelmakh"},{"id":3,"debut":"16h40","fin":"16h45","etape":"Mot d'accueil de l'officiant","duree":"5 min","details":"Bienvenue, remerciements, introduction","musique":""},{"id":4,"debut":"16h45","fin":"16h55","etape":"Histoire du couple","duree":"10 min","details":"Récit de votre rencontre et parcours","musique":""},{"id":5,"debut":"16h55","fin":"17h00","etape":"Discours des proches","duree":"5 min","details":"1 discours maximum, environ 4 à 5 min chacun","musique":""},{"id":6,"debut":"17h00","fin":"17h10","etape":"Rituel symbolique","duree":"10 min","details":"Sable, bougie, rubans ou autre rituel choisi","musique":"Unchained Melody, Elvis Presley"},{"id":7,"debut":"17h10","fin":"17h15","etape":"Discours des proches","duree":"5 min","details":"1 discours maximum, environ 4 à 5 min chacun","musique":""},{"id":8,"debut":"17h15","fin":"17h25","etape":"Échange des vœux","duree":"10 min","details":"Marié puis mariée","musique":""},{"id":9,"debut":"17h25","fin":"17h30","etape":"Échange des alliances","duree":"5 min","details":"Présentation et échange des alliances","musique":"Hallelujah, Alexandra Burke"},{"id":10,"debut":"17h30","fin":"17h35","etape":"Déclaration officielle + baiser","duree":"5 min","details":"Moment central de la cérémonie","musique":""},{"id":11,"debut":"17h35","fin":"17h40","etape":"Sortie des invités","duree":"5 min","details":"Les invités se rendent vers la sortie pour former une haie d'honneur","musique":"You're the First, the Last, my Everything, Barry White"},{"id":12,"debut":"17h40","fin":"17h45","etape":"Sortie des mariés","duree":"5 min","details":"Musique festive, sortie du couple puis du cortège","musique":"Happy, C2C, Derek Martin"}],
+  animations: [{"id":1,"nom":"Jeu des 12 mois","heure":"22h15","responsable":"DJ","lieu":"Piste de danse","description":"13 participants, 12 chaises = 12 mois de l'année. À chaque manche, le dernier sans chaise reçoit un gage lié à un mois.","materiel":"12 chaises ; 12 objets à retrouver (serviette de table, chaussure femme, clés voiture/maison, ceinture, briquet, cravate ou nœud papillon, pièce de monnaie, carte d'identité, crayon, rouge à lèvres, chemise, une personne du même signe astro que le/la marié·e) ; gages des 12 mois imprimés","personnes":"Julian, Mélissa, Bertrand, Mémé, Caroline, Chloé, Eliane, Romuald, Théo, Manon, JP, Aurore, Janine","musique":"","instructions":"À chaque manche : le DJ annonce un objet à trouver, musique, les joueurs partent le chercher et reviennent s'asseoir, le dernier sans chaise est éliminé et reçoit un gage lié à un mois de l'année (galette, chocolats, sorties, apéros...). À la fin, il ne reste qu'un gagnant : le super gagnant des 12 mois. Récompense bonus : une bouteille.","statut":"pret"},{"id":2,"nom":"10 anecdotes sur les invités","heure":"17h45","responsable":"DJ / Animateur","lieu":"Vin d'honneur","description":"Chaque invité reçoit une feuille contenant des anecdotes sur différents convives présents au mariage. Le but est de retrouver à qui correspond chaque anecdote.","materiel":"100 feuilles anecdotes ; 1 boîte de crayons de papier","personnes":"Tous les invités","musique":"","instructions":"Le DJ annonce le début de l'animation et explique les règles. Tous les invités participent en même temps. Lorsque quelqu'un pense avoir trouvé toutes les bonnes réponses, il se rend discrètement voir les mariés ou l'animateur pour vérification. Si toutes les réponses sont correctes, il est déclaré vainqueur. Récompense : une bouteille.\n\nAnecdotes collectées : Qui a 6 frères et sœurs ? / Qui s'est marié(e) en 2026 ? / Qui est charpentier ? / Qui est apiculteur ? / Qui est né en Suisse ? / Qui a une colombe tatouée sur la nuque ?","statut":"a_preparer"},{"id":3,"nom":"Course à la bouteille","heure":"19h00","responsable":"DJ","lieu":"Extérieur / piste","description":"Épreuve réservée aux hommes célibataires présents. Une bouteille est placée à distance ; au signal, les participants courent pour être le premier à l'attraper.","materiel":"Une bouteille","personnes":"Hommes célibataires","musique":"","instructions":"Le DJ annonce l'épreuve, place la bouteille à distance, donne le signal de départ.","statut":"a_faire"},{"id":4,"nom":"Lancer de bouquet","heure":"19h30","responsable":"DJ","lieu":"Piste de danse","description":"Traditionnel lancer de bouquet de la mariée.","materiel":"Bouquet","personnes":"Invitées","musique":"Gimme! Gimme! Gimme! – ABBA","instructions":"","statut":"a_faire"}],
+  tasks: [{"id":1,"titre":"Confirmer le nombre de menus","description":"Faire le point avec le traiteur sur les menus classiques, végétariens et enfants.","responsable":"Nathaelle","priorite":"urgent","statut":"a_faire"},{"id":2,"titre":"Contacter les prestataires pour confirmation finale","description":"DJ, photographe, vidéaste, traiteur, fleuriste.","responsable":"Nathaelle","priorite":"important","statut":"a_faire"},{"id":3,"titre":"Relancer les invités sans réponse","description":"","responsable":"Nathaelle","priorite":"important","statut":"a_faire"},{"id":4,"titre":"Imprimer les gages du jeu des 12 mois","description":"12 gages liés aux mois de l'année, pour l'animation du soir.","responsable":"","priorite":"normal","statut":"a_faire"},{"id":5,"titre":"Préparer les feuilles du jeu des 10 anecdotes","description":"100 feuilles anecdotes + boîte de crayons de papier.","responsable":"","priorite":"normal","statut":"a_faire"},{"id":6,"titre":"Prévoir les bouteilles récompenses","description":"Pour le jeu des 12 mois, les 10 anecdotes et la course à la bouteille.","responsable":"","priorite":"normal","statut":"a_faire"},{"id":7,"titre":"Valider la checklist finale","description":"","responsable":"Nathaelle","priorite":"important","statut":"a_faire"},{"id":8,"titre":"Préparer les paiements des prestataires","description":"Soldes à régler avant ou le jour J.","responsable":"Nathaelle","priorite":"important","statut":"a_faire"},{"id":9,"titre":"Récupérer la robe","description":"Aller chercher la robe à Lyon.","responsable":"Nathaelle","priorite":"urgent","statut":"termine"},{"id":10,"titre":"Préparer la trousse de secours","description":"Voir la liste dédiée : gloss, fil et aiguille, coupe-fil, pansements, ibuprofène...","responsable":"Sandra","priorite":"normal","statut":"a_faire"}],
+  trousse: {"responsable":"Léna","items":[{"id":1,"nom":"Gloss","coche":false},{"id":2,"nom":"Fil blanc et aiguille","coche":false},{"id":3,"nom":"Coupe-fil","coche":false},{"id":4,"nom":"Serviette hygiénique","coche":false},{"id":5,"nom":"Éventail","coche":false},{"id":6,"nom":"Mouchoirs","coche":false},{"id":7,"nom":"Pansements","coche":false},{"id":8,"nom":"Lime à ongles","coche":false},{"id":9,"nom":"Craie blanche","coche":false},{"id":10,"nom":"Épingles à cheveux","coche":false},{"id":11,"nom":"Ibuprofène","coche":false}]},
+  honneur: {"demoiselles":{"role":"","avant":"","jourJ":"","missions":[{"id":1,"titre":"Trousse de secours","responsable":"Léna","statut":"a_faire","notes":"Voir l'onglet Trousse de secours pour le contenu"}]},"temoins":{"role":"","avant":"","jourJ":"","missions":[]}},
+  menu: {"cocktailPieces":"","cocktailBoissons":"","cocktailInfos":"","entree":"","plat":"","accompagnement":"","fromage":"","dessert":"","champagne":"","vins":"","softs":"","eau":"","cafeThe":""},
+  vendors: [{"id":1,"categorie":"Lieu","nom":"Château des Anges","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":2,"categorie":"DJ","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":3,"categorie":"Photographe","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":4,"categorie":"Vidéaste","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":5,"categorie":"Traiteur","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":6,"categorie":"Fleuriste","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":7,"categorie":"Coiffure","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":8,"categorie":"Maquillage","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":9,"categorie":"Gâteau","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":10,"categorie":"Transport","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""}],
+  contacts: [{"id":1,"role":"Lieu","nom":"","telephone":""},{"id":2,"role":"DJ","nom":"","telephone":""},{"id":3,"role":"Photographe","nom":"","telephone":""},{"id":4,"role":"Vidéaste","nom":"","telephone":""},{"id":5,"role":"Traiteur","nom":"","telephone":""},{"id":6,"role":"Témoin","nom":"","telephone":""},{"id":7,"role":"Témoin","nom":"","telephone":""},{"id":8,"role":"Demoiselle d'honneur","nom":"","telephone":""},{"id":9,"role":"Parent","nom":"","telephone":""},{"id":10,"role":"Chauffeur","nom":"","telephone":""}],
+  moodboard: [{"id":1,"nom":"Ambiance générale","notes":"","liens":[]},{"id":2,"nom":"Robe","notes":"","liens":[]},{"id":3,"nom":"Costume","notes":"","liens":[]},{"id":4,"nom":"Fleurs","notes":"","liens":[]},{"id":5,"nom":"Bouquet","notes":"","liens":[]},{"id":6,"nom":"Décoration","notes":"","liens":[]},{"id":7,"nom":"Tables","notes":"","liens":[]},{"id":8,"nom":"Lumières","notes":"","liens":[]},{"id":9,"nom":"Photos","notes":"","liens":[]},{"id":10,"nom":"Cérémonie","notes":"","liens":[]},{"id":11,"nom":"Gâteau","notes":"","liens":[]}],
+  documents: [],
+  access: {"passcode":""}
+};
+
+/* ============ STATE ============ */
+var STATE = {};
+var CAN_EDIT = true;
+var GATE_NEEDED = false;
+var CURRENT_TAB = "dashboard";
+var DRAG = null;
+
+/* ============ API CLIENT ============ */
+var api = {
+  getAll: function() {
+    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf("COLLE_ICI") === 0) return Promise.resolve({});
+    return fetch(CONFIG.API_URL + "?action=getAll")
+      .then(function(r){ return r.json(); })
+      .then(function(r){ return r.ok ? r.data : {}; })
+      .catch(function(){ return {}; });
+  },
+  set: function(key, value) {
+    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf("COLLE_ICI") === 0) return;
+    fetch(CONFIG.API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "set", key: key, value: value })
+    }).catch(function(){});
+  }
+};
+
+/* ============ HELPERS ============ */
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function uid(arr) { return arr.reduce(function(m,x){ return Math.max(m, x.id||0); }, 0) + 1; }
+function timeToMinutes(t) {
+  if (!t) return 0;
+  var m = /(\d{1,2})h(\d{2})/.exec(t);
+  if (!m) return 0;
+  var h = parseInt(m[1],10), min = parseInt(m[2],10);
+  if (h < 6) h += 24;
+  return h*60+min;
+}
+function groupByHeure(events) {
+  var out = [];
+  events.forEach(function(e){
+    var last = out[out.length-1];
+    if (last && last.heure === e.heure) last.events.push(e);
+    else out.push({ heure: e.heure, events: [e] });
+  });
+  return out;
+}
+function save(key, value) {
+  if (!CAN_EDIT) return;
+  STATE[key] = value;
+  api.set(key, value);
+  render();
+}
+function go(tab) { CURRENT_TAB = tab; window.scrollTo(0,0); render(); }
+
+/* ============ LOAD ============ */
+function loadAndStart() {
+  api.getAll().then(function(remote){
+    Object.keys(SEEDS).forEach(function(k){
+      if (remote[k] !== undefined) {
+        STATE[k] = remote[k];
+      } else {
+        STATE[k] = SEEDS[k];
+        api.set(k, STATE[k]); // first-time init
+      }
+    });
+    GATE_NEEDED = !!(STATE.access && STATE.access.passcode);
+    if (GATE_NEEDED) {
+      var sess = sessionStorage.getItem("wedding_session");
+      if (sess) {
+        try {
+          var parsed = JSON.parse(sess);
+          CAN_EDIT = !!parsed.canEdit;
+          renderApp();
+          return;
+        } catch(e) {}
+      }
+      renderGate();
+    } else {
+      CAN_EDIT = true;
+      renderApp();
+    }
+  });
+}
+
+function tryUnlock(pin) {
+  var access = STATE.access;
+  var canEdit = null;
+  if (pin === access.passcode) canEdit = true;
+  else if (access.readonlyPasscode && pin === access.readonlyPasscode) canEdit = false;
+  if (canEdit === null) {
+    document.getElementById("gate-error").style.display = "block";
+    return;
+  }
+  CAN_EDIT = canEdit;
+  sessionStorage.setItem("wedding_session", JSON.stringify({ canEdit: canEdit }));
+  renderApp();
+}
+
+/* ============ RENDER: GATE ============ */
+function renderGate() {
+  document.getElementById("app").innerHTML =
+    '<div id="gate"><div class="box">' +
+      '<div style="display:flex;justify-content:center;margin-bottom:10px;">' + monogramSvg(48) + '</div>' +
+      '<h1 class="display" style="font-size:24px;margin:6px 0 4px;">Espace privé</h1>' +
+      '<p class="muted" style="font-size:12px;margin:0 0 16px;">Entrez le code partagé par les mariés pour accéder à l\'espace d\'organisation.</p>' +
+      '<input id="gate-pin" type="password" placeholder="Code d\'accès" style="text-align:center;border-radius:999px;padding:10px;" />' +
+      '<p id="gate-error" style="display:none;color:var(--rose-deep);font-size:12px;margin:8px 0 0;">Code incorrect, réessayez.</p>' +
+      '<button class="btn" style="width:100%;justify-content:center;margin-top:14px;" onclick="tryUnlock(document.getElementById(\'gate-pin\').value)">Entrer</button>' +
+    '</div></div>';
+  var pinInput = document.getElementById("gate-pin");
+  pinInput.focus();
+  pinInput.addEventListener("keydown", function(e){ if (e.key === "Enter") tryUnlock(pinInput.value); });
+}
+
+function monogramSvg(size) {
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100" fill="none">' +
+    '<circle cx="50" cy="50" r="47" stroke="#BFA059" stroke-width="1"/>' +
+    '<circle cx="50" cy="50" r="42" stroke="#BFA059" stroke-width="0.5" opacity="0.5"/>' +
+    '<text x="50" y="58" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="30" fill="#3A332B" font-style="italic">N&amp;J</text>' +
+    '</svg>';
+}
+
+/* ============ RENDER: SHELL ============ */
+var TABS = [
+  { key:"dashboard", label:"Accueil" },
+  { key:"guests", label:"Invités" },
+  { key:"planning", label:"Planning" },
+  { key:"ceremony", label:"Cérémonie" },
+  { key:"animations", label:"Animations" },
+  { key:"tasks", label:"Tâches" },
+  { key:"trousse", label:"Trousse de secours" },
+  { key:"demoiselles", label:"Demoiselles d'honneur" },
+  { key:"temoins", label:"Témoins" },
+  { key:"menu", label:"Menu" },
+  { key:"vendors", label:"Prestataires" },
+  { key:"contacts", label:"Contacts" },
+  { key:"moodboard", label:"Moodboard" },
+  { key:"tables", label:"Plan de table" },
+  { key:"rooms", label:"Chambres" },
+  { key:"documents", label:"Documents" },
+  { key:"admin", label:"Administration" }
+];
+
+function renderApp() {
+  var visibleTabs = CAN_EDIT ? TABS : TABS.filter(function(t){ return t.key !== "admin"; });
+  var html = '';
+  if (GATE_NEEDED && !CAN_EDIT) {
+    html += '<div class="readonly-banner">🔒 Mode lecture seule — consultation uniquement, aucune modification possible</div>';
+  }
+  html += '<header id="header"><div class="row">' +
+    '<div id="brand">' + monogramSvg(38) +
+      '<div><div class="name">Nathaelle &amp; Jérémy</div><div class="sub">Espace d\'organisation</div></div>' +
+    '</div>' +
+    '<nav id="nav">' + visibleTabs.map(function(t){
+      return '<button class="'+(CURRENT_TAB===t.key?'active':'')+'" onclick="go(\''+t.key+'\')">'+t.label+'</button>';
+    }).join('') + '</nav>' +
+    '<div style="position:relative;">' +
+      '<button class="icon-btn" style="font-size:18px;" onclick="toggleSearch()">🔍</button>' +
+      '<div id="search-panel" style="display:none;"></div>' +
+    '</div>' +
+  '</div></header>' +
+  '<main id="main">' + viewFor(CURRENT_TAB) + '</main>' +
+  '<footer style="text-align:center;padding:28px;"><div class="muted" style="font-size:11px;">Espace privé d\'organisation — Nathaelle &amp; Jérémy — 19 juin 2027</div></footer>';
+
+  document.getElementById("app").innerHTML = html;
+}
+var UI = {};
+var EDITING = { type: null, id: null };
+function setEditing(type, id) { EDITING = { type: type, id: id }; render(); }
+function clearEditing() { EDITING = { type: null, id: null }; render(); }
+function withField(obj, key, value) { var o = Object.assign({}, obj); o[key] = value; return o; }
+function val(id) { var el = document.getElementById(id); return el ? el.value : ""; }
+
+var FOCUS_MEMO = null;
+function render() {
+  var el = document.activeElement;
+  if (el && el.id) {
+    FOCUS_MEMO = { id: el.id, selStart: (typeof el.selectionStart === "number") ? el.selectionStart : null, selEnd: (typeof el.selectionEnd === "number") ? el.selectionEnd : null };
+  } else {
+    FOCUS_MEMO = null;
+  }
+  renderApp();
+  if (FOCUS_MEMO) {
+    var el2 = document.getElementById(FOCUS_MEMO.id);
+    if (el2) {
+      el2.focus();
+      if (el2.setSelectionRange && FOCUS_MEMO.selStart !== null) {
+        try { el2.setSelectionRange(FOCUS_MEMO.selStart, FOCUS_MEMO.selEnd); } catch (e) {}
+      }
+    }
+  }
+}
+
+function toggleSearch() {
+  var panel = document.getElementById("search-panel");
+  var open = panel.style.display === "block";
+  panel.style.display = open ? "none" : "block";
+  if (!open) {
+    panel.innerHTML = '<input id="search-input" placeholder="Rechercher une personne, une tâche..." oninput="doSearch(this.value)" />' +
+      '<div id="search-results" style="margin-top:8px;max-height:280px;overflow-y:auto;"></div>';
+    document.getElementById("search-input").focus();
+  }
+}
+function doSearch(q) {
+  q = q.trim().toLowerCase();
+  var out = [];
+  if (q) {
+    STATE.guests.forEach(function(g){ if (g.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Invité",label:g.nom,sub:g.table?"Table "+g.table:"",tab:"guests"}); });
+    STATE.tasks.forEach(function(t){ if (t.titre.toLowerCase().indexOf(q)>=0) out.push({type:"Tâche",label:t.titre,sub:t.responsable,tab:"tasks"}); });
+    STATE.vendors.forEach(function(v){ if ((v.nom+" "+v.categorie).toLowerCase().indexOf(q)>=0) out.push({type:"Prestataire",label:v.nom||v.categorie,sub:v.categorie,tab:"vendors"}); });
+    STATE.contacts.forEach(function(c){ if ((c.nom+" "+c.role).toLowerCase().indexOf(q)>=0) out.push({type:"Contact",label:c.nom||c.role,sub:c.role,tab:"contacts"}); });
+    STATE.animations.forEach(function(a){ if (a.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Animation",label:a.nom,sub:a.heure,tab:"animations"}); });
+    STATE.tables.forEach(function(t){
+      if (t.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Table",label:t.nom,sub:t.occupants.length+" invités",tab:"tables"});
+      t.occupants.forEach(function(o){ if (o.label.toLowerCase().indexOf(q)>=0) out.push({type:"Table",label:o.label,sub:t.nom,tab:"tables"}); });
+    });
+    STATE.rooms.forEach(function(r){
+      if (r.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Chambre",label:r.nom,sub:r.occupants.length+" pers.",tab:"rooms"});
+      r.occupants.forEach(function(o){ if (o.label.toLowerCase().indexOf(q)>=0) out.push({type:"Chambre",label:o.label,sub:r.nom,tab:"rooms"}); });
+    });
+    STATE.planning.forEach(function(e){ if (e.titre.toLowerCase().indexOf(q)>=0) out.push({type:"Planning",label:e.titre,sub:e.jour+" "+e.heure,tab:"planning"}); });
+    STATE.ceremony.forEach(function(s){ if (s.etape.toLowerCase().indexOf(q)>=0) out.push({type:"Cérémonie",label:s.etape,sub:s.debut,tab:"ceremony"}); });
+    STATE.documents.forEach(function(d){ if (d.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Document",label:d.nom,sub:d.categorie,tab:"documents"}); });
+  }
+  out = out.slice(0,20);
+  document.getElementById("search-results").innerHTML = out.map(function(r){
+    return '<button class="search-result" onclick="go(\''+r.tab+'\');toggleSearch();"><div><div style="font-size:13px;">'+esc(r.label)+'</div><div class="muted" style="font-size:10px;">'+esc(r.sub||'')+'</div></div><span class="gold" style="font-size:10px;">'+r.type+'</span></button>';
+  }).join('') || (q ? '<p class="muted" style="font-size:12px;text-align:center;padding:10px;">Aucun résultat.</p>' : '');
+}
+
+/* ============ ROUTER ============ */
+function viewFor(tab) {
+  switch(tab) {
+    case "dashboard": return viewDashboard();
+    case "guests": return viewGuests();
+    case "planning": return viewPlanning();
+    case "ceremony": return viewCeremony();
+    case "animations": return viewAnimations();
+    case "tasks": return viewTasks();
+    case "trousse": return viewTrousse();
+    case "demoiselles": return viewRoleGuide("demoiselles", "Demoiselles d'honneur", "🌸");
+    case "temoins": return viewRoleGuide("temoins", "Témoins", "💍");
+    case "menu": return viewMenu();
+    case "vendors": return viewVendors();
+    case "contacts": return viewContacts();
+    case "moodboard": return viewMoodboard();
+    case "tables": return viewTables();
+    case "rooms": return viewRooms();
+    case "documents": return viewDocuments();
+    case "admin": return CAN_EDIT ? viewAdmin() : "";
+    default: return "";
+  }
+}
+
+/* ============ DASHBOARD ============ */
+function stat(label, value, sub) {
+  return '<div class="stat"><div class="icon">✦</div><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></div>';
+}
+function viewDashboard() {
+  var now = new Date();
+  var diff = WEDDING_DATE.getTime() - now.getTime();
+  var days = Math.max(0, Math.floor(diff/(1000*60*60*24)));
+  var hours = Math.max(0, Math.floor((diff/(1000*60*60))%24));
+  var guests = STATE.guests;
+  var confirmed = guests.filter(function(g){return g.presence==="confirme";});
+  var attente = guests.filter(function(g){return g.presence==="attente";}).length;
+  var absent = guests.filter(function(g){return g.presence==="absent";}).length;
+  var totalPersonnes = confirmed.reduce(function(s,g){return s+1+(Number(g.accompagnants)||0);},0);
+  var heberges = guests.filter(function(g){return g.hebergement;}).length;
+  var highlights = [
+    {h:"14h00",t:"Cérémonie civile",l:"Mairie de Saint-Jean-de-Moirans"},
+    {h:"16h30",t:"Cérémonie laïque",l:"Château des Anges"},
+    {h:"17h30",t:"Vin d'honneur",l:"Discours de remerciement"},
+    {h:"20h30",t:"Repas",l:"Entrée, plat, fromage, dessert"},
+    {h:"23h15",t:"Ouverture de bal",l:"Puis soirée dansante"}
+  ];
+  return '<div class="fade">'+
+  '<div class="card" style="padding:32px;">'+
+    '<div class="flex-between">'+
+      '<div><div class="eyebrow">19 juin 2027</div><h1 class="display" style="font-size:34px;margin:0;">Nathaelle &amp; Jérémy</h1></div>'+
+      '<div style="display:flex;gap:16px;">'+
+        '<div style="text-align:center;"><div class="display" style="font-size:40px;">'+days+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">jours</div></div>'+
+        '<div style="text-align:center;border-left:1px solid var(--border);padding-left:16px;"><div class="display" style="font-size:40px;">'+hours+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">heures</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="height:1px;background:linear-gradient(to right, transparent, var(--gold), transparent);margin:14px 0;"></div>'+
+    '<div class="grid2">'+
+      '<div style="font-size:13px;">📍 Mairie de Saint-Jean-de-Moirans — 14h00</div>'+
+      '<div style="font-size:13px;">📍 Cérémonie laïque — Château des Anges — 16h30</div>'+
+    '</div>'+
+  '</div>'+
+  '<div class="statgrid" style="margin-top:16px;">'+
+    stat('Invités', guests.length, totalPersonnes+' personnes si confirmés')+
+    stat('Confirmés', confirmed.length, '')+
+    stat('En attente', attente, absent+' absent(s)')+
+    stat('Hébergés', heberges, '')+
+  '</div>'+
+  '<div class="grid2" style="margin-top:16px;">'+
+    '<div class="card">'+
+      '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Aperçu du jour J</h2><button class="gold" style="font-size:11px;" onclick="go(\'planning\')">Voir tout →</button></div>'+
+      '<div style="margin-top:12px;">'+ highlights.map(function(h){
+        return '<div style="display:flex;gap:10px;"><div class="gold" style="width:44px;font-size:11px;padding-top:2px;flex-shrink:0;">'+h.h+'</div><div style="flex:1;border-left:1px solid var(--border);padding-left:10px;padding-bottom:10px;"><div style="font-size:13px;">'+h.t+'</div><div class="muted" style="font-size:11px;">'+h.l+'</div></div></div>';
+      }).join('') +'</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Invités</h2><button class="gold" style="font-size:11px;" onclick="go(\'guests\')">Gérer →</button></div>'+
+      '<div style="margin-top:12px;font-size:13px;">'+
+        '<div class="flex-between"><span class="muted">Confirmés</span><span>'+confirmed.length+' / '+guests.length+'</span></div>'+
+        '<div class="progressbar" style="margin:6px 0 10px;"><div class="fill" style="width:'+(guests.length?Math.round(confirmed.length/guests.length*100):0)+'%;"></div></div>'+
+        '<div class="flex-between"><span class="muted">En attente</span><span>'+attente+'</span></div>'+
+        '<div class="flex-between"><span class="muted">Absents</span><span>'+absent+'</span></div>'+
+        '<div class="flex-between"><span class="muted">Hébergés</span><span>'+heberges+'</span></div>'+
+      '</div>'+
+    '</div>'+
+  '</div></div>';
+}
+
+/* ============ GUESTS ============ */
+function guestRow(g){
+  return '<tr>'+
+    '<td><input value="'+esc(g.nom)+'" onchange="updateGuest('+g.id+',\'nom\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td><select onchange="updateGuest('+g.id+',\'presence\',this.value)" '+(CAN_EDIT?'':'disabled')+'>'+
+      ['attente','confirme','absent'].map(function(p){return '<option value="'+p+'" '+(g.presence===p?'selected':'')+'>'+({attente:'En attente',confirme:'Confirmé',absent:'Absent'}[p])+'</option>';}).join('')+
+    '</select></td>'+
+    '<td><input type="number" min="0" value="'+g.accompagnants+'" style="width:60px;" onchange="updateGuest('+g.id+',\'accompagnants\',parseInt(this.value||0,10))" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td><input value="'+esc(g.menu)+'" onchange="updateGuest('+g.id+',\'menu\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td><input value="'+esc(g.allergies)+'" onchange="updateGuest('+g.id+',\'allergies\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td style="text-align:center;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" style="width:70px;" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td><input value="'+esc(g.notes)+'" onchange="updateGuest('+g.id+',\'notes\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></td>'+
+    '<td>'+(CAN_EDIT?'<button class="icon-btn danger" onclick="removeGuest('+g.id+')">✕</button>':'')+'</td>'+
+  '</tr>';
+}
+function updateGuest(id, field, value){ save('guests', STATE.guests.map(function(g){ if(g.id!==id) return g; return withField(g, field, value); })); }
+function removeGuest(id){ save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
+function addGuest(){
+  var id=uid(STATE.guests);
+  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",allergies:"",hebergement:false,chambre:"",table:"",role:"",notes:""}]));
+}
+function setGuestsSearch(v){ UI.guestsSearch=v; render(); }
+function setGuestsFilter(v){ UI.guestsFilter=v; render(); }
+function viewGuests(){
+  var search=(UI.guestsSearch||'').toLowerCase();
+  var filter=UI.guestsFilter||'tous';
+  var filtered = STATE.guests.filter(function(g){
+    if(search && g.nom.toLowerCase().indexOf(search)<0) return false;
+    if(filter==='confirme'&&g.presence!=='confirme') return false;
+    if(filter==='attente'&&g.presence!=='attente') return false;
+    if(filter==='absent'&&g.presence!=='absent') return false;
+    if(filter==='heberges'&&!g.hebergement) return false;
+    return true;
+  });
+  var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés']];
+  return '<div class="fade">'+
+  '<div class="flex-between"><h2 class="display" style="font-size:28px;">Invités <span class="muted" style="font-size:13px;">('+filtered.length+'/'+STATE.guests.length+')</span></h2>'+
+    (CAN_EDIT?'<button class="btn" onclick="addGuest()">+ Ajouter un invité</button>':'')+
+  '</div>'+
+  '<div class="row-flex" style="margin:12px 0;">'+
+    '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
+    filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
+  '</div>'+
+  '<div class="card" style="overflow-x:auto;padding:0;">'+
+    '<table style="min-width:900px;"><thead><tr><th>Nom</th><th>Présence</th><th>+Acc.</th><th>Menu</th><th>Allergies</th><th>Héb.</th><th>Chambre</th><th>Table</th><th>Notes</th><th></th></tr></thead>'+
+    '<tbody>'+ filtered.map(guestRow).join('') +'</tbody></table>'+
+  '</div></div>';
+}
+
+/* ============ PLANNING ============ */
+function setPlanningMode(m){UI.planningMode=m;render();}
+function setPlanningDay(d){UI.planningDay=d;render();}
+function setPlanningOnlyMajor(v){UI.planningOnlyMajor=v;render();}
+function setPlanningPerson(p){UI.planningPerson=p;render();}
+function updatePlanningEvent(id,patch){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,patch):e;})); }
+function deletePlanningEvent(id){ save('planning', STATE.planning.filter(function(e){return e.id!==id;})); }
+function toggleImportant(id){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,{important:!e.important}):e;})); }
+function addPlanningEvent(){
+  var titre=val('add-ev-titre');
+  if(!titre.trim()) return;
+  var id=uid(STATE.planning);
+  var personnes=val('add-ev-personnes').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,personnes:personnes,important:false}]));
+}
+function saveEventEdit(id){
+  var personnes=val('ev-edit-personnes').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  updatePlanningEvent(id,{heure:val('ev-edit-heure'),titre:val('ev-edit-titre'),personnes:personnes});
+  clearEditing();
+}
+function eventCardHtml(e, showStar){
+  if(EDITING.type==='event'&&EDITING.id===e.id){
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+      '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
+      '<input id="ev-edit-personnes" value="'+esc(e.personnes.join(', '))+'" placeholder="Personnes (virgules)" style="margin-top:6px;"/>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+    '</div>';
+  }
+  var starHtml = showStar ? '<button class="icon-btn" style="color:'+(e.important?'var(--gold)':'#D8CDBB')+';font-size:15px;" onclick="toggleImportant('+e.id+')">★</button>' : '';
+  return '<div class="eventcard"><div class="flex-between">'+
+      '<div style="display:flex;gap:8px;">'+ starHtml +
+        '<div><div class="title">'+esc(e.titre)+'</div>'+
+        (e.personnes.length?'<div style="margin-top:4px;">'+e.personnes.map(function(p){return '<span class="chip" style="margin-right:4px;">'+esc(p)+'</span>';}).join('')+'</div>':'')+
+        '</div>'+
+      '</div>'+
+      (CAN_EDIT?'<div class="row-flex"><button class="icon-btn" onclick="setEditing(\'event\','+e.id+')">✎</button><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑</button></div>':'')+
+  '</div></div>';
+}
+function timeBlockHtml(group, showStar){
+  return '<div class="timegroup"><div class="time">'+group.heure+'</div><div class="events">'+group.events.map(function(e){return eventCardHtml(e, showStar);}).join('')+'</div></div>';
+}
+function viewPlanning(){
+  var mode=UI.planningMode||'general';
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Planning</h2>'+
+    '<div style="background:var(--champagne-soft);border-radius:999px;padding:4px;display:inline-flex;">'+
+      '<button style="border-radius:999px;padding:7px 14px;font-size:12px;'+(mode==='general'?'background:var(--ink);color:#fff;':'color:var(--ink-soft);')+'" onclick="setPlanningMode(\'general\')">Général</button>'+
+      '<button style="border-radius:999px;padding:7px 14px;font-size:12px;'+(mode==='individuel'?'background:var(--ink);color:#fff;':'color:var(--ink-soft);')+'" onclick="setPlanningMode(\'individuel\')">Individuel</button>'+
+    '</div></div>';
+
+  if(mode==='general'){
+    if(!UI.planningDay) UI.planningDay='Samedi';
+    if(UI.planningOnlyMajor===undefined) UI.planningOnlyMajor=true;
+    var day=UI.planningDay;
+    var showStar = !UI.planningOnlyMajor;
+    html+='<div class="tabbar">'+DAY_ORDER.map(function(d){return '<button class="'+(day===d?'active':'')+'" onclick="setPlanningDay(\''+d+'\')">'+d+'</button>';}).join('')+'</div>';
+    html+='<div class="tabbar">'+
+      '<button class="'+(UI.planningOnlyMajor?'active':'')+'" onclick="setPlanningOnlyMajor(true)">★ Grands moments</button>'+
+      '<button class="'+(!UI.planningOnlyMajor?'active':'')+'" onclick="setPlanningOnlyMajor(false)">Tout le détail</button>'+
+    '</div>';
+    var evs=STATE.planning.filter(function(e){return e.jour===day && (!UI.planningOnlyMajor || e.important);}).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
+    var groups=groupByHeure(evs);
+    html+='<div class="card">';
+    if(!evs.length) html+='<p class="muted" style="text-align:center;padding:20px;font-size:13px;">'+(UI.planningOnlyMajor?'Aucun grand moment marqué pour ce jour.':'Aucun événement pour ce jour.')+'</p>';
+    html+=groups.map(function(g){return timeBlockHtml(g, showStar);}).join('');
+    if(CAN_EDIT){
+      html+='<div class="row-flex" style="margin-top:10px;flex-wrap:wrap;">'+
+        '<input id="add-ev-heure" placeholder="Heure" style="width:80px;"/>'+
+        '<input id="add-ev-titre" placeholder="Titre" style="flex:1;min-width:140px;"/>'+
+        '<input id="add-ev-personnes" placeholder="Personnes (virgules)" style="flex:1;min-width:160px;"/>'+
+        '<button class="btn" onclick="addPlanningEvent()">+ Ajouter</button>'+
+      '</div>';
+    }
+    html+='</div>';
+  } else {
+    var people=["Tout le monde"].concat(Array.from(new Set(STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[]))).sort());
+    var person=UI.planningPerson||'Tout le monde';
+    html+='<select style="max-width:280px;border-radius:999px;" onchange="setPlanningPerson(this.value)">'+people.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</select>';
+    html+='<div class="card" style="margin-top:12px;">';
+    var any=false;
+    DAY_ORDER.forEach(function(d){
+      var evs=STATE.planning.filter(function(e){return e.jour===d && (person==='Tout le monde'||e.personnes.indexOf(person)>=0);}).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
+      if(!evs.length) return;
+      any=true;
+      html+='<div class="gold" style="font-size:11px;text-transform:uppercase;margin:10px 0 6px;">'+d+'</div>';
+      html+=groupByHeure(evs).map(function(g){return timeBlockHtml(g, true);}).join('');
+    });
+    if(!any) html+='<p class="muted" style="text-align:center;padding:20px;font-size:13px;">Aucun événement trouvé pour '+esc(person)+'.</p>';
+    html+='</div>';
+  }
+  return html+'</div>';
+}
+
+/* ============ CEREMONY ============ */
+function saveCeremonyEdit(id){
+  var patch={debut:val('cer-debut'),fin:val('cer-fin'),duree:val('cer-duree'),etape:val('cer-etape'),details:val('cer-details'),musique:val('cer-musique')};
+  save('ceremony', STATE.ceremony.map(function(s){return s.id===id?Object.assign({},s,patch):s;}));
+  clearEditing();
+}
+function deleteCeremonyStep(id){ save('ceremony', STATE.ceremony.filter(function(s){return s.id!==id;})); }
+function moveCeremonyStep(idx,dir){
+  var next=STATE.ceremony.slice(); var t=idx+dir;
+  if(t<0||t>=next.length) return;
+  var tmp=next[idx]; next[idx]=next[t]; next[t]=tmp;
+  save('ceremony', next);
+}
+function addCeremonyStep(){
+  var etape=val('add-cer-etape');
+  if(!etape.trim()) return;
+  var id=uid(STATE.ceremony);
+  save('ceremony', STATE.ceremony.concat([{id:id,debut:val('add-cer-debut'),fin:val('add-cer-fin'),duree:val('add-cer-duree'),etape:etape,details:'',musique:''}]));
+  UI.addingCeremony=false;
+}
+function ceremonyStepHtml(s, idx, total){
+  if(EDITING.type==='ceremony'&&EDITING.id===s.id){
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+      '<div class="row-flex"><input id="cer-debut" value="'+esc(s.debut)+'" style="width:70px;" placeholder="Début"/><input id="cer-fin" value="'+esc(s.fin)+'" style="width:70px;" placeholder="Fin"/><input id="cer-duree" value="'+esc(s.duree)+'" style="width:90px;" placeholder="Durée"/></div>'+
+      '<input id="cer-etape" value="'+esc(s.etape)+'" placeholder="Étape" style="margin-top:6px;"/>'+
+      '<textarea id="cer-details" rows="2" placeholder="Détails" style="margin-top:6px;">'+esc(s.details)+'</textarea>'+
+      '<input id="cer-musique" value="'+esc(s.musique)+'" placeholder="Musique" style="margin-top:6px;"/>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveCeremonyEdit('+s.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+    '</div>';
+  }
+  return '<div style="display:flex;gap:14px;">'+
+    '<div style="width:56px;flex-shrink:0;text-align:center;"><div class="gold" style="font-size:12px;">'+esc(s.debut)+'</div>'+(idx===total-1?'<div class="muted" style="font-size:10px;">'+esc(s.fin)+'</div>':'')+'</div>'+
+    '<div class="card" style="flex:1;margin-bottom:14px;">'+
+      '<div class="flex-between"><div><div class="display" style="font-size:16px;">'+esc(s.etape)+'</div><div class="muted" style="font-size:11px;">'+esc(s.duree)+'</div></div>'+
+      (CAN_EDIT?'<div class="row-flex">'+
+        (idx>0?'<button class="icon-btn" onclick="moveCeremonyStep('+idx+',-1)">↑</button>':'')+
+        (idx<total-1?'<button class="icon-btn" onclick="moveCeremonyStep('+idx+',1)">↓</button>':'')+
+        '<button class="icon-btn" onclick="setEditing(\'ceremony\','+s.id+')">✎</button><button class="icon-btn danger" onclick="deleteCeremonyStep('+s.id+')">🗑</button></div>':'')+
+      '</div>'+
+      (s.details?'<p style="font-size:13px;margin:8px 0 0;">'+esc(s.details)+'</p>':'')+
+      (s.musique?'<div class="muted" style="font-size:12px;margin-top:6px;">🎵 '+esc(s.musique)+'</div>':'')+
+    '</div>'+
+  '</div>';
+}
+function viewCeremony(){
+  var html='<div class="fade"><h2 class="display" style="font-size:28px;">Cérémonie laïque</h2>'+
+    '<p class="muted" style="font-size:12px;">Château des Anges — '+(STATE.ceremony[0]?esc(STATE.ceremony[0].debut):'')+' à '+(STATE.ceremony.length?esc(STATE.ceremony[STATE.ceremony.length-1].fin):'')+'</p>'+
+    '<div style="margin-top:14px;">'+
+    STATE.ceremony.map(function(s,i){return ceremonyStepHtml(s,i,STATE.ceremony.length);}).join('');
+  if(CAN_EDIT){
+    if(UI.addingCeremony){
+      html+='<div class="card"><div class="row-flex"><input id="add-cer-debut" placeholder="Début" style="width:70px;"/><input id="add-cer-fin" placeholder="Fin" style="width:70px;"/><input id="add-cer-duree" placeholder="Durée" style="width:90px;"/></div>'+
+        '<input id="add-cer-etape" placeholder="Étape" style="margin-top:6px;"/>'+
+        '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addCeremonyStep()">✓</button><button class="btn-outline" onclick="UI.addingCeremony=false;render();">✕</button></div></div>';
+    } else {
+      html+='<button class="gold" style="font-size:12px;" onclick="UI.addingCeremony=true;render();">+ Ajouter une étape</button>';
+    }
+  }
+  return html+'</div></div>';
+}
+
+/* ============ ANIMATIONS ============ */
+var ANIM_STATUTS={pret:{l:'Prête',dot:'🟢',bg:'#E4EFE3',c:'#5C8A5A'},a_preparer:{l:'À préparer',dot:'🟠',bg:'#F6EFE0',c:'#BFA059'},a_faire:{l:'À faire',dot:'🔴',bg:'#F3E3E1',c:'#B15E56'}};
+function saveAnimEdit(id){
+  var patch={nom:val('an-nom'),heure:val('an-heure'),responsable:val('an-resp'),lieu:val('an-lieu'),statut:val('an-statut'),description:val('an-desc'),personnes:val('an-pers'),materiel:val('an-mat'),musique:val('an-mus'),instructions:val('an-instr')};
+  save('animations', STATE.animations.map(function(a){return a.id===id?Object.assign({},a,patch):a;}));
+  clearEditing();
+}
+function deleteAnim(id){ save('animations', STATE.animations.filter(function(a){return a.id!==id;})); }
+function addAnim(){
+  var nom=val('add-an-nom');
+  if(!nom.trim()) return;
+  var id=uid(STATE.animations);
+  save('animations', STATE.animations.concat([{id:id,nom:nom,heure:val('add-an-heure'),responsable:val('add-an-resp'),lieu:val('add-an-lieu'),description:val('add-an-desc'),personnes:'',materiel:'',musique:'',instructions:'',statut:'a_faire'}]));
+  UI.addingAnim=false;
+}
+function animCardHtml(a){
+  var st=ANIM_STATUTS[a.statut]||ANIM_STATUTS.a_faire;
+  var open= UI.openAnim===a.id;
+  if(EDITING.type==='anim'&&EDITING.id===a.id){
+    return '<div class="card">'+
+      '<input id="an-nom" value="'+esc(a.nom)+'" placeholder="Nom" style="font-size:15px;"/>'+
+      '<div class="row-flex" style="margin-top:6px;"><input id="an-heure" value="'+esc(a.heure)+'" style="width:70px;" placeholder="Heure"/><input id="an-resp" value="'+esc(a.responsable)+'" placeholder="Responsable" style="flex:1;"/><input id="an-lieu" value="'+esc(a.lieu)+'" placeholder="Lieu" style="flex:1;"/>'+
+      '<select id="an-statut">'+Object.keys(ANIM_STATUTS).map(function(k){return '<option value="'+k+'" '+(a.statut===k?'selected':'')+'>'+ANIM_STATUTS[k].dot+' '+ANIM_STATUTS[k].l+'</option>';}).join('')+'</select></div>'+
+      '<textarea id="an-desc" rows="2" placeholder="Description" style="margin-top:6px;">'+esc(a.description)+'</textarea>'+
+      '<input id="an-pers" value="'+esc(a.personnes)+'" placeholder="Personnes impliquées" style="margin-top:6px;"/>'+
+      '<input id="an-mat" value="'+esc(a.materiel)+'" placeholder="Matériel" style="margin-top:6px;"/>'+
+      '<input id="an-mus" value="'+esc(a.musique)+'" placeholder="Musique" style="margin-top:6px;"/>'+
+      '<textarea id="an-instr" rows="3" placeholder="Instructions" style="margin-top:6px;">'+esc(a.instructions)+'</textarea>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveAnimEdit('+a.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+    '</div>';
+  }
+  return '<div class="card" style="padding:0;overflow:hidden;">'+
+    '<button style="width:100%;text-align:left;padding:16px;display:flex;justify-content:space-between;align-items:flex-start;" onclick="UI.openAnim='+(open?'null':a.id)+';render();">'+
+      '<div><div class="row-flex"><span class="display" style="font-size:16px;">'+esc(a.nom)+'</span><span class="chip" style="background:'+st.bg+';color:'+st.c+';">'+st.dot+' '+st.l+'</span></div>'+
+      '<div class="muted" style="font-size:11px;margin-top:4px;">'+(a.heure?'🕐 '+esc(a.heure)+' ':'')+(a.lieu?'📍 '+esc(a.lieu)+' ':'')+(a.responsable?'· '+esc(a.responsable):'')+'</div></div>'+
+      '<span>'+(open?'▲':'▼')+'</span>'+
+    '</button>'+
+    (open?'<div style="padding:0 16px 16px;border-top:1px solid var(--border);font-size:13px;">'+
+      (a.description?'<p>'+esc(a.description)+'</p>':'')+
+      (a.personnes?'<p><span class="muted">Personnes impliquées : </span>'+esc(a.personnes)+'</p>':'')+
+      (a.materiel?'<p><span class="muted">Matériel : </span>'+esc(a.materiel)+'</p>':'')+
+      (a.musique?'<p style="color:var(--rose-deep);">🎵 '+esc(a.musique)+'</p>':'')+
+      (a.instructions?'<p><span class="muted">Instructions : </span>'+esc(a.instructions).replace(/\n/g,'<br>')+'</p>':'')+
+      (CAN_EDIT?'<div class="row-flex"><button class="icon-btn" style="font-size:11px;" onclick="setEditing(\'anim\','+a.id+')">✎ Modifier</button><button class="icon-btn danger" style="font-size:11px;" onclick="deleteAnim('+a.id+')">🗑 Supprimer</button></div>':'')+
+    '</div>':'')+
+  '</div>';
+}
+function viewAnimations(){
+  var sorted=STATE.animations.slice().sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Animations</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingAnim=true;render();">+ Ajouter</button>':'')+'</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:10px;">';
+  html+=sorted.map(animCardHtml).join('');
+  if(UI.addingAnim){
+    html+='<div class="card"><input id="add-an-nom" placeholder="Nom de l\'animation" style="font-size:15px;"/>'+
+    '<div class="row-flex" style="margin-top:6px;"><input id="add-an-heure" placeholder="Heure" style="width:70px;"/><input id="add-an-resp" placeholder="Responsable" style="flex:1;"/><input id="add-an-lieu" placeholder="Lieu" style="flex:1;"/></div>'+
+    '<textarea id="add-an-desc" rows="2" placeholder="Description" style="margin-top:6px;"></textarea>'+
+    '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addAnim()">✓</button><button class="btn-outline" onclick="UI.addingAnim=false;render();">✕</button></div></div>';
+  }
+  if(!sorted.length && !UI.addingAnim) html+='<p class="muted" style="text-align:center;padding:20px;">Aucune animation.</p>';
+  return html+'</div></div>';
+}
+
+/* ============ TASKS ============ */
+var PRIO_STYLE={urgent:{l:'Urgent',dot:'🔴',bg:'#F3E3E1',c:'#B15E56'},important:{l:'Important',dot:'🟠',bg:'#F6EFE0',c:'#BFA059'},normal:{l:'Normal',dot:'🟢',bg:'#E4EFE3',c:'#5C8A5A'}};
+function toggleTaskDone(id){ save('tasks', STATE.tasks.map(function(t){return t.id===id?Object.assign({},t,{statut:t.statut==='termine'?'a_faire':'termine'}):t;})); }
+function saveTaskEdit(id){
+  var patch={titre:val('tk-titre'),description:val('tk-desc'),responsable:val('tk-resp'),priorite:val('tk-prio'),statut:val('tk-statut')};
+  save('tasks', STATE.tasks.map(function(t){return t.id===id?Object.assign({},t,patch):t;}));
+  clearEditing();
+}
+function deleteTask(id){ save('tasks', STATE.tasks.filter(function(t){return t.id!==id;})); }
+function addTask(){
+  var titre=val('add-tk-titre');
+  if(!titre.trim()) return;
+  var id=uid(STATE.tasks);
+  save('tasks', STATE.tasks.concat([{id:id,titre:titre,description:val('add-tk-desc'),responsable:val('add-tk-resp'),priorite:'normal',statut:'a_faire'}]));
+  UI.addingTask=false;
+}
+function taskRowHtml(t){
+  var prio=PRIO_STYLE[t.priorite]||PRIO_STYLE.normal;
+  var done=t.statut==='termine';
+  if(EDITING.type==='task'&&EDITING.id===t.id){
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+      '<input id="tk-titre" value="'+esc(t.titre)+'" placeholder="Titre"/>'+
+      '<textarea id="tk-desc" rows="2" placeholder="Description" style="margin-top:6px;">'+esc(t.description)+'</textarea>'+
+      '<div class="row-flex" style="margin-top:6px;"><input id="tk-resp" value="'+esc(t.responsable)+'" placeholder="Responsable" style="flex:1;"/>'+
+      '<select id="tk-prio">'+Object.keys(PRIO_STYLE).map(function(k){return '<option value="'+k+'" '+(t.priorite===k?'selected':'')+'>'+PRIO_STYLE[k].dot+' '+PRIO_STYLE[k].l+'</option>';}).join('')+'</select>'+
+      '<select id="tk-statut"><option value="a_faire" '+(t.statut==='a_faire'?'selected':'')+'>À faire</option><option value="en_cours" '+(t.statut==='en_cours'?'selected':'')+'>En cours</option><option value="termine" '+(t.statut==='termine'?'selected':'')+'>Terminé</option></select></div>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveTaskEdit('+t.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+    '</div>';
+  }
+  return '<div class="listrow">'+
+    '<button class="icon-btn" style="font-size:17px;color:'+(done?'#5C8A5A':'#D8CDBB')+';" onclick="toggleTaskDone('+t.id+')">'+(done?'☑':'☐')+'</button>'+
+    '<div style="flex:1;"><div class="row-flex"><span style="font-size:13px;'+(done?'text-decoration:line-through;opacity:.5;':'')+'">'+esc(t.titre)+'</span><span class="chip" style="background:'+prio.bg+';color:'+prio.c+';">'+prio.dot+' '+prio.l+'</span>'+(t.statut==='en_cours'?'<span class="chip">En cours</span>':'')+'</div>'+
+    (t.description?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(t.description)+'</div>':'')+
+    (t.responsable?'<div class="gold" style="font-size:11px;margin-top:2px;">'+esc(t.responsable)+'</div>':'')+
+    '</div>'+
+    (CAN_EDIT?'<div class="row-flex"><button class="icon-btn" onclick="setEditing(\'task\','+t.id+')">✎</button><button class="icon-btn danger" onclick="deleteTask('+t.id+')">🗑</button></div>':'')+
+  '</div>';
+}
+function viewTasks(){
+  var responsables=["Toutes"].concat(Array.from(new Set(STATE.tasks.map(function(t){return t.responsable;}).filter(Boolean))).sort());
+  var filter=UI.tasksFilter||'Toutes';
+  var filtered= filter==='Toutes'?STATE.tasks:STATE.tasks.filter(function(t){return t.responsable===filter;});
+  var done=STATE.tasks.filter(function(t){return t.statut==='termine';}).length;
+  var progress=STATE.tasks.length?Math.round(done/STATE.tasks.length*100):0;
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Tâches</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingTask=true;render();">+ Ajouter</button>':'')+'</div>'+
+  '<div class="card" style="margin:12px 0;"><div class="flex-between" style="font-size:12px;"><span class="muted">Progression globale</span><span>'+progress+'% ('+done+'/'+STATE.tasks.length+')</span></div><div class="progressbar" style="margin-top:6px;"><div class="fill" style="width:'+progress+'%;"></div></div></div>'+
+  '<div class="tabbar" style="justify-content:flex-start;">'+responsables.map(function(r){return '<button class="'+(filter===r?'active':'')+'" onclick="UI.tasksFilter=\''+r+'\';render();">'+r+'</button>';}).join('')+'</div>'+
+  '<div>'+filtered.map(taskRowHtml).join('');
+  if(UI.addingTask){
+    html+='<div class="listrow" style="flex-direction:column;align-items:stretch;"><input id="add-tk-titre" placeholder="Titre"/><textarea id="add-tk-desc" rows="2" placeholder="Description" style="margin-top:6px;"></textarea><input id="add-tk-resp" placeholder="Responsable" style="margin-top:6px;"/><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addTask()">✓</button><button class="btn-outline" onclick="UI.addingTask=false;render();">✕</button></div></div>';
+  }
+  if(!filtered.length && !UI.addingTask) html+='<p class="muted" style="text-align:center;padding:20px;">Aucune tâche.</p>';
+  return html+'</div></div>';
+}
+
+/* ============ TROUSSE ============ */
+function toggleTrousseItem(id){ save('trousse', Object.assign({},STATE.trousse,{items:STATE.trousse.items.map(function(i){return i.id===id?Object.assign({},i,{coche:!i.coche}):i;})})); }
+function removeTrousseItem(id){ save('trousse', Object.assign({},STATE.trousse,{items:STATE.trousse.items.filter(function(i){return i.id!==id;})})); }
+function addTrousseItem(){
+  var v=val('add-trousse-item');
+  if(!v.trim()) return;
+  var id=uid(STATE.trousse.items);
+  save('trousse', Object.assign({},STATE.trousse,{items:STATE.trousse.items.concat([{id:id,nom:v,coche:false}])}));
+}
+function saveTrousseResponsable(v){ save('trousse', Object.assign({},STATE.trousse,{responsable:v})); }
+function viewTrousse(){
+  var t=STATE.trousse;
+  var done=t.items.filter(function(i){return i.coche;}).length;
+  var progress=t.items.length?Math.round(done/t.items.length*100):0;
+  var html='<div class="fade"><h2 class="display" style="font-size:28px;">✨ Trousse de secours</h2>'+
+  '<div class="muted" style="font-size:12px;margin:6px 0;">Responsable : '+
+    (CAN_EDIT?'<input value="'+esc(t.responsable)+'" style="display:inline-block;width:120px;padding:2px 6px;" onchange="saveTrousseResponsable(this.value)"/>':'<b class="gold">'+esc(t.responsable||'à définir')+'</b>')+
+  '</div>'+
+  '<div class="card"><div class="flex-between" style="font-size:12px;"><span class="muted">Préparation</span><span>'+done+'/'+t.items.length+'</span></div><div class="progressbar" style="margin-top:6px;"><div class="fill" style="width:'+progress+'%;"></div></div></div>'+
+  '<div class="card" style="margin-top:12px;"><div class="grid2">'+
+    t.items.map(function(i){
+      return '<div class="row-flex" style="background:var(--ivory);border-radius:10px;padding:8px 12px;"><button class="icon-btn" style="color:'+(i.coche?'#5C8A5A':'#D8CDBB')+';" onclick="toggleTrousseItem('+i.id+')">'+(i.coche?'☑':'☐')+'</button><span style="flex:1;font-size:13px;'+(i.coche?'text-decoration:line-through;opacity:.5;':'')+'">'+esc(i.nom)+'</span>'+(CAN_EDIT?'<button class="icon-btn danger" onclick="removeTrousseItem('+i.id+')">✕</button>':'')+'</div>';
+    }).join('') +
+  '</div>';
+  if(CAN_EDIT){
+    html+='<div class="row-flex" style="margin-top:10px;"><input id="add-trousse-item" placeholder="Nouvel élément" style="border-radius:999px;"/><button class="btn" onclick="addTrousseItem()">+</button></div>';
+  }
+  return html+'</div></div>';
+}
+
+/* ============ ROLE GUIDE (Demoiselles / Témoins) ============ */
+function saveHonneurField(key,field,value){
+  var next=Object.assign({},STATE.honneur); next[key]=withField(next[key],field,value);
+  save('honneur', next);
+}
+function toggleMission(key,id){
+  var next=Object.assign({},STATE.honneur); next[key]=Object.assign({},next[key]);
+  next[key].missions=next[key].missions.map(function(m){return m.id===id?Object.assign({},m,{statut:m.statut==='termine'?'a_faire':'termine'}):m;});
+  save('honneur', next);
+}
+function removeMission(key,id){
+  var next=Object.assign({},STATE.honneur); next[key]=Object.assign({},next[key]);
+  next[key].missions=next[key].missions.filter(function(m){return m.id!==id;});
+  save('honneur', next);
+}
+function addMission(key){
+  var titre=val('add-mission-titre-'+key), resp=val('add-mission-resp-'+key);
+  if(!titre.trim()) return;
+  var next=Object.assign({},STATE.honneur); next[key]=Object.assign({},next[key]);
+  var id=uid(next[key].missions);
+  next[key].missions=next[key].missions.concat([{id:id,titre:titre,responsable:resp,statut:'a_faire'}]);
+  save('honneur', next);
+}
+function viewRoleGuide(key, title, emoji){
+  var data=STATE.honneur[key];
+  var labels={role:"Leur rôle",avant:"Avant le mariage",jourJ:"Jour J"};
+  var html='<div class="fade"><h2 class="display" style="font-size:28px;">'+emoji+' '+title+'</h2>'+
+  '<div class="card" style="margin-top:12px;">'+
+    ['role','avant','jourJ'].map(function(f){
+      return '<div class="field" style="margin-bottom:14px;"><label>'+labels[f]+'</label>'+
+        (CAN_EDIT?'<textarea rows="3" onchange="saveHonneurField(\''+key+'\',\''+f+'\',this.value)">'+esc(data[f])+'</textarea>':'<p style="font-size:13px;">'+(data[f]?esc(data[f]):'<span class="muted">Non renseigné.</span>')+'</p>')+
+      '</div>';
+    }).join('') +
+  '</div>'+
+  '<div class="card" style="margin-top:12px;"><div class="eyebrow">Missions</div>'+
+    data.missions.map(function(m){
+      var done=m.statut==='termine';
+      return '<div class="listrow"><button class="icon-btn" style="font-size:16px;color:'+(done?'#5C8A5A':'#D8CDBB')+';" onclick="toggleMission(\''+key+'\','+m.id+')">'+(done?'☑':'☐')+'</button>'+
+        '<span style="flex:1;font-size:13px;'+(done?'text-decoration:line-through;opacity:.5;':'')+'">'+esc(m.titre)+(m.responsable?' <span class="gold">— '+esc(m.responsable)+'</span>':'')+'</span>'+
+        (CAN_EDIT?'<button class="icon-btn danger" onclick="removeMission(\''+key+'\','+m.id+')">✕</button>':'')+
+      '</div>';
+    }).join('') +
+    (data.missions.length===0?'<p class="muted" style="font-size:12px;">Aucune mission assignée.</p>':'') +
+    (CAN_EDIT?'<div class="row-flex" style="margin-top:8px;"><input id="add-mission-titre-'+key+'" placeholder="Mission" style="flex:1;"/><input id="add-mission-resp-'+key+'" placeholder="Responsable" style="width:130px;"/><button class="btn" onclick="addMission(\''+key+'\')">+</button></div>':'')+
+  '</div></div>';
+  return html;
+}
+
+/* ============ MENU ============ */
+function saveMenuField(key,value){ save('menu', withField(STATE.menu,key,value)); }
+function viewMenu(){
+  var m=STATE.menu, guests=STATE.guests;
+  var byMenu={}; guests.forEach(function(g){ var k=(g.menu||'').trim()||'Non renseigné'; byMenu[k]=(byMenu[k]||0)+1; });
+  var allergies=guests.filter(function(g){return (g.allergies||'').trim();}).length;
+  var sections=[
+    {section:'Cocktail',fields:[['cocktailPieces','Pièces cocktail'],['cocktailBoissons','Boissons'],['cocktailInfos','Informations particulières']]},
+    {section:'Repas',fields:[['entree','Entrée'],['plat','Plat'],['accompagnement','Accompagnement'],['fromage','Fromage'],['dessert','Dessert']]},
+    {section:'Boissons',fields:[['champagne','Champagne'],['vins','Vins'],['softs','Softs'],['eau','Eau'],['cafeThe','Café / Thé']]}
+  ];
+  var html='<div class="fade"><h2 class="display" style="font-size:28px;">Menu</h2>'+
+  '<div class="card" style="margin:12px 0;"><div class="eyebrow">Compteurs automatiques (depuis Invités)</div><div class="row-flex">'+
+    '<span class="chip" style="background:var(--champagne-soft);color:var(--ink);">'+guests.length+' invités</span>'+
+    Object.keys(byMenu).map(function(k){return '<span class="chip">'+byMenu[k]+' '+esc(k)+'</span>';}).join('')+
+    (allergies>0?'<span class="chip" style="background:var(--champagne-soft);color:var(--ink);">'+allergies+' avec allergie/régime</span>':'')+
+  '</div></div>';
+  sections.forEach(function(sec){
+    html+='<div class="card" style="margin-bottom:12px;"><div class="display" style="font-size:19px;margin-bottom:10px;">'+sec.section+'</div><div class="grid2">'+
+      sec.fields.map(function(f){
+        return '<div class="field"><label>'+f[1]+'</label>'+(CAN_EDIT?'<textarea rows="2" onchange="saveMenuField(\''+f[0]+'\',this.value)">'+esc(m[f[0]])+'</textarea>':'<p style="font-size:13px;">'+(m[f[0]]?esc(m[f[0]]):'<span class="muted">—</span>')+'</p>')+'</div>';
+      }).join('') +
+    '</div></div>';
+  });
+  return html+'</div>';
+}
+
+/* ============ VENDORS ============ */
+function saveVendorEdit(id){
+  var patch={categorie:val('vd-cat'),nom:val('vd-nom'),entreprise:val('vd-ent'),telephone:val('vd-tel'),email:val('vd-email'),site:val('vd-site'),montant:val('vd-montant'),acompte:val('vd-acompte'),solde:val('vd-solde'),horaires:val('vd-horaires'),notes:val('vd-notes')};
+  save('vendors', STATE.vendors.map(function(v){return v.id===id?Object.assign({},v,patch):v;}));
+  clearEditing();
+}
+function deleteVendor(id){ save('vendors', STATE.vendors.filter(function(v){return v.id!==id;})); }
+function addVendor(){
+  var cat=val('add-vd-cat');
+  if(!cat.trim()) return;
+  var id=uid(STATE.vendors);
+  save('vendors', STATE.vendors.concat([{id:id,categorie:cat,nom:val('add-vd-nom'),entreprise:'',telephone:'',email:'',site:'',montant:'',acompte:'',solde:'',horaires:'',notes:''}]));
+  UI.addingVendor=false;
+}
+function vendorCardHtml(v){
+  var open=UI.openVendor===v.id;
+  if(EDITING.type==='vendor'&&EDITING.id===v.id){
+    return '<div class="card">'+
+      '<div class="row-flex"><input id="vd-cat" value="'+esc(v.categorie)+'" placeholder="Catégorie" style="width:120px;"/><input id="vd-nom" value="'+esc(v.nom)+'" placeholder="Nom" style="flex:1;"/></div>'+
+      '<input id="vd-ent" value="'+esc(v.entreprise)+'" placeholder="Entreprise" style="margin-top:6px;"/>'+
+      '<div class="row-flex" style="margin-top:6px;"><input id="vd-tel" value="'+esc(v.telephone)+'" placeholder="Téléphone" style="flex:1;"/><input id="vd-email" value="'+esc(v.email)+'" placeholder="Email" style="flex:1;"/></div>'+
+      '<input id="vd-site" value="'+esc(v.site)+'" placeholder="Site" style="margin-top:6px;"/>'+
+      '<div class="row-flex" style="margin-top:6px;"><input id="vd-montant" value="'+esc(v.montant)+'" placeholder="Montant" style="flex:1;"/><input id="vd-acompte" value="'+esc(v.acompte)+'" placeholder="Acompte" style="flex:1;"/><input id="vd-solde" value="'+esc(v.solde)+'" placeholder="Solde" style="flex:1;"/></div>'+
+      '<input id="vd-horaires" value="'+esc(v.horaires)+'" placeholder="Horaires" style="margin-top:6px;"/>'+
+      '<textarea id="vd-notes" rows="2" placeholder="Notes" style="margin-top:6px;">'+esc(v.notes)+'</textarea>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveVendorEdit('+v.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+    '</div>';
+  }
+  return '<div class="card" style="padding:0;overflow:hidden;">'+
+    '<button style="width:100%;text-align:left;padding:14px;display:flex;justify-content:space-between;" onclick="UI.openVendor='+(open?'null':v.id)+';render();">'+
+      '<div><div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+'</div><div class="display" style="font-size:16px;">'+(v.nom?esc(v.nom):'<span class="muted" style="font-style:normal;font-size:13px;">à renseigner</span>')+'</div></div><span>'+(open?'▲':'▼')+'</span>'+
+    '</button>'+
+    (open?'<div style="padding:0 14px 14px;border-top:1px solid var(--border);font-size:12px;">'+
+      (v.entreprise?'<div>'+esc(v.entreprise)+'</div>':'')+
+      (v.telephone?'<div>📞 '+esc(v.telephone)+'</div>':'')+
+      (v.email?'<div>'+esc(v.email)+'</div>':'')+
+      (v.site?'<div class="gold">'+esc(v.site)+'</div>':'')+
+      ((v.montant||v.acompte||v.solde)?'<div style="margin-top:4px;">'+(v.montant?'Montant : '+esc(v.montant)+' ':'')+(v.acompte?'Acompte : '+esc(v.acompte)+' ':'')+(v.solde?'Solde : '+esc(v.solde):'')+'</div>':'')+
+      (v.horaires?'<div>Horaires : '+esc(v.horaires)+'</div>':'')+
+      (v.notes?'<div class="muted" style="margin-top:4px;">'+esc(v.notes)+'</div>':'')+
+      (CAN_EDIT?'<div class="row-flex" style="margin-top:8px;"><button class="icon-btn" onclick="setEditing(\'vendor\','+v.id+')">✎ Modifier</button><button class="icon-btn danger" onclick="deleteVendor('+v.id+')">🗑 Supprimer</button></div>':'')+
+    '</div>':'')+
+  '</div>';
+}
+function viewVendors(){
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Prestataires</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingVendor=true;render();">+ Ajouter</button>':'')+'</div>'+
+  '<div class="grid2" style="margin-top:14px;">'+STATE.vendors.map(vendorCardHtml).join('')+'</div>';
+  if(UI.addingVendor){
+    html+='<div class="card" style="margin-top:10px;"><div class="row-flex"><input id="add-vd-cat" placeholder="Catégorie" style="width:140px;"/><input id="add-vd-nom" placeholder="Nom" style="flex:1;"/></div><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addVendor()">✓</button><button class="btn-outline" onclick="UI.addingVendor=false;render();">✕</button></div></div>';
+  }
+  return html+'</div>';
+}
+
+/* ============ CONTACTS ============ */
+function saveContactEdit(id){
+  var patch={role:val('ct-role'),nom:val('ct-nom'),telephone:val('ct-tel')};
+  save('contacts', STATE.contacts.map(function(c){return c.id===id?Object.assign({},c,patch):c;}));
+  clearEditing();
+}
+function deleteContact(id){ save('contacts', STATE.contacts.filter(function(c){return c.id!==id;})); }
+function addContact(){
+  var role=val('add-ct-role');
+  if(!role.trim()) return;
+  var id=uid(STATE.contacts);
+  save('contacts', STATE.contacts.concat([{id:id,role:role,nom:val('add-ct-nom'),telephone:val('add-ct-tel')}]));
+  UI.addingContact=false;
+}
+function contactRowHtml(c){
+  if(EDITING.type==='contact'&&EDITING.id===c.id){
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;"><div class="row-flex"><input id="ct-role" value="'+esc(c.role)+'" placeholder="Rôle" style="width:130px;"/><input id="ct-nom" value="'+esc(c.nom)+'" placeholder="Nom" style="flex:1;"/><input id="ct-tel" value="'+esc(c.telephone)+'" placeholder="Téléphone" style="flex:1;"/></div><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveContactEdit('+c.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>';
+  }
+  return '<div class="listrow"><div style="flex:1;"><div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(c.role)+'</div><div style="font-size:13px;">'+(c.nom?esc(c.nom):'<span class="muted">à renseigner</span>')+'</div></div>'+
+    (c.telephone?'<a class="chip" href="tel:'+esc(c.telephone)+'" style="background:var(--champagne-soft);color:var(--gold);">📞 '+esc(c.telephone)+'</a>':'<span class="muted" style="font-size:11px;">pas de numéro</span>')+
+    (CAN_EDIT?'<button class="icon-btn" onclick="setEditing(\'contact\','+c.id+')">✎</button><button class="icon-btn danger" onclick="deleteContact('+c.id+')">🗑</button>':'')+
+  '</div>';
+}
+function viewContacts(){
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Contacts</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingContact=true;render();">+ Ajouter</button>':'')+'</div><div style="margin-top:14px;">'+
+  STATE.contacts.map(contactRowHtml).join('');
+  if(UI.addingContact){
+    html+='<div class="listrow" style="flex-direction:column;align-items:stretch;"><div class="row-flex"><input id="add-ct-role" placeholder="Rôle" style="width:130px;"/><input id="add-ct-nom" placeholder="Nom" style="flex:1;"/><input id="add-ct-tel" placeholder="Téléphone" style="flex:1;"/></div><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addContact()">✓</button><button class="btn-outline" onclick="UI.addingContact=false;render();">✕</button></div></div>';
+  }
+  return html+'</div></div>';
+}
+
+/* ============ MOODBOARD ============ */
+function saveMoodNotes(id,value){ save('moodboard', STATE.moodboard.map(function(c){return c.id===id?Object.assign({},c,{notes:value}):c;})); }
+function addMoodLink(id){
+  var v=val('mood-link-'+id);
+  if(!v.trim()) return;
+  save('moodboard', STATE.moodboard.map(function(c){return c.id===id?Object.assign({},c,{liens:c.liens.concat([v.trim()])}):c;}));
+}
+function removeMoodLink(id,idx){ save('moodboard', STATE.moodboard.map(function(c){ if(c.id!==id) return c; var l=c.liens.slice(); l.splice(idx,1); return Object.assign({},c,{liens:l}); })); }
+function deleteMood(id){ save('moodboard', STATE.moodboard.filter(function(c){return c.id!==id;})); }
+function addMoodCategory(){
+  var v=val('add-mood-cat');
+  if(!v.trim()) return;
+  var id=uid(STATE.moodboard);
+  save('moodboard', STATE.moodboard.concat([{id:id,nom:v,notes:'',liens:[]}]));
+  UI.addingMood=false;
+}
+function moodCardHtml(c){
+  return '<div class="card"><div class="flex-between"><div class="display" style="font-size:16px;">'+esc(c.nom)+'</div>'+(CAN_EDIT?'<button class="icon-btn danger" onclick="deleteMood('+c.id+')">🗑</button>':'')+'</div>'+
+    (CAN_EDIT?'<textarea rows="2" placeholder="Notes, couleurs, idées..." style="margin-top:6px;font-size:12px;" onchange="saveMoodNotes('+c.id+',this.value)">'+esc(c.notes)+'</textarea>':(c.notes?'<p style="font-size:12px;">'+esc(c.notes)+'</p>':'<p class="muted" style="font-size:12px;">Aucune note.</p>'))+
+    '<div style="margin-top:6px;">'+c.liens.map(function(l,i){return '<div class="row-flex"><a href="'+esc(l)+'" target="_blank" class="gold" style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(l)+'</a>'+(CAN_EDIT?'<button class="icon-btn danger" onclick="removeMoodLink('+c.id+','+i+')">✕</button>':'')+'</div>';}).join('')+'</div>'+
+    (CAN_EDIT?'<div class="row-flex" style="margin-top:6px;"><input id="mood-link-'+c.id+'" placeholder="Coller un lien" style="font-size:11px;"/><button class="icon-btn" onclick="addMoodLink('+c.id+')">+</button></div>':'')+
+  '</div>';
+}
+function viewMoodboard(){
+  var html='<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Moodboard</h2><p class="muted" style="font-size:12px;">Colle ici tes liens d\'inspiration par catégorie</p></div>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingMood=true;render();">+ Catégorie</button>':'')+'</div>'+
+  '<div class="grid3" style="margin-top:14px;">'+STATE.moodboard.map(moodCardHtml).join('')+'</div>';
+  if(UI.addingMood){
+    html+='<div class="row-flex" style="margin-top:10px;"><input id="add-mood-cat" placeholder="Nom de la catégorie" style="border-radius:999px;"/><button class="btn" onclick="addMoodCategory()">✓</button><button class="btn-outline" onclick="UI.addingMood=false;render();">✕</button></div>';
+  }
+  return html+'</div>';
+}
+
+/* ============ TABLES (plan de table, rond, drag&drop) ============ */
+function removeFromAllTables(arr,guestId,label){ return arr.map(function(t){ return Object.assign({},t,{occupants:t.occupants.filter(function(o){return guestId?o.guestId!==guestId:o.label!==label;})}); }); }
+function onDragStartGuest(e,guestId,label){ DRAG={guestId:guestId,label:label}; e.dataTransfer.setData('text/plain','x'); }
+function onDragStartOccupant(e,guestId,label){ DRAG={guestId:guestId||null,label:label}; e.dataTransfer.setData('text/plain','x'); }
+function onDropTable(e,tableId){
+  e.preventDefault(); e.currentTarget.classList.remove('dragover');
+  if(!DRAG) return;
+  var target=STATE.tables.find(function(t){return t.id===tableId;});
+  if(!target||target.occupants.length>=target.capacity){DRAG=null;return;}
+  var next=removeFromAllTables(STATE.tables,DRAG.guestId,DRAG.label);
+  next=next.map(function(t){return t.id===tableId?Object.assign({},t,{occupants:t.occupants.concat([{guestId:DRAG.guestId||null,label:DRAG.label}])}):t;});
+  save('tables', next);
+  DRAG=null;
+}
+function onDropPoolTables(e){
+  e.preventDefault(); e.currentTarget.classList.remove('dragover');
+  if(!DRAG) return;
+  save('tables', removeFromAllTables(STATE.tables,DRAG.guestId,DRAG.label));
+  DRAG=null;
+}
+function renameTable(id,nom){ save('tables', STATE.tables.map(function(t){return t.id===id?Object.assign({},t,{nom:nom}):t;})); }
+function tableCapacity(id,delta){ save('tables', STATE.tables.map(function(t){ if(t.id!==id) return t; return Object.assign({},t,{capacity:Math.max(t.occupants.length,t.capacity+delta)}); })); }
+function deleteTable(id){ save('tables', STATE.tables.filter(function(t){return t.id!==id;})); }
+function addTable(){ var id=uid(STATE.tables); save('tables', STATE.tables.concat([{id:id,nom:'Nouvelle table',forme:'ronde',capacity:10,occupants:[]}])); }
+function removeTableOccupant(tableId, idx){ save('tables', STATE.tables.map(function(t){ if(t.id!==tableId) return t; var occ=t.occupants.slice(); occ.splice(idx,1); return Object.assign({},t,{occupants:occ}); })); }
+function tableCardHtml(t){
+  var filled=t.occupants.length, cap=t.capacity;
+  var seatCount=Math.max(cap,filled);
+  var angleStep=360/(seatCount||1), radius=41;
+  var seatSize= seatCount<=8?26:seatCount<=10?23:seatCount<=12?20:17;
+  var seatsHtml='';
+  for(var i=0;i<seatCount;i++){
+    var angle=(angleStep*i-90)*Math.PI/180;
+    var x=50+radius*Math.cos(angle), y=50+radius*Math.sin(angle);
+    var occ=t.occupants[i];
+    seatsHtml+='<div class="seat" style="left:'+x+'%;top:'+y+'%;width:'+seatSize+'%;">';
+    if(occ){
+      var gid = occ.guestId===null||occ.guestId===undefined?'null':occ.guestId;
+      seatsHtml+='<div class="seat-chip" '+(CAN_EDIT?'draggable="true" ondragstart="onDragStartOccupant(event,'+gid+',\''+esc(occ.label).replace(/\047/g,"\\'")+'\')"':'')+' title="'+esc(occ.label)+'">'+esc(occ.label)+
+        (CAN_EDIT?'<span onclick="removeTableOccupant('+t.id+','+i+')" style="position:absolute;top:-4px;right:-4px;background:#fff;border-radius:999px;width:13px;height:13px;font-size:9px;line-height:13px;text-align:center;border:1px solid var(--border);cursor:pointer;">✕</span>':'')+
+      '</div>';
+    } else {
+      seatsHtml+='<div class="seat-empty">·</div>';
+    }
+    seatsHtml+='</div>';
+  }
+  var over=filled>cap, full=filled===cap&&cap>0;
+  var badgeColor= over?'#B15E56':full?'#5C8A5A':'#BFA059';
+  var badgeBg= over?'#F3E3E1':full?'#E4EFE3':'#F6EFE0';
+  return '<div class="table-card card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropTable(event,'+t.id+')">'+
+    '<div class="table-round" style="position:relative;">'+seatsHtml+
+      '<div class="table-center">'+
+        (CAN_EDIT? '<input value="'+esc(t.nom)+'" onchange="renameTable('+t.id+',this.value)" style="border:none;background:transparent;text-align:center;font-family:\'Cormorant Garamond\',serif;font-style:italic;padding:0;font-size:13px;"/>' : '<div class="display" style="font-size:13px;">'+esc(t.nom)+'</div>')+
+        '<span class="chip" style="background:'+badgeBg+';color:'+badgeColor+';margin-top:4px;">'+filled+'/'+cap+'</span>'+
+        (CAN_EDIT?'<div class="row-flex" style="margin-top:6px;"><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',-1)">–</button><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',1)">+</button></div>':'')+
+      '</div>'+
+    '</div>'+
+    (CAN_EDIT?'<div style="text-align:center;margin-top:8px;"><button class="icon-btn danger" style="font-size:11px;" onclick="deleteTable('+t.id+')">🗑 Supprimer</button></div>':'')+
+  '</div>';
+}
+function viewTables(){
+  var placedKeys={};
+  STATE.tables.forEach(function(t){ t.occupants.forEach(function(o){ placedKeys[o.guestId?('g'+o.guestId):('l'+o.label)]=true; }); });
+  var search=(UI.tablesSearch||'').toLowerCase();
+  var unplaced=STATE.guests.filter(function(g){ return !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
+  var totalSeats=STATE.tables.reduce(function(s,t){return s+t.capacity;},0);
+  var totalOcc=STATE.tables.reduce(function(s,t){return s+t.occupants.length;},0);
+  return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Plan de table</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalSeats+' places occupées</p></div>'+
+    (CAN_EDIT?'<button class="btn" onclick="addTable()">+ Ajouter une table</button>':'')+
+  '</div>'+
+  '<div class="grid2" style="margin-top:14px;align-items:start;">'+
+    '<div class="grid2">'+ STATE.tables.map(tableCardHtml).join('') +'</div>'+
+    '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolTables(event)">'+
+      '<b style="font-size:13px;">Non placés ('+unplaced.length+')</b>'+
+      '<input id="tables-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.tablesSearch||'')+'" oninput="UI.tablesSearch=this.value;render();"/>'+
+      unplaced.map(function(g){return '<div class="pool-chip" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+esc(g.nom).replace(/\047/g,"\\'")+'\')">'+esc(g.nom)+'</div>';}).join('') +
+      (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé 🎉</p>':'')+
+    '</div>'+
+  '</div></div>';
+}
+
+/* ============ ROOMS (chambres, drag&drop) ============ */
+function removeFromAllRooms(arr,guestId,label){ return arr.map(function(r){ return Object.assign({},r,{occupants:r.occupants.filter(function(o){return guestId?o.guestId!==guestId:o.label!==label;})}); }); }
+function onDropRoom(e,roomId){
+  e.preventDefault(); e.currentTarget.classList.remove('dragover');
+  if(!DRAG) return;
+  var target=STATE.rooms.find(function(r){return r.id===roomId;});
+  if(!target||target.occupants.length>=target.capacity){DRAG=null;return;}
+  var next=removeFromAllRooms(STATE.rooms,DRAG.guestId,DRAG.label);
+  next=next.map(function(r){ return r.id===roomId?Object.assign({},r,{occupants:r.occupants.concat([{guestId:DRAG.guestId||null,label:DRAG.label}])}):r; });
+  save('rooms', next);
+  DRAG=null;
+}
+function onDropPoolRooms(e){
+  e.preventDefault(); e.currentTarget.classList.remove('dragover');
+  if(!DRAG) return;
+  save('rooms', removeFromAllRooms(STATE.rooms,DRAG.guestId,DRAG.label));
+  DRAG=null;
+}
+function renameRoom(id,nom){ save('rooms', STATE.rooms.map(function(r){return r.id===id?Object.assign({},r,{nom:nom}):r;})); }
+function roomCapacity(id,delta){ save('rooms', STATE.rooms.map(function(r){ if(r.id!==id) return r; return Object.assign({},r,{capacity:Math.max(r.occupants.length,r.capacity+delta)}); })); }
+function deleteRoom(id){ save('rooms', STATE.rooms.filter(function(r){return r.id!==id;})); }
+function addRoom(){ var id=uid(STATE.rooms); save('rooms', STATE.rooms.concat([{id:id,nom:'Nouvelle chambre',capacity:4,occupants:[]}])); }
+function removeRoomOccupant(roomId, idx){ save('rooms', STATE.rooms.map(function(r){ if(r.id!==roomId) return r; var occ=r.occupants.slice(); occ.splice(idx,1); return Object.assign({},r,{occupants:occ}); })); }
+function roomCardHtml(r){
+  var filled=r.occupants.length, cap=r.capacity;
+  var over=filled>cap, full=filled===cap&&cap>0;
+  var dot= over?'🔴':full?'🟢':'🟠';
+  var badgeColor= over?'#B15E56':full?'#5C8A5A':'#BFA059';
+  var badgeBg= over?'#F3E3E1':full?'#E4EFE3':'#F6EFE0';
+  return '<div class="room-card card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropRoom(event,'+r.id+')">'+
+    '<div class="flex-between">'+
+      (CAN_EDIT?'<input value="'+esc(r.nom)+'" onchange="renameRoom('+r.id+',this.value)" style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:16px;border:none;flex:1;padding:0;"/>':'<div class="display" style="font-size:16px;">'+esc(r.nom)+'</div>')+
+      (CAN_EDIT?'<button class="icon-btn danger" onclick="deleteRoom('+r.id+')">🗑</button>':'')+
+    '</div>'+
+    '<div class="row-flex" style="margin:8px 0;">'+
+      '<span class="chip" style="background:'+badgeBg+';color:'+badgeColor+';">'+dot+' '+filled+'/'+cap+' places</span>'+
+      (CAN_EDIT?'<div class="row-flex" style="margin-left:auto;"><button class="btn-outline" style="padding:2px 8px;" onclick="roomCapacity('+r.id+',-1)">–</button><button class="btn-outline" style="padding:2px 8px;" onclick="roomCapacity('+r.id+',1)">+</button></div>':'')+
+    '</div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;">'+
+      r.occupants.map(function(o,idx){ return '<div class="pool-chip" draggable="'+(CAN_EDIT?'true':'false')+'" ondragstart="onDragStartOccupant(event,'+(o.guestId===null||o.guestId===undefined?'null':o.guestId)+',\''+esc(o.label).replace(/\047/g,"\\'")+'\')">'+esc(o.label)+(CAN_EDIT?' <span onclick="removeRoomOccupant('+r.id+','+idx+')" style="margin-left:4px;cursor:pointer;">✕</span>':'')+'</div>'; }).join('') +
+      (r.occupants.length===0?'<span class="muted" style="font-size:12px;">Glissez des invités ici</span>':'')+
+    '</div>'+
+  '</div>';
+}
+function viewRooms(){
+  var placedKeys={};
+  STATE.rooms.forEach(function(r){ r.occupants.forEach(function(o){ placedKeys[o.guestId?('g'+o.guestId):('l'+o.label)]=true; }); });
+  var search=(UI.roomsSearch||'').toLowerCase();
+  var unplaced=STATE.guests.filter(function(g){ return !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
+  var totalCap=STATE.rooms.reduce(function(s,r){return s+r.capacity;},0);
+  var totalOcc=STATE.rooms.reduce(function(s,r){return s+r.occupants.length;},0);
+  return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Chambres</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalCap+' places occupées</p></div>'+
+    (CAN_EDIT?'<button class="btn" onclick="addRoom()">+ Ajouter une chambre</button>':'')+
+  '</div>'+
+  '<div class="grid2" style="margin-top:14px;align-items:start;">'+
+    '<div class="grid2">'+ STATE.rooms.map(roomCardHtml).join('') +'</div>'+
+    '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolRooms(event)">'+
+      '<b style="font-size:13px;">Non hébergés ('+unplaced.length+')</b>'+
+      '<input id="rooms-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.roomsSearch||'')+'" oninput="UI.roomsSearch=this.value;render();"/>'+
+      unplaced.map(function(g){return '<div class="pool-chip" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+esc(g.nom).replace(/\047/g,"\\'")+'\')">'+esc(g.nom)+'</div>';}).join('') +
+      (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé 🎉</p>':'')+
+    '</div>'+
+  '</div></div>';
+}
+
+/* ============ DOCUMENTS ============ */
+var DOC_CATS=["Contrats","Devis","Factures","Plans","Château","Traiteur","DJ","Cérémonie","Autres"];
+function saveDocEdit(id){
+  var patch={nom:val('dc-nom'),categorie:val('dc-cat'),lien:val('dc-lien'),notes:val('dc-notes')};
+  save('documents', STATE.documents.map(function(d){return d.id===id?Object.assign({},d,patch):d;}));
+  clearEditing();
+}
+function deleteDoc(id){ save('documents', STATE.documents.filter(function(d){return d.id!==id;})); }
+function addDoc(){
+  var nom=val('add-dc-nom');
+  if(!nom.trim()) return;
+  var id=uid(STATE.documents);
+  save('documents', STATE.documents.concat([{id:id,nom:nom,categorie:val('add-dc-cat')||'Autres',lien:val('add-dc-lien'),notes:''}]));
+  UI.addingDoc=false;
+}
+function docRowHtml(d){
+  if(EDITING.type==='doc'&&EDITING.id===d.id){
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;"><input id="dc-nom" value="'+esc(d.nom)+'" placeholder="Nom"/><div class="row-flex" style="margin-top:6px;"><select id="dc-cat">'+DOC_CATS.map(function(c){return '<option '+(d.categorie===c?'selected':'')+'>'+c+'</option>';}).join('')+'</select><input id="dc-lien" value="'+esc(d.lien)+'" placeholder="Lien" style="flex:1;"/></div><input id="dc-notes" value="'+esc(d.notes)+'" placeholder="Notes" style="margin-top:6px;"/><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveDocEdit('+d.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>';
+  }
+  return '<div class="listrow"><span>📄</span><div style="flex:1;"><div style="font-size:13px;">'+(d.nom?esc(d.nom):'<span class="muted">Sans nom</span>')+'</div><div class="muted" style="font-size:10px;">'+esc(d.categorie)+(d.notes?' · '+esc(d.notes):'')+'</div></div>'+
+    (d.lien?'<a class="chip" href="'+esc(d.lien)+'" target="_blank" style="background:var(--champagne-soft);color:var(--gold);">↗ Ouvrir</a>':'')+
+    (CAN_EDIT?'<button class="icon-btn" onclick="setEditing(\'doc\','+d.id+')">✎</button><button class="icon-btn danger" onclick="deleteDoc('+d.id+')">🗑</button>':'')+
+  '</div>';
+}
+function viewDocuments(){
+  var search=(UI.docSearch||'').toLowerCase();
+  var filtered=STATE.documents.filter(function(d){return !search||d.nom.toLowerCase().indexOf(search)>=0||d.categorie.toLowerCase().indexOf(search)>=0;});
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Documents</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingDoc=true;render();">+ Ajouter</button>':'')+'</div>'+
+  '<input id="documents-search" placeholder="Rechercher un document..." style="border-radius:999px;margin:12px 0;" value="'+esc(UI.docSearch||'')+'" oninput="UI.docSearch=this.value;render();"/>'+
+  '<div>'+filtered.map(docRowHtml).join('');
+  if(UI.addingDoc){
+    html+='<div class="listrow" style="flex-direction:column;align-items:stretch;"><input id="add-dc-nom" placeholder="Nom du document"/><div class="row-flex" style="margin-top:6px;"><select id="add-dc-cat">'+DOC_CATS.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select><input id="add-dc-lien" placeholder="Lien" style="flex:1;"/></div><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addDoc()">✓</button><button class="btn-outline" onclick="UI.addingDoc=false;render();">✕</button></div></div>';
+  }
+  if(!filtered.length && !UI.addingDoc) html+='<p class="muted" style="text-align:center;padding:20px;">Aucun document.</p>';
+  return html+'</div></div>';
+}
+
+/* ============ ADMIN ============ */
+function saveAccessField(field,value){ save('access', withField(STATE.access,field,value)); }
+function viewAdmin(){
+  var a=STATE.access;
+  return '<div class="fade"><h2 class="display" style="font-size:28px;">Administration</h2>'+
+  '<div class="card" style="max-width:420px;margin-top:12px;"><div class="eyebrow">🔒 Code complet (modification)</div>'+
+  '<p class="muted" style="font-size:12px;">'+(a.passcode?'Ce code donne un accès complet. Ne le partage qu\'avec les personnes autorisées.':'Aucun code défini : tout le monde peut modifier le site.')+'</p>'+
+  '<div class="row-flex"><input id="admin-pass" value="'+esc(a.passcode)+'" placeholder="Code d\'accès"/><button class="btn" onclick="saveAccessField(\'passcode\',val(\'admin-pass\'))">✓</button></div>'+
+  '</div>'+
+  '<div class="card" style="max-width:420px;margin-top:12px;"><div class="eyebrow">👁 Code lecture seule</div>'+
+  '<p class="muted" style="font-size:12px;">'+(a.readonlyPasscode?'Ce second code permet de consulter sans modifier.':'Pas encore de code lecture seule.')+'</p>'+
+  '<div class="row-flex"><input id="admin-pass-ro" value="'+esc(a.readonlyPasscode)+'" placeholder="Code lecture seule"/><button class="btn" onclick="saveAccessField(\'readonlyPasscode\',val(\'admin-pass-ro\'))">✓</button></div>'+
+  '</div>'+
+  '<p class="muted" style="font-size:11px;max-width:420px;margin-top:10px;">Ces deux codes sont partagés (pas de comptes individuels) : quiconque connaît le code complet peut aussi les modifier ici.</p>'+
+  '</div>';
+}
+
+
+document.addEventListener("DOMContentLoaded", loadAndStart);
+</script>
+</body>
+</html>
