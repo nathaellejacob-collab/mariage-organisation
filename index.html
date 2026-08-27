@@ -89,6 +89,11 @@
   .progressbar{height:8px;border-radius:999px;background:var(--champagne-soft);overflow:hidden;}
   .progressbar .fill{height:100%;background:var(--gold);}
   .flex-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  @media(max-width:560px){
+    .hero-row{flex-direction:column;text-align:center;}
+    .hero-row .eyebrow{text-align:center;}
+    .hero-countdown{justify-content:center;width:100%;margin-top:12px;}
+  }
   .icon-btn{color:var(--ink-soft);padding:4px;}
   .icon-btn:hover{color:var(--gold);}
   .icon-btn.danger:hover{color:var(--rose-deep);}
@@ -173,7 +178,7 @@ var SEEDS = {
   trousse: {"responsable":"Léna","items":[{"id":1,"nom":"Gloss","coche":false},{"id":2,"nom":"Fil blanc et aiguille","coche":false},{"id":3,"nom":"Coupe-fil","coche":false},{"id":4,"nom":"Serviette hygiénique","coche":false},{"id":5,"nom":"Éventail","coche":false},{"id":6,"nom":"Mouchoirs","coche":false},{"id":7,"nom":"Pansements","coche":false},{"id":8,"nom":"Lime à ongles","coche":false},{"id":9,"nom":"Craie blanche","coche":false},{"id":10,"nom":"Épingles à cheveux","coche":false},{"id":11,"nom":"Ibuprofène","coche":false}]},
   honneur: {"demoiselles":{"role":"","avant":"","jourJ":"","missions":[{"id":1,"titre":"Trousse de secours","responsable":"Léna","statut":"a_faire","notes":"Voir l'onglet Trousse de secours pour le contenu"}]},"temoins":{"role":"","avant":"","jourJ":"","missions":[]}},
   menu: {"cocktailPieces":"","cocktailBoissons":"","cocktailInfos":"","entree":"","plat":"","accompagnement":"","fromage":"","dessert":"","champagne":"","vins":"","softs":"","eau":"","cafeThe":""},
-  vendors: [{"id":1,"categorie":"Lieu","nom":"Château des Anges","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":2,"categorie":"DJ","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":3,"categorie":"Photographe","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":4,"categorie":"Vidéaste","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":5,"categorie":"Traiteur","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":6,"categorie":"Fleuriste","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":7,"categorie":"Coiffure","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":8,"categorie":"Maquillage","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":9,"categorie":"Gâteau","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":10,"categorie":"Transport","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""}],
+  vendors: [{"id":1,"categorie":"Lieu","nom":"Château des Anges","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":2,"categorie":"DJ","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":3,"categorie":"Photographe","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":4,"categorie":"Vidéaste","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":5,"categorie":"Traiteur","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":6,"categorie":"Fleuriste","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":7,"categorie":"Coiffure","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""},{"id":9,"categorie":"Gâteau","nom":"","entreprise":"","telephone":"","email":"","site":"","montant":"","acompte":"","solde":"","horaires":"","notes":""}],
   contacts: [{"id":1,"role":"Lieu","nom":"","telephone":""},{"id":2,"role":"DJ","nom":"","telephone":""},{"id":3,"role":"Photographe","nom":"","telephone":""},{"id":4,"role":"Vidéaste","nom":"","telephone":""},{"id":5,"role":"Traiteur","nom":"","telephone":""},{"id":6,"role":"Témoin","nom":"","telephone":""},{"id":7,"role":"Témoin","nom":"","telephone":""},{"id":8,"role":"Demoiselle d'honneur","nom":"","telephone":""},{"id":9,"role":"Parent","nom":"","telephone":""},{"id":10,"role":"Chauffeur","nom":"","telephone":""}],
   moodboard: [{"id":1,"nom":"Ambiance générale","notes":"","liens":[]},{"id":2,"nom":"Robe","notes":"","liens":[]},{"id":3,"nom":"Costume","notes":"","liens":[]},{"id":4,"nom":"Fleurs","notes":"","liens":[]},{"id":5,"nom":"Bouquet","notes":"","liens":[]},{"id":6,"nom":"Décoration","notes":"","liens":[]},{"id":7,"nom":"Tables","notes":"","liens":[]},{"id":8,"nom":"Lumières","notes":"","liens":[]},{"id":9,"nom":"Photos","notes":"","liens":[]},{"id":10,"nom":"Cérémonie","notes":"","liens":[]},{"id":11,"nom":"Gâteau","notes":"","liens":[]}],
   documents: [],
@@ -564,9 +569,9 @@ function viewDashboard() {
     (isWeddingDay ?
       '<div style="text-align:center;"><div class="display" style="font-size:32px;">C\'est aujourd\'hui</div><div class="muted" style="font-size:13px;margin-top:6px;">Nathaelle &amp; Jérémy se marient — que la fête commence !</div></div>'
     :
-      '<div class="flex-between">'+
+      '<div class="hero-row flex-between">'+
         '<div><div class="eyebrow">19 juin 2027</div><h1 class="display" style="font-size:34px;margin:0;">Nathaelle &amp; Jérémy</h1></div>'+
-        '<div style="display:flex;gap:16px;">'+
+        '<div class="hero-countdown" style="display:flex;gap:16px;">'+
           '<div style="text-align:center;"><div class="display" style="font-size:40px;">'+days+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">jours</div></div>'+
           '<div style="text-align:center;border-left:1px solid var(--border);padding-left:16px;"><div class="display" style="font-size:40px;">'+hours+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">heures</div></div>'+
           '<div style="text-align:center;border-left:1px solid var(--border);padding-left:16px;"><div class="display" style="font-size:40px;">'+minutes+'</div><div class="muted" style="font-size:10px;text-transform:uppercase;">minutes</div></div>'+
@@ -580,11 +585,11 @@ function viewDashboard() {
     '</div>'+
   '</div>'+
   (urgentVendors.length ? (
-    '<div class="card" style="margin-top:16px;border-color:var(--gold);">'+
+    '<div class="card" style="margin-top:16px;border-color:var(--gold);text-align:center;">'+
       '<div class="eyebrow" style="margin-bottom:10px;">Contacts prioritaires</div>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:8px;">'+
+      '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">'+
       urgentVendors.map(function(v){
-        return '<a href="tel:'+esc(v.telephone)+'" class="chip" style="background:var(--champagne-soft);color:var(--gold);font-size:13px;padding:8px 14px;">📞 '+esc(v.categorie)+(v.nom?' — '+esc(v.nom):'')+'</a>';
+        return '<a href="tel:'+esc(v.telephone)+'" class="chip" style="background:var(--champagne-soft);color:var(--gold);font-size:13px;padding:8px 14px;">'+esc(v.categorie)+(v.nom?' — '+esc(v.nom):'')+'</a>';
       }).join('')+
       '</div>'+
     '</div>'
