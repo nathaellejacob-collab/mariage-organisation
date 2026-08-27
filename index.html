@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nathaelle & Jérémy — Espace d'organisation</title>
+<title>N &amp; J</title>
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="N&amp;J Mariage">
+<meta name="apple-mobile-web-app-title" content="N&amp;J">
 <meta name="theme-color" content="#B98A82">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Alex+Brush&family=Poppins:wght@300;400;500;600&display=swap');
@@ -350,7 +350,7 @@ function renderApp() {
   }
   html += '<header id="header"><div class="row">' +
     '<div id="brand">' + monogramSvg(38) +
-      '<div><div class="name display" style="font-size:19px;">Nathaelle &amp; Jérémy</div><div class="sub">Espace d\'organisation</div></div>' +
+      '<div><div class="name display" style="font-size:19px;">N &amp; J</div></div>' +
     '</div>' +
     '<div style="position:relative;flex:1;max-width:280px;">' +
       '<button class="nav-toggle" onclick="toggleNavMenu()">'+ currentLabel +' <span style="float:right;">▾</span></button>' +
@@ -494,6 +494,14 @@ function viewDashboard() {
     .filter(function(e){ return e.jour==="Samedi" && e.important; })
     .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); })
     .map(function(e){ return {h:e.heure, t:e.titre, l:e.personnes.join(', ')}; });
+  var urgentVendors = STATE.vendors.filter(function(v){ return v.urgent && v.telephone; });
+  var knownPeople = Array.from(new Set(
+    STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[])
+      .concat((STATE.honneur.demoiselles.missions||[]).map(function(m){return m.responsable;}))
+      .concat((STATE.honneur.temoins.missions||[]).map(function(m){return m.responsable;}))
+      .filter(Boolean)
+  )).sort();
+  var selPerson = UI.dashPerson && knownPeople.indexOf(UI.dashPerson)>=0 ? UI.dashPerson : '';
   return '<div class="fade">'+
   '<div class="card" style="padding:32px;">'+
     (isWeddingDay ?
@@ -513,6 +521,24 @@ function viewDashboard() {
       '<div style="font-size:13px;">'+mapsLink('Mairie de Saint-Jean-de-Moirans', 'Mairie de Saint-Jean-de-Moirans')+' — 14h00</div>'+
       '<div style="font-size:13px;">Cérémonie laïque — '+mapsLink('Château des Anges', 'Château des Anges')+' — 16h30</div>'+
     '</div>'+
+  '</div>'+
+  (urgentVendors.length ? (
+    '<div class="card" style="margin-top:16px;border-color:var(--gold);">'+
+      '<div class="eyebrow" style="margin-bottom:10px;">Contacts prioritaires</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:8px;">'+
+      urgentVendors.map(function(v){
+        return '<a href="tel:'+esc(v.telephone)+'" class="chip" style="background:var(--champagne-soft);color:var(--gold);font-size:13px;padding:8px 14px;">📞 '+esc(v.categorie)+(v.nom?' — '+esc(v.nom):'')+'</a>';
+      }).join('')+
+      '</div>'+
+    '</div>'
+  ) : '')+
+  '<div class="card" style="margin-top:16px;">'+
+    '<div class="flex-between"><div class="eyebrow">Trouver quelqu\'un</div>'+(selPerson?'<button class="btn-outline" style="font-size:11px;" onclick="window.print()">🖨️ Imprimer</button>':'')+'</div>'+
+    '<select style="max-width:280px;border-radius:999px;margin-top:8px;" onchange="UI.dashPerson=this.value;render();">'+
+      '<option value="">Choisir un nom</option>'+
+      knownPeople.map(function(p){return '<option '+(p===selPerson?'selected':'')+'>'+esc(p)+'</option>';}).join('')+
+    '</select>'+
+    (selPerson ? myMissionsHtml(selPerson) : '')+
   '</div>'+
   '<div class="statgrid" style="margin-top:16px;">'+
     stat('✦', 'Invités', guests.length, totalPersonnes+' personnes si confirmés', 'guests')+
@@ -540,6 +566,33 @@ function viewDashboard() {
       '</div>'+
     '</button>'+
   '</div></div>';
+}
+function myMissionsHtml(person){
+  var missions = [].concat(STATE.honneur.demoiselles.missions||[], STATE.honneur.temoins.missions||[])
+    .filter(function(m){ return m.responsable===person; });
+  var html = '';
+  if(missions.length){
+    html += '<div style="margin-top:14px;"><div class="eyebrow" style="margin-bottom:6px;">Mission(s)</div>'+
+      missions.map(function(m){
+        return '<div class="tl-card"><div class="title">'+esc(m.titre)+'</div>'+(m.notes?'<div class="muted" style="font-size:12px;margin-top:4px;">'+esc(m.notes)+'</div>':'')+'</div>';
+      }).join('') + '</div>';
+  }
+  var any=false;
+  var scheduleHtml='';
+  DAY_ORDER.forEach(function(d){
+    var evs = STATE.planning.filter(function(e){ return e.jour===d && e.personnes.indexOf(person)>=0; })
+      .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); });
+    if(!evs.length) return;
+    any=true;
+    scheduleHtml += '<div class="gold" style="font-size:11px;text-transform:uppercase;margin:14px 0 6px;">'+d+'</div>';
+    scheduleHtml += timelineHtml(groupByHeure(evs));
+  });
+  if(any){
+    html += '<div style="margin-top:6px;"><div class="eyebrow">Planning de '+esc(person)+'</div>'+scheduleHtml+'</div>';
+  } else if(!missions.length){
+    html += '<p class="muted" style="font-size:12px;margin-top:14px;">Rien de prévu pour '+esc(person)+' pour le moment.</p>';
+  }
+  return html;
 }
 
 /* ============ GUESTS ============ */
@@ -686,6 +739,7 @@ function viewPlanning(){
 
   var html='<div class="fade"><div class="flex-between">'+
     '<div><h2 class="display" style="font-size:28px;margin:0;">Planning</h2><p class="muted" style="font-size:12px;margin-top:2px;">'+(onlyMajor?"Déroulé de la journée":"Planning détaillé de "+esc(person))+'</p></div>'+
+    '<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button>'+
   '</div>';
 
   html+='<select style="max-width:280px;border-radius:999px;margin-top:12px;" onchange="setPlanningPerson(this.value)">'+
@@ -693,7 +747,10 @@ function viewPlanning(){
     people.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+
   '</select>';
 
-  html+='<div class="tabbar">'+DAY_ORDER.map(function(d){return '<button class="'+(day===d?'active':'')+'" onclick="setPlanningDay(\''+d+'\')">'+d+'</button>';}).join('')+'</div>';
+  var GENERAL_DAYS = ["Vendredi","Samedi","Dimanche"];
+  var dayOptions = onlyMajor ? GENERAL_DAYS : DAY_ORDER;
+  if(onlyMajor && dayOptions.indexOf(day)<0) day = "Samedi";
+  html+='<div class="tabbar">'+dayOptions.map(function(d){return '<button class="'+(day===d?'active':'')+'" onclick="setPlanningDay(\''+d+'\')">'+d+'</button>';}).join('')+'</div>';
 
   var evs = STATE.planning.filter(function(e){
     if(e.jour!==day) return false;
@@ -1001,7 +1058,7 @@ function viewMenu(){
 
 /* ============ VENDORS ============ */
 function saveVendorEdit(id){
-  var patch={categorie:val('vd-cat'),nom:val('vd-nom'),telephone:val('vd-tel'),email:val('vd-email')};
+  var patch={categorie:val('vd-cat'),nom:val('vd-nom'),telephone:val('vd-tel'),email:val('vd-email'),urgent:document.getElementById('vd-urgent')?document.getElementById('vd-urgent').checked:false};
   save('vendors', STATE.vendors.map(function(v){return v.id===id?Object.assign({},v,patch):v;}));
   clearEditing();
 }
@@ -1010,7 +1067,7 @@ function addVendor(){
   var cat=val('add-vd-cat');
   if(!cat.trim()) return;
   var id=uid(STATE.vendors);
-  save('vendors', STATE.vendors.concat([{id:id,categorie:cat,nom:val('add-vd-nom'),telephone:'',email:''}]));
+  save('vendors', STATE.vendors.concat([{id:id,categorie:cat,nom:val('add-vd-nom'),telephone:'',email:'',urgent:false}]));
   UI.addingVendor=false;
 }
 function vendorRowHtml(v){
@@ -1018,12 +1075,13 @@ function vendorRowHtml(v){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="vd-cat" value="'+esc(v.categorie)+'" placeholder="Catégorie" style="width:140px;"/><input id="vd-nom" value="'+esc(v.nom)+'" placeholder="Nom" style="flex:1;"/></div>'+
       '<div class="row-flex" style="margin-top:6px;"><input id="vd-tel" value="'+esc(v.telephone)+'" placeholder="Téléphone" style="flex:1;"/><input id="vd-email" value="'+esc(v.email)+'" placeholder="Email" style="flex:1;"/></div>'+
+      '<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-top:6px;"><input type="checkbox" id="vd-urgent" '+(v.urgent?'checked':'')+'/> Contact prioritaire (affiché sur l\'accueil)</label>'+
       '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deleteVendor('+v.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveVendorEdit('+v.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
   return '<div class="listrow">'+
     '<div style="flex:1;min-width:0;">'+
-      '<div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+'</div>'+
+      '<div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+(v.urgent?' · <span class="gold">prioritaire</span>':'')+'</div>'+
       '<div style="font-size:13px;">'+(v.nom?(v.categorie==='Lieu'?mapsLink(v.nom):esc(v.nom)):'<span class="muted" style="font-style:italic;">à renseigner</span>')+'</div>'+
       (v.email?'<div class="muted" style="font-size:11px;">'+esc(v.email)+'</div>':'')+
     '</div>'+
