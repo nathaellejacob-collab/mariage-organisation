@@ -306,6 +306,17 @@ function loadAndStart() {
         api.set(k, STATE[k]); // first-time init
       }
     });
+    if (STATE.trousse && STATE.trousse.guestItems === undefined) {
+      STATE.trousse = Object.assign({}, STATE.trousse, {guestItems: [
+        {id:1,nom:"Doliprane / Paracétamol",coche:false},
+        {id:2,nom:"Pansements",coche:false},
+        {id:3,nom:"Coton",coche:false},
+        {id:4,nom:"Désinfectant",coche:false},
+        {id:5,nom:"Épingles à nourrice",coche:false},
+        {id:6,nom:"Mouchoirs",coche:false}
+      ]});
+      api.set('trousse', STATE.trousse);
+    }
     GATE_NEEDED = !!(STATE.access && STATE.access.passcode);
     if (GATE_NEEDED) {
       var sess = sessionStorage.getItem("wedding_session");
@@ -1019,10 +1030,21 @@ function addTrousseItem(){
   save('trousse', Object.assign({},STATE.trousse,{items:STATE.trousse.items.concat([{id:id,nom:v,coche:false}])}));
 }
 function saveTrousseResponsable(v){ save('trousse', Object.assign({},STATE.trousse,{responsable:v})); }
+function toggleGuestTrousseItem(id){ save('trousse', Object.assign({},STATE.trousse,{guestItems:(STATE.trousse.guestItems||[]).map(function(i){return i.id===id?Object.assign({},i,{coche:!i.coche}):i;})})); }
+function removeGuestTrousseItem(id){ save('trousse', Object.assign({},STATE.trousse,{guestItems:(STATE.trousse.guestItems||[]).filter(function(i){return i.id!==id;})})); }
+function addGuestTrousseItem(){
+  var v=val('add-guest-trousse-item');
+  if(!v.trim()) return;
+  var id=uid(STATE.trousse.guestItems||[]);
+  save('trousse', Object.assign({},STATE.trousse,{guestItems:(STATE.trousse.guestItems||[]).concat([{id:id,nom:v,coche:false}])}));
+}
 function viewTrousse(){
   var t=STATE.trousse;
   var done=t.items.filter(function(i){return i.coche;}).length;
   var progress=t.items.length?Math.round(done/t.items.length*100):0;
+  var gItems=t.guestItems||[];
+  var gDone=gItems.filter(function(i){return i.coche;}).length;
+  var gProgress=gItems.length?Math.round(gDone/gItems.length*100):0;
   var html='<div class="fade"><h2 class="display" style="font-size:28px;">Trousse de secours</h2>'+
   '<div class="muted" style="font-size:12px;margin:6px 0;">Responsable : '+
     (CAN_EDIT?'<input value="'+esc(t.responsable)+'" style="display:inline-block;width:120px;padding:2px 6px;" onchange="saveTrousseResponsable(this.value)"/>':'<b class="gold">'+esc(t.responsable||'à définir')+'</b>')+
@@ -1035,6 +1057,19 @@ function viewTrousse(){
   '</div>';
   if(CAN_EDIT){
     html+='<div class="row-flex" style="margin-top:10px;"><input id="add-trousse-item" placeholder="Nouvel élément" style="border-radius:999px;"/><button class="btn" onclick="addTrousseItem()">+</button></div>';
+  }
+  html+='</div>'+
+  '<h2 class="display" style="font-size:22px;margin-top:24px;">Trousse de secours — invités</h2>'+
+  '<p class="muted" style="font-size:12px;margin:6px 0;">À prévoir sur une table dédiée, pour que tes invités puissent se dépanner eux-mêmes.</p>'+
+  '<div class="card"><div class="flex-between" style="font-size:12px;"><span class="muted">Préparation</span><span>'+gDone+'/'+gItems.length+'</span></div><div class="progressbar" style="margin-top:6px;"><div class="fill" style="width:'+gProgress+'%;"></div></div></div>'+
+  '<div class="card" style="margin-top:12px;"><div class="grid2">'+
+    gItems.map(function(i){
+      return '<div class="row-flex" style="background:var(--ivory);border-radius:10px;padding:8px 12px;"><button class="icon-btn" style="color:'+(i.coche?'#5C8A5A':'#D8CDBB')+';" onclick="toggleGuestTrousseItem('+i.id+')">'+(i.coche?'☑':'☐')+'</button><span style="flex:1;font-size:13px;'+(i.coche?'text-decoration:line-through;opacity:.5;':'')+'">'+esc(i.nom)+'</span>'+(CAN_EDIT?'<button class="icon-btn danger" onclick="removeGuestTrousseItem('+i.id+')">✕</button>':'')+'</div>';
+    }).join('') +
+    (gItems.length===0?'<p class="muted" style="font-size:12px;">Aucun élément pour le moment.</p>':'')+
+  '</div>';
+  if(CAN_EDIT){
+    html+='<div class="row-flex" style="margin-top:10px;"><input id="add-guest-trousse-item" placeholder="Nouvel élément" style="border-radius:999px;"/><button class="btn" onclick="addGuestTrousseItem()">+</button></div>';
   }
   return html+'</div></div>';
 }
