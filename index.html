@@ -538,8 +538,8 @@ function viewDashboard() {
     )+
     '<div style="height:1px;background:linear-gradient(to right, transparent, var(--gold), transparent);margin:14px 0;"></div>'+
     '<div class="grid2">'+
-      '<div style="font-size:13px;">'+mapsLink('Mairie de Saint-Jean-de-Moirans', 'Mairie de Saint-Jean-de-Moirans')+' — 14h00</div>'+
-      '<div style="font-size:13px;">Cérémonie laïque — '+mapsLink('Château des Anges', 'Château des Anges')+' — 16h30</div>'+
+      '<div style="font-size:13px;">'+mapsLink('Mairie de Saint-Jean-de-Moirans', 'Mairie de Saint-Jean-de-Moirans')+'</div>'+
+      '<div style="font-size:13px;">'+mapsLink('Château des Anges', 'Château des Anges')+'</div>'+
     '</div>'+
   '</div>'+
   (urgentVendors.length ? (
@@ -623,12 +623,25 @@ var PRESENCE_STYLE = {
 
 function updateGuest(id, field, value){ save('guests', STATE.guests.map(function(g){ if(g.id!==id) return g; return withField(g, field, value); })); }
 function updateGuestVinHonneur(id, checked){
-  save('guests', STATE.guests.map(function(g){
+  if (!CAN_EDIT) return;
+  var nextGuests = STATE.guests.map(function(g){
     if(g.id!==id) return g;
     var next = withField(g,'vinHonneur',checked);
     if(checked){ next = withField(next,'hebergement',false); next = withField(next,'brunch',false); }
     return next;
-  }));
+  });
+  STATE.guests = nextGuests;
+  api.set('guests', nextGuests);
+  if(checked){
+    var nextTables = STATE.tables.map(function(t){ return Object.assign({},t,{occupants:t.occupants.filter(function(o){return o.guestId!==id;})}); });
+    var nextRooms = STATE.rooms.map(function(r){ return Object.assign({},r,{occupants:r.occupants.filter(function(o){return o.guestId!==id;})}); });
+    STATE.tables = nextTables;
+    STATE.rooms = nextRooms;
+    api.set('tables', nextTables);
+    api.set('rooms', nextRooms);
+  }
+  showToast('✓ Enregistré');
+  render();
 }
 function removeGuest(id){ save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
@@ -1257,8 +1270,7 @@ function viewTables(){
   var placedKeys={};
   STATE.tables.forEach(function(t){ t.occupants.forEach(function(o){ placedKeys[o.guestId?('g'+o.guestId):('l'+o.label)]=true; }); });
   var search=(UI.tablesSearch||'').toLowerCase();
-  var unplaced=STATE.guests.filter(function(g){ return !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
-  var totalSeats=STATE.tables.reduce(function(s,t){return s+t.capacity;},0);
+  var unplaced=STATE.guests.filter(function(g){ return !g.vinHonneur && !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
   var totalOcc=STATE.tables.reduce(function(s,t){return s+t.occupants.length;},0);
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Plan de table</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalSeats+' places occupées</p></div>'+
     '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addTable()">+ Ajouter une table</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
@@ -1327,8 +1339,7 @@ function viewRooms(){
   var placedKeys={};
   STATE.rooms.forEach(function(r){ r.occupants.forEach(function(o){ placedKeys[o.guestId?('g'+o.guestId):('l'+o.label)]=true; }); });
   var search=(UI.roomsSearch||'').toLowerCase();
-  var unplaced=STATE.guests.filter(function(g){ return !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
-  var totalCap=STATE.rooms.reduce(function(s,r){return s+r.capacity;},0);
+  var unplaced=STATE.guests.filter(function(g){ return !g.vinHonneur && !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
   var totalOcc=STATE.rooms.reduce(function(s,r){return s+r.occupants.length;},0);
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Chambres</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalCap+' places occupées</p></div>'+
     '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addRoom()">+ Ajouter une chambre</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
