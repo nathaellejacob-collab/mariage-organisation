@@ -688,7 +688,7 @@ function updateGuestVinHonneur(id, checked){
 function removeGuest(id){ save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
   var id=uid(STATE.guests);
-  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",famille:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",notes:""}]));
+  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",notes:""}]));
 }
 function setGuestsSearch(v){ UI.guestsSearch=v; render(); }
 function setGuestsFilter(v){ UI.guestsFilter=v; render(); }
@@ -708,7 +708,6 @@ function guestCardMobile(g){
         GUEST_CATEGORIES.map(function(c){return '<option value="'+esc(c)+'" '+(g.groupe===c?'selected':'')+'>'+c+'</option>';}).join('')+
       '</select></div>'+
     '</div>'+
-    (CAN_EDIT?'<div class="mrow"><div style="flex:1;"><label class="mlbl">Famille / Couple (optionnel)</label><input list="familles-list" value="'+esc(g.famille||'')+'" placeholder="ex. Famille Guiot" onchange="updateGuest('+g.id+',\'famille\',this.value)"/></div></div>':'')+
     '<div class="mrow">'+
       '<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuestVinHonneur('+g.id+',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Vin d\'honneur</label>'+
       (!vin?'<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Hébergé</label>':'')+
@@ -752,7 +751,7 @@ function viewGuests(){
   }).slice().sort(function(a,b){ return cmpGuests(a,b,sortKey); });
   var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés'],['vin',"Vin d'honneur"]];
   var sortOptions=[['nom','Nom'],['presence','Présence'],['groupe','Catégorie']];
-  html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés</p>';
+  html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés — regroupés par catégorie</p>';
   html += '<div class="row-flex" style="margin:12px 0;">'+
     '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
     filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setGuestsFilter(\''+f[0]+'\')">'+f[1]+'</button>';}).join('')+
@@ -761,27 +760,21 @@ function viewGuests(){
     '</select>'+
   '</div>';
 
-  var allFamilies = Array.from(new Set(STATE.guests.map(function(g){return (g.famille||'').trim();}).filter(Boolean))).sort();
-  if(CAN_EDIT){
-    html += '<datalist id="familles-list">'+allFamilies.map(function(f){return '<option value="'+esc(f)+'">';}).join('')+'</datalist>';
-  }
-
-  var families = {};
-  var standalone = [];
+  var groupOrder = GUEST_CATEGORIES.concat(['']);
+  var byGroup = {};
   filtered.forEach(function(g){
-    var f=(g.famille||'').trim();
-    if(f){ (families[f]=families[f]||[]).push(g); } else { standalone.push(g); }
+    var k = groupOrder.indexOf(g.groupe||'')>=0 ? (g.groupe||'') : '';
+    (byGroup[k]=byGroup[k]||[]).push(g);
   });
-  var familyNames = Object.keys(families).sort();
-
   html += '<div class="guest-grid">';
-  familyNames.forEach(function(fname){
+  groupOrder.forEach(function(cat){
+    var members = byGroup[cat];
+    if(!members || !members.length) return;
     html += '<div class="card" style="grid-column:1/-1;">'+
-      '<div class="eyebrow" style="margin-bottom:10px;">'+esc(fname)+'</div>'+
-      '<div class="guest-grid">'+ families[fname].map(guestCardMobile).join('') +'</div>'+
+      '<div class="eyebrow" style="margin-bottom:10px;">'+(cat?esc(cat):'Non classés')+' <span class="muted" style="text-transform:none;font-size:11px;">('+members.length+')</span></div>'+
+      '<div class="guest-grid">'+ members.map(guestCardMobile).join('') +'</div>'+
     '</div>';
   });
-  html += standalone.map(guestCardMobile).join('');
   html += '</div></div>';
   return html;
 }
