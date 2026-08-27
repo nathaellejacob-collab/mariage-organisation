@@ -217,6 +217,12 @@ function esc(s) {
   if (s === null || s === undefined) return "";
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
+function parseEventTitle(titre) {
+  var range = null;
+  var m = titre.match(/\s*\(([\dhH:’'\s]+-[\dhH:’'\s]+)\)\s*$/);
+  if (m) { range = m[1].trim(); titre = titre.slice(0, m.index).trim(); }
+  return { titre: titre, range: range };
+}
 function mapsUrl(place) {
   return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place);
 }
@@ -450,7 +456,7 @@ function doSearch(q) {
       if (r.nom.toLowerCase().indexOf(q)>=0) out.push({type:"Chambre",label:r.nom,sub:r.occupants.length+" pers.",tab:"rooms"});
       r.occupants.forEach(function(o){ if (o.label.toLowerCase().indexOf(q)>=0) out.push({type:"Chambre",label:o.label,sub:r.nom,tab:"rooms"}); });
     });
-    STATE.planning.forEach(function(e){ if (e.titre.toLowerCase().indexOf(q)>=0) out.push({type:"Planning",label:e.titre,sub:e.jour+" "+e.heure,tab:"planning"}); });
+    STATE.planning.forEach(function(e){ if (e.titre.toLowerCase().indexOf(q)>=0) out.push({type:"Planning",label:parseEventTitle(e.titre).titre,sub:e.jour+" "+e.heure,tab:"planning"}); });
     STATE.ceremony.forEach(function(s){ if (s.etape.toLowerCase().indexOf(q)>=0) out.push({type:"Cérémonie",label:s.etape,sub:s.debut,tab:"ceremony"}); });
   }
   out = out.slice(0,20);
@@ -507,7 +513,7 @@ function viewDashboard() {
   var highlights = STATE.planning
     .filter(function(e){ return e.jour==="Samedi" && e.important; })
     .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); })
-    .map(function(e){ return {h:e.heure, t:e.titre, l:e.personnes.join(', ')}; });
+    .map(function(e){ var p = parseEventTitle(e.titre); return {h:e.heure, t:p.titre, range:p.range}; });
   var urgentVendors = STATE.vendors.filter(function(v){ return v.urgent && v.telephone; });
   var knownPeople = Array.from(new Set(
     STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[])
@@ -562,7 +568,7 @@ function viewDashboard() {
     '<button class="card clickcard" onclick="go(\'planning\')">'+
       '<div class="flex-between"><h2 class="display" style="font-size:22px;margin:0;">Aperçu du jour J</h2><span class="gold" style="font-size:11px;">Voir tout →</span></div>'+
       '<div style="margin-top:12px;">'+ (highlights.length ? highlights.map(function(h){
-        return '<div style="display:flex;gap:10px;"><div class="gold" style="width:44px;font-size:11px;padding-top:2px;flex-shrink:0;">'+esc(h.h)+'</div><div style="flex:1;border-left:1px solid var(--border);padding-left:10px;padding-bottom:10px;"><div style="font-size:13px;">'+esc(h.t)+'</div>'+(h.l?'<div class="muted" style="font-size:11px;">'+esc(h.l)+'</div>':'')+'</div></div>';
+        return '<div style="display:flex;gap:10px;"><div class="gold" style="width:44px;font-size:11px;padding-top:2px;flex-shrink:0;">'+esc(h.h)+'</div><div style="flex:1;border-left:1px solid var(--border);padding-left:10px;padding-bottom:10px;"><div style="font-size:13px;">'+esc(h.t)+'</div>'+(h.range?'<div class="muted" style="font-size:11px;">'+esc(h.range)+'</div>':'')+'</div></div>';
       }).join('') : '<p class="muted" style="font-size:12px;">Aucun grand moment marqué pour le samedi pour le moment.</p>') +'</div>'+
     '</button>'+
     '<button class="card clickcard" onclick="go(\'guests\')">'+
@@ -728,12 +734,9 @@ function eventCardHtml(e){
       '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
-  var titre = e.titre;
-  var range = null;
-  var m = titre.match(/\s*\(([\dhH:’'\s]+-[\dhH:’'\s]+)\)\s*$/);
-  if(m){ range = m[1].trim(); titre = titre.slice(0, m.index).trim(); }
+  var parsed = parseEventTitle(e.titre);
   return '<div class="tl-card"><div class="flex-between">'+
-      '<div><div class="title">'+esc(titre)+'</div>'+(range?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(range)+'</div>':'')+'</div>'+
+      '<div><div class="title">'+esc(parsed.titre)+'</div>'+(parsed.range?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(parsed.range)+'</div>':'')+'</div>'+
       (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
   '</div></div>';
 }
@@ -1022,8 +1025,17 @@ function addMission(key){
 }
 function viewRoleGuide(key, title){
   var data=STATE.honneur[key];
+  var quiLabel = key==='temoins' ? 'Qui sont-ils ?' : 'Qui sont-elles ?';
   var labels={role:"Leur rôle",avant:"Avant le mariage",jourJ:"Jour J"};
+  var quiNames = (data.qui||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
   var html='<div class="fade"><h2 class="display" style="font-size:28px;">'+title+'</h2>'+
+  '<div class="card" style="margin-top:12px;">'+
+    '<div class="field">'+
+      '<label>'+quiLabel+'</label>'+
+      (CAN_EDIT?'<input value="'+esc(data.qui||'')+'" placeholder="Prénoms séparés par des virgules" onchange="saveHonneurField(\''+key+'\',\'qui\',this.value)"/>':'')+
+      (quiNames.length?'<div class="row-flex" style="margin-top:'+(CAN_EDIT?'8px':'4px')+';">'+quiNames.map(function(n){return '<span class="chip" style="background:var(--champagne-soft);color:var(--gold);">'+esc(n)+'</span>';}).join('')+'</div>':(CAN_EDIT?'':'<p class="muted" style="font-size:13px;">Non renseigné.</p>'))+
+    '</div>'+
+  '</div>'+
   '<div class="card" style="margin-top:12px;">'+
     ['role','avant','jourJ'].map(function(f){
       return '<div class="field" style="margin-bottom:14px;"><label>'+labels[f]+'</label>'+
