@@ -926,7 +926,7 @@ function ceremonyStepHtml(s, idx, total){
 function saveCortegeField(field, value){ save('cortege', Object.assign({},STATE.cortege,{[field]:value})); }
 function viewCeremony(){
   var c = STATE.cortege || {civil:"",laique:"",voiture:""};
-  var html='<div class="fade"><h2 class="display" style="font-size:28px;">Cérémonie laïque</h2>'+
+  var html='<div class="fade"><h2 class="display" style="font-size:28px;">Cérémonie</h2>'+
     '<p class="muted" style="font-size:12px;">'+mapsLink('Château des Anges')+' — '+(STATE.ceremony[0]?esc(STATE.ceremony[0].debut):'')+' à '+(STATE.ceremony.length?esc(STATE.ceremony[STATE.ceremony.length-1].fin):'')+'</p>'+
     '<div class="card" style="margin-top:14px;"><div class="eyebrow" style="margin-bottom:10px;">Cortèges</div>'+
     [['civil','Cortège civil (mairie)'],['laique','Cortège laïque'],['voiture','Cortège en voiture']].map(function(f){
@@ -935,7 +935,8 @@ function viewCeremony(){
       '</div>';
     }).join('') +
     '</div>'+
-    '<div style="margin-top:14px;">'+
+    '<div class="eyebrow" style="margin-top:20px;margin-bottom:6px;">Déroulé de la cérémonie laïque</div>'+
+    '<div>'+
     STATE.ceremony.map(function(s,i){return ceremonyStepHtml(s,i,STATE.ceremony.length);}).join('');
   if(CAN_EDIT){
     if(UI.addingCeremony){
