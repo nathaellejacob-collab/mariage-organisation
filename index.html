@@ -537,7 +537,7 @@ function viewDashboard() {
       '</div>'
     )+
     '<div style="height:1px;background:linear-gradient(to right, transparent, var(--gold), transparent);margin:14px 0;"></div>'+
-    '<div class="grid2">'+
+    '<div class="grid2" style="text-align:center;">'+
       '<div style="font-size:13px;">'+mapsLink('Mairie de Saint-Jean-de-Moirans', 'Mairie de Saint-Jean-de-Moirans')+'</div>'+
       '<div style="font-size:13px;">'+mapsLink('Château des Anges', 'Château des Anges')+'</div>'+
     '</div>'+
@@ -1271,6 +1271,7 @@ function viewTables(){
   STATE.tables.forEach(function(t){ t.occupants.forEach(function(o){ placedKeys[o.guestId?('g'+o.guestId):('l'+o.label)]=true; }); });
   var search=(UI.tablesSearch||'').toLowerCase();
   var unplaced=STATE.guests.filter(function(g){ return !g.vinHonneur && !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
+  var totalSeats=STATE.tables.reduce(function(s,t){return s+t.capacity;},0);
   var totalOcc=STATE.tables.reduce(function(s,t){return s+t.occupants.length;},0);
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Plan de table</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalSeats+' places occupées</p></div>'+
     '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addTable()">+ Ajouter une table</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
@@ -1340,6 +1341,7 @@ function viewRooms(){
   STATE.rooms.forEach(function(r){ r.occupants.forEach(function(o){ placedKeys[o.guestId?('g'+o.guestId):('l'+o.label)]=true; }); });
   var search=(UI.roomsSearch||'').toLowerCase();
   var unplaced=STATE.guests.filter(function(g){ return !g.vinHonneur && !placedKeys['g'+g.id] && (!search||g.nom.toLowerCase().indexOf(search)>=0); });
+  var totalCap=STATE.rooms.reduce(function(s,r){return s+r.capacity;},0);
   var totalOcc=STATE.rooms.reduce(function(s,r){return s+r.occupants.length;},0);
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Chambres</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalCap+' places occupées</p></div>'+
     '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addRoom()">+ Ajouter une chambre</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
