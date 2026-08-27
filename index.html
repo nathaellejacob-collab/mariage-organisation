@@ -1033,7 +1033,7 @@ function viewRoleGuide(key, title){
     '<div class="field">'+
       '<label>'+quiLabel+'</label>'+
       (CAN_EDIT?'<input value="'+esc(data.qui||'')+'" placeholder="Prénoms séparés par des virgules" onchange="saveHonneurField(\''+key+'\',\'qui\',this.value)"/>':'')+
-      (quiNames.length?'<div class="row-flex" style="margin-top:'+(CAN_EDIT?'8px':'4px')+';">'+quiNames.map(function(n){return '<span class="chip" style="background:var(--champagne-soft);color:var(--gold);">'+esc(n)+'</span>';}).join('')+'</div>':(CAN_EDIT?'':'<p class="muted" style="font-size:13px;">Non renseigné.</p>'))+
+      (CAN_EDIT?'':(quiNames.length?'<div class="row-flex" style="margin-top:4px;">'+quiNames.map(function(n){return '<span class="chip" style="background:var(--champagne-soft);color:var(--gold);">'+esc(n)+'</span>';}).join('')+'</div>':'<p class="muted" style="font-size:13px;">Non renseigné.</p>'))+
     '</div>'+
   '</div>'+
   '<div class="card" style="margin-top:12px;">'+
