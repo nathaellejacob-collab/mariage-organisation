@@ -20,6 +20,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--ivory);color:var(--ink);font-family:'Poppins',sans-serif;}
+  @keyframes spin{to{transform:rotate(360deg);}}
   .display{font-family:'Cormorant Garamond',serif;font-style:italic;}
   .script{font-family:'Alex Brush',cursive;font-style:normal;line-height:1;}
   a{color:inherit;}
@@ -66,9 +67,9 @@
   .tabbar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 0;}
   .tabbar button{padding:8px 14px;border:1px solid var(--border);border-radius:999px;font-size:12px;color:var(--ink-soft);background:var(--paper);}
   .tabbar button.active{background:var(--gold);color:#fff;border-color:var(--gold);}
-  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  @media(min-width:700px){.statgrid{grid-template-columns:repeat(4,1fr);}}
-  .stat{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;transition:border-color .15s,transform .15s;}
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:640px;margin:16px auto 0;}
+  .stat{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:border-color .15s,transform .15s;}
+  .stat .val{font-size:32px;}
   .stat:hover{border-color:var(--gold);transform:translateY(-1px);}
   .clickcard{cursor:pointer;transition:border-color .15s,transform .15s;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;width:100%;text-align:left;}
   .clickcard:hover{border-color:var(--gold);transform:translateY(-1px);}
@@ -139,7 +140,12 @@
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">
+  <div id="boot-loading" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--ivory);">
+    <div style="width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:999px;animation:spin 0.9s linear infinite;"></div>
+    <div class="muted" style="font-size:12px;">Chargement…</div>
+  </div>
+</div>
 
 <script>
 /* ============ CONFIG ============ */
@@ -284,6 +290,14 @@ function loadAndStart() {
       CAN_EDIT = true;
       renderApp();
     }
+  }).catch(function(){
+    document.getElementById("app").innerHTML =
+      '<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:var(--ivory);">'+
+        monogramSvg(56) +
+        '<div class="display" style="font-size:20px;">Connexion impossible</div>'+
+        '<p class="muted" style="font-size:13px;max-width:280px;">Vérifie ta connexion internet, puis réessaie.</p>'+
+        '<button class="btn" onclick="location.reload()">Réessayer</button>'+
+      '</div>';
   });
 }
 
@@ -455,8 +469,8 @@ function viewFor(tab) {
     case "animations": return viewAnimations();
     case "tasks": return viewTasks();
     case "trousse": return viewTrousse();
-    case "demoiselles": return viewRoleGuide("demoiselles", "Demoiselles d'honneur", "🌸");
-    case "temoins": return viewRoleGuide("temoins", "Témoins", "💍");
+    case "demoiselles": return viewRoleGuide("demoiselles", "Demoiselles d'honneur");
+    case "temoins": return viewRoleGuide("temoins", "Témoins");
     case "menu": return viewMenu();
     case "vendors": return viewVendors();
     case "contacts": return viewContacts();
@@ -471,7 +485,7 @@ function viewFor(tab) {
 
 /* ============ DASHBOARD ============ */
 function stat(icon, label, value, sub, tab) {
-  return '<button class="stat" onclick="go(\''+tab+'\')"><div class="icon">'+icon+'</div><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
+  return '<button class="stat" onclick="go(\''+tab+'\')"><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
 }
 function viewDashboard() {
   var now = new Date();
@@ -533,17 +547,15 @@ function viewDashboard() {
     '</div>'
   ) : '')+
   '<div class="card" style="margin-top:16px;">'+
-    '<div class="flex-between"><div class="eyebrow">Trouver quelqu\'un</div>'+(selPerson?'<button class="btn-outline" style="font-size:11px;" onclick="window.print()">🖨️ Imprimer</button>':'')+'</div>'+
+    '<div class="flex-between"><div class="eyebrow">Quel est votre programme ?</div>'+(selPerson?'<button class="btn-outline" style="font-size:11px;" onclick="window.print()">🖨️ Imprimer</button>':'')+'</div>'+
     '<select style="max-width:280px;border-radius:999px;margin-top:8px;" onchange="UI.dashPerson=this.value;render();">'+
       '<option value="">Choisir un nom</option>'+
       knownPeople.map(function(p){return '<option '+(p===selPerson?'selected':'')+'>'+esc(p)+'</option>';}).join('')+
     '</select>'+
     (selPerson ? myMissionsHtml(selPerson) : '')+
   '</div>'+
-  '<div class="statgrid" style="margin-top:16px;">'+
-    stat('✦', 'Invités', guests.length, totalPersonnes+' personnes si confirmés', 'guests')+
+  '<div class="statgrid">'+
     stat('✦', 'Confirmés', confirmed.length, attente+' en attente', 'guests')+
-    stat('✦', 'Hébergés', heberges, guests.length?heberges+' / '+guests.length:'', 'rooms')+
     stat('✦', 'Plan de table', totalOcc+'/'+totalSeats, 'places occupées', 'tables')+
   '</div>'+
   '<div class="grid2" style="margin-top:16px;">'+
@@ -716,8 +728,12 @@ function eventCardHtml(e){
       '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
+  var titre = e.titre;
+  var range = null;
+  var m = titre.match(/\s*\(([\dhH:’'\s]+-[\dhH:’'\s]+)\)\s*$/);
+  if(m){ range = m[1].trim(); titre = titre.slice(0, m.index).trim(); }
   return '<div class="tl-card"><div class="flex-between">'+
-      '<div class="title">'+esc(e.titre)+'</div>'+
+      '<div><div class="title">'+esc(titre)+'</div>'+(range?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(range)+'</div>':'')+'</div>'+
       (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
   '</div></div>';
 }
@@ -816,7 +832,7 @@ function ceremonyStepHtml(s, idx, total){
         '<button class="icon-btn" onclick="setEditing(\'ceremony\','+s.id+')">✎</button></div>':'')+
       '</div>'+
       (s.details?'<p style="font-size:13px;margin:8px 0 0;">'+esc(s.details)+'</p>':'')+
-      (s.musique?'<div class="muted" style="font-size:12px;margin-top:6px;">🎵 '+esc(s.musique)+'</div>':'')+
+      (s.musique?'<div class="muted" style="font-size:12px;margin-top:6px;font-style:italic;">'+esc(s.musique)+'</div>':'')+
     '</div>'+
   '</div>';
 }
@@ -868,15 +884,15 @@ function animCardHtml(a){
   return '<div class="card" style="padding:0;overflow:hidden;">'+
     '<button style="width:100%;text-align:left;padding:16px;display:flex;justify-content:space-between;align-items:flex-start;" onclick="UI.openAnim='+(open?'null':a.id)+';render();">'+
       '<div><div class="row-flex"><span class="display" style="font-size:16px;">'+esc(a.nom)+'</span></div>'+
-      '<div class="muted" style="font-size:11px;margin-top:4px;">'+(a.heure?'🕐 '+esc(a.heure)+' ':'')+(a.lieu?'📍 '+esc(a.lieu)+' ':'')+(a.responsable?'· '+esc(a.responsable):'')+'</div></div>'+
+      '<div class="muted" style="font-size:11px;margin-top:4px;">'+(a.heure?esc(a.heure)+' ':'')+(a.lieu?'· '+esc(a.lieu)+' ':'')+(a.responsable?'· '+esc(a.responsable):'')+'</div></div>'+
       '<span>'+(open?'▲':'▼')+'</span>'+
     '</button>'+
     (open?'<div style="padding:0 16px 16px;border-top:1px solid var(--border);font-size:13px;">'+
-      (a.lieu?'<p>📍 '+mapsLink(a.lieu)+'</p>':'')+
+      (a.lieu?'<p>'+mapsLink(a.lieu)+'</p>':'')+
       (a.description?'<p>'+esc(a.description)+'</p>':'')+
       (a.personnes?'<p><span class="muted">Personnes impliquées : </span>'+esc(a.personnes)+'</p>':'')+
       (a.materiel?'<p><span class="muted">Matériel : </span>'+esc(a.materiel)+'</p>':'')+
-      (a.musique?'<p style="color:var(--rose-deep);">🎵 '+esc(a.musique)+'</p>':'')+
+      (a.musique?'<p style="color:var(--rose-deep);font-style:italic;">'+esc(a.musique)+'</p>':'')+
       (a.instructions?'<p><span class="muted">Instructions : </span>'+esc(a.instructions).replace(/\n/g,'<br>')+'</p>':'')+
       (CAN_EDIT?'<div class="row-flex"><button class="icon-btn" style="font-size:11px;" onclick="setEditing(\'anim\','+a.id+')">✎ Modifier</button></div>':'')+
     '</div>':'')+
@@ -965,7 +981,7 @@ function viewTrousse(){
   var t=STATE.trousse;
   var done=t.items.filter(function(i){return i.coche;}).length;
   var progress=t.items.length?Math.round(done/t.items.length*100):0;
-  var html='<div class="fade"><h2 class="display" style="font-size:28px;">✨ Trousse de secours</h2>'+
+  var html='<div class="fade"><h2 class="display" style="font-size:28px;">Trousse de secours</h2>'+
   '<div class="muted" style="font-size:12px;margin:6px 0;">Responsable : '+
     (CAN_EDIT?'<input value="'+esc(t.responsable)+'" style="display:inline-block;width:120px;padding:2px 6px;" onchange="saveTrousseResponsable(this.value)"/>':'<b class="gold">'+esc(t.responsable||'à définir')+'</b>')+
   '</div>'+
@@ -1004,10 +1020,10 @@ function addMission(key){
   next[key].missions=next[key].missions.concat([{id:id,titre:titre,responsable:resp,statut:'a_faire'}]);
   save('honneur', next);
 }
-function viewRoleGuide(key, title, emoji){
+function viewRoleGuide(key, title){
   var data=STATE.honneur[key];
   var labels={role:"Leur rôle",avant:"Avant le mariage",jourJ:"Jour J"};
-  var html='<div class="fade"><h2 class="display" style="font-size:28px;">'+emoji+' '+title+'</h2>'+
+  var html='<div class="fade"><h2 class="display" style="font-size:28px;">'+title+'</h2>'+
   '<div class="card" style="margin-top:12px;">'+
     ['role','avant','jourJ'].map(function(f){
       return '<div class="field" style="margin-bottom:14px;"><label>'+labels[f]+'</label>'+
@@ -1235,14 +1251,14 @@ function viewTables(){
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Plan de table</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalSeats+' places occupées</p></div>'+
     '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addTable()">+ Ajouter une table</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
   '</div>'+
-  (DRAG?'<p class="muted" style="font-size:12px;margin:6px 0;">👆 <b>'+esc(DRAG.label)+'</b> sélectionné — touchez une table pour le placer, ou touchez-le à nouveau pour annuler.</p>':(CAN_EDIT?'<p class="muted" style="font-size:11px;margin:6px 0;">Astuce mobile : touchez un invité pour le sélectionner, puis touchez une table.</p>':''))+
+  (DRAG?'<p class="muted" style="font-size:12px;margin:6px 0;"><b>'+esc(DRAG.label)+'</b> sélectionné — touchez une table pour le placer, ou touchez-le à nouveau pour annuler.</p>':(CAN_EDIT?'<p class="muted" style="font-size:11px;margin:6px 0;">Astuce mobile : touchez un invité pour le sélectionner, puis touchez une table.</p>':''))+
   '<div class="grid2" style="margin-top:14px;align-items:start;">'+
     '<div class="grid2">'+ STATE.tables.map(tableCardHtml).join('') +'</div>'+
     '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolTables(event)" onclick="onDropPoolTables(event)">'+
       '<b style="font-size:13px;">Non placés ('+unplaced.length+')</b>'+
       '<input id="tables-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.tablesSearch||'')+'" oninput="UI.tablesSearch=this.value;render();" onclick="event.stopPropagation()"/>'+
       unplaced.map(function(g){var gl=esc(g.nom).replace(/\047/g,"\\'"); var sel=isSelected(g.id,g.nom); return '<div class="pool-chip'+(sel?' selected-guest':'')+'" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+gl+'\')" onclick="selectGuestForDrag(event,'+g.id+',\''+gl+'\')">'+esc(g.nom)+'</div>';}).join('') +
-      (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé 🎉</p>':'')+
+      (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé.</p>':'')+
     '</div>'+
   '</div></div>';
 }
@@ -1273,7 +1289,6 @@ function removeRoomOccupant(roomId, idx){ save('rooms', STATE.rooms.map(function
 function roomCardHtml(r){
   var filled=r.occupants.length, cap=r.capacity;
   var over=filled>cap, full=filled===cap&&cap>0;
-  var dot= over?'🔴':full?'🟢':'🟠';
   var badgeColor= over?'#B15E56':full?'#5C8A5A':'#BFA059';
   var badgeBg= over?'#F3E3E1':full?'#E4EFE3':'#F6EFE0';
   return '<div class="room-card card" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropRoom(event,'+r.id+')" onclick="onDropRoom(event,'+r.id+')">'+
@@ -1282,7 +1297,7 @@ function roomCardHtml(r){
       (CAN_EDIT?'<button class="icon-btn danger" onclick="deleteRoom('+r.id+')">🗑</button>':'')+
     '</div>'+
     '<div class="row-flex" style="margin:8px 0;" onclick="event.stopPropagation()">'+
-      '<span class="chip" style="background:'+badgeBg+';color:'+badgeColor+';">'+dot+' '+filled+'/'+cap+' places</span>'+
+      '<span class="chip" style="background:'+badgeBg+';color:'+badgeColor+';">'+filled+'/'+cap+' places</span>'+
       (CAN_EDIT?'<div class="row-flex" style="margin-left:auto;"><button class="btn-outline" style="padding:2px 8px;" onclick="roomCapacity('+r.id+',-1)">–</button><button class="btn-outline" style="padding:2px 8px;" onclick="roomCapacity('+r.id+',1)">+</button></div>':'')+
     '</div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:6px;min-height:32px;">'+
@@ -1306,14 +1321,14 @@ function viewRooms(){
   return '<div class="fade"><div class="flex-between"><div><h2 class="display" style="font-size:28px;">Chambres</h2><p class="muted" style="font-size:12px;">'+totalOcc+' / '+totalCap+' places occupées</p></div>'+
     '<div class="row-flex">'+(CAN_EDIT?'<button class="btn" onclick="addRoom()">+ Ajouter une chambre</button>':'')+'<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button></div>'+
   '</div>'+
-  (DRAG?'<p class="muted" style="font-size:12px;margin:6px 0;">👆 <b>'+esc(DRAG.label)+'</b> sélectionné — touchez une chambre pour le placer, ou touchez-le à nouveau pour annuler.</p>':(CAN_EDIT?'<p class="muted" style="font-size:11px;margin:6px 0;">Astuce mobile : touchez un invité pour le sélectionner, puis touchez une chambre.</p>':''))+
+  (DRAG?'<p class="muted" style="font-size:12px;margin:6px 0;"><b>'+esc(DRAG.label)+'</b> sélectionné — touchez une chambre pour le placer, ou touchez-le à nouveau pour annuler.</p>':(CAN_EDIT?'<p class="muted" style="font-size:11px;margin:6px 0;">Astuce mobile : touchez un invité pour le sélectionner, puis touchez une chambre.</p>':''))+
   '<div class="grid2" style="margin-top:14px;align-items:start;">'+
     '<div class="grid2">'+ STATE.rooms.map(roomCardHtml).join('') +'</div>'+
     '<div class="pool" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="onDropPoolRooms(event)" onclick="onDropPoolRooms(event)">'+
       '<b style="font-size:13px;">Non hébergés ('+unplaced.length+')</b>'+
       '<input id="rooms-search" placeholder="Rechercher..." style="border-radius:999px;margin:8px 0;" value="'+esc(UI.roomsSearch||'')+'" oninput="UI.roomsSearch=this.value;render();" onclick="event.stopPropagation()"/>'+
       unplaced.map(function(g){var gl=esc(g.nom).replace(/\047/g,"\\'"); var sel=isSelected(g.id,g.nom); return '<div class="pool-chip'+(sel?' selected-guest':'')+'" draggable="true" ondragstart="onDragStartGuest(event,'+g.id+',\''+gl+'\')" onclick="selectGuestForDrag(event,'+g.id+',\''+gl+'\')">'+esc(g.nom)+'</div>';}).join('') +
-      (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé 🎉</p>':'')+
+      (unplaced.length===0?'<p class="muted" style="font-size:12px;">Tout le monde est placé.</p>':'')+
     '</div>'+
   '</div></div>';
 }
@@ -1364,7 +1379,7 @@ function viewAdmin(){
   '<p class="muted" style="font-size:12px;">'+(a.passcode?'Ce code donne un accès complet. Ne le partage qu\'avec les personnes autorisées.':'Aucun code défini : tout le monde peut modifier le site.')+'</p>'+
   '<div class="row-flex"><input id="admin-pass" value="'+esc(a.passcode)+'" placeholder="Code d\'accès"/><button class="btn" onclick="saveAccessField(\'passcode\',val(\'admin-pass\'))">✓</button></div>'+
   '</div>'+
-  '<div class="card" style="max-width:420px;margin-top:12px;"><div class="eyebrow">👁 Code lecture seule</div>'+
+  '<div class="card" style="max-width:420px;margin-top:12px;"><div class="eyebrow">Code lecture seule</div>'+
   '<p class="muted" style="font-size:12px;">'+(a.readonlyPasscode?'Ce second code permet de consulter sans modifier.':'Pas encore de code lecture seule.')+'</p>'+
   '<div class="row-flex"><input id="admin-pass-ro" value="'+esc(a.readonlyPasscode)+'" placeholder="Code lecture seule"/><button class="btn" onclick="saveAccessField(\'readonlyPasscode\',val(\'admin-pass-ro\'))">✓</button></div>'+
   '</div>'+
