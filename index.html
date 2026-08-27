@@ -441,7 +441,18 @@ function toggleNavMenu() {
 }
 var UI = {};
 var EDITING = { type: null, id: null };
-function setEditing(type, id) { EDITING = { type: type, id: id }; render(); }
+var EDIT_FOCUS_FIELD = { event:'ev-edit-titre', ceremony:'cer-etape', anim:'an-nom', vendor:'vd-nom' };
+function setEditing(type, id) {
+  EDITING = { type: type, id: id };
+  render();
+  var fieldId = EDIT_FOCUS_FIELD[type];
+  if (fieldId) {
+    setTimeout(function(){
+      var el = document.getElementById(fieldId);
+      if (el) { el.focus(); if (el.select) el.select(); }
+    }, 0);
+  }
+}
 function clearEditing() { EDITING = { type: null, id: null }; render(); }
 function withField(obj, key, value) { var o = Object.assign({}, obj); o[key] = value; return o; }
 function val(id) { var el = document.getElementById(id); return el ? el.value : ""; }
@@ -685,7 +696,7 @@ function updateGuestVinHonneur(id, checked){
   showToast('✓ Enregistré');
   render();
 }
-function removeGuest(id){ save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
+function removeGuest(id){ if(!confirm('Supprimer cet invité ?')) return; save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
   var id=uid(STATE.guests);
   save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",notes:""}]));
@@ -783,7 +794,7 @@ function viewGuests(){
 function setPlanningDay(d){UI.planningDay=d;render();}
 function setPlanningPerson(p){UI.planningPerson=p;render();}
 function updatePlanningEvent(id,patch){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,patch):e;})); }
-function deletePlanningEvent(id){ save('planning', STATE.planning.filter(function(e){return e.id!==id;})); }
+function deletePlanningEvent(id){ if(!confirm('Supprimer cet événement ?')) return; save('planning', STATE.planning.filter(function(e){return e.id!==id;})); }
 function toggleImportant(id){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,{important:!e.important}):e;})); }
 function addPlanningEvent(person){
   var titre=val('add-ev-titre');
@@ -871,7 +882,7 @@ function saveCeremonyEdit(id){
   save('ceremony', STATE.ceremony.map(function(s){return s.id===id?Object.assign({},s,patch):s;}));
   clearEditing();
 }
-function deleteCeremonyStep(id){ save('ceremony', STATE.ceremony.filter(function(s){return s.id!==id;})); }
+function deleteCeremonyStep(id){ if(!confirm('Supprimer cette étape ?')) return; save('ceremony', STATE.ceremony.filter(function(s){return s.id!==id;})); }
 function moveCeremonyStep(idx,dir){
   var next=STATE.ceremony.slice(); var t=idx+dir;
   if(t<0||t>=next.length) return;
@@ -932,7 +943,7 @@ function saveAnimEdit(id){
   save('animations', STATE.animations.map(function(a){return a.id===id?Object.assign({},a,patch):a;}));
   clearEditing();
 }
-function deleteAnim(id){ save('animations', STATE.animations.filter(function(a){return a.id!==id;})); }
+function deleteAnim(id){ if(!confirm('Supprimer cette animation ?')) return; save('animations', STATE.animations.filter(function(a){return a.id!==id;})); }
 function addAnim(){
   var nom=val('add-an-nom');
   if(!nom.trim()) return;
@@ -1105,6 +1116,7 @@ function toggleMission(key,id){
   save('honneur', next);
 }
 function removeMission(key,id){
+  if(!confirm('Supprimer cette mission ?')) return;
   var next=Object.assign({},STATE.honneur); next[key]=Object.assign({},next[key]);
   next[key].missions=next[key].missions.filter(function(m){return m.id!==id;});
   save('honneur', next);
@@ -1184,7 +1196,7 @@ function saveVendorEdit(id){
   save('vendors', STATE.vendors.map(function(v){return v.id===id?Object.assign({},v,patch):v;}));
   clearEditing();
 }
-function deleteVendor(id){ save('vendors', STATE.vendors.filter(function(v){return v.id!==id;})); }
+function deleteVendor(id){ if(!confirm('Supprimer ce prestataire ?')) return; save('vendors', STATE.vendors.filter(function(v){return v.id!==id;})); }
 function addVendor(){
   var cat=val('add-vd-cat');
   if(!cat.trim()) return;
@@ -1307,7 +1319,7 @@ function onDropPoolTables(e){
 }
 function renameTable(id,nom){ save('tables', STATE.tables.map(function(t){return t.id===id?Object.assign({},t,{nom:nom}):t;})); }
 function tableCapacity(id,delta){ save('tables', STATE.tables.map(function(t){ if(t.id!==id) return t; return Object.assign({},t,{capacity:Math.max(t.occupants.length,t.capacity+delta)}); })); }
-function deleteTable(id){ save('tables', STATE.tables.filter(function(t){return t.id!==id;})); }
+function deleteTable(id){ if(!confirm('Supprimer cette table ?')) return; save('tables', STATE.tables.filter(function(t){return t.id!==id;})); }
 function addTable(){ var id=uid(STATE.tables); save('tables', STATE.tables.concat([{id:id,nom:'Nouvelle table',forme:'ronde',capacity:10,occupants:[]}])); }
 function removeTableOccupant(tableId, idx){ save('tables', STATE.tables.map(function(t){ if(t.id!==tableId) return t; var occ=t.occupants.slice(); occ.splice(idx,1); return Object.assign({},t,{occupants:occ}); })); }
 function tableCardHtml(t){
@@ -1389,7 +1401,7 @@ function onDropPoolRooms(e){
 }
 function renameRoom(id,nom){ save('rooms', STATE.rooms.map(function(r){return r.id===id?Object.assign({},r,{nom:nom}):r;})); }
 function roomCapacity(id,delta){ save('rooms', STATE.rooms.map(function(r){ if(r.id!==id) return r; return Object.assign({},r,{capacity:Math.max(r.occupants.length,r.capacity+delta)}); })); }
-function deleteRoom(id){ save('rooms', STATE.rooms.filter(function(r){return r.id!==id;})); }
+function deleteRoom(id){ if(!confirm('Supprimer cette chambre ?')) return; save('rooms', STATE.rooms.filter(function(r){return r.id!==id;})); }
 function addRoom(){ var id=uid(STATE.rooms); save('rooms', STATE.rooms.concat([{id:id,nom:'Nouvelle chambre',capacity:4,occupants:[]}])); }
 function removeRoomOccupant(roomId, idx){ save('rooms', STATE.rooms.map(function(r){ if(r.id!==roomId) return r; var occ=r.occupants.slice(); occ.splice(idx,1); return Object.assign({},r,{occupants:occ}); })); }
 function roomCardHtml(r){
@@ -1494,6 +1506,42 @@ function viewAdmin(){
 }
 
 
+document.addEventListener('click', function(e){
+  var navPanel = document.getElementById('nav-panel');
+  var navToggle = document.querySelector('.nav-toggle');
+  if (navPanel && navPanel.style.display === 'block') {
+    if (!navPanel.contains(e.target) && (!navToggle || !navToggle.contains(e.target))) {
+      navPanel.style.display = 'none';
+    }
+  }
+  var searchPanel = document.getElementById('search-panel');
+  var searchToggle = document.querySelector('button[onclick="toggleSearch()"]');
+  if (searchPanel && searchPanel.style.display === 'block') {
+    if (!searchPanel.contains(e.target) && (!searchToggle || !searchToggle.contains(e.target))) {
+      searchPanel.style.display = 'none';
+    }
+  }
+});
+var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','add-ev-heure','add-ev-titre',
+  'cer-debut','cer-fin','cer-duree','cer-etape','cer-musique','add-cer-debut','add-cer-fin','add-cer-duree','add-cer-etape',
+  'an-nom','an-heure','an-resp','an-lieu','an-pers','an-mat','an-mus',
+  'add-an-nom','add-an-heure','add-an-resp','add-an-lieu',
+  'vd-cat','vd-nom','vd-tel','vd-email','add-vd-cat','add-vd-nom',
+  'add-trousse-item','add-guest-trousse-item'];
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Enter') return;
+  var t = e.target;
+  if (!t || t.tagName !== 'INPUT') return;
+  var id = t.id || '';
+  var ok = ENTER_TO_VALIDATE_IDS.indexOf(id) >= 0 || id.indexOf('add-mission-titre-')===0 || id.indexOf('add-mission-resp-')===0;
+  if (!ok) return;
+  var el = t;
+  while (el && el !== document.body) {
+    var btn = el.querySelector('button.btn');
+    if (btn) { e.preventDefault(); btn.click(); return; }
+    el = el.parentElement;
+  }
+});
 document.addEventListener("DOMContentLoaded", loadAndStart);
 setInterval(function(){ if (CURRENT_TAB === "dashboard") render(); }, 60000);
 </script>
