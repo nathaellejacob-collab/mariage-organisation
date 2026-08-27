@@ -909,10 +909,8 @@ function ceremonyStepHtml(s, idx, total){
       '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deleteCeremonyStep('+s.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveCeremonyEdit('+s.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
-  return '<div style="display:flex;gap:14px;">'+
-    '<div style="width:56px;flex-shrink:0;text-align:center;"><div class="gold" style="font-size:12px;">'+esc(s.debut)+'</div>'+(idx===total-1?'<div class="muted" style="font-size:10px;">'+esc(s.fin)+'</div>':'')+'</div>'+
-    '<div class="card" style="flex:1;margin-bottom:14px;">'+
-      '<div class="flex-between"><div><div class="display" style="font-size:16px;">'+esc(s.etape)+'</div><div class="muted" style="font-size:11px;">'+esc(s.duree)+'</div></div>'+
+  return '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="flex-between"><div><div class="gold" style="font-size:11px;font-weight:600;">'+esc(s.debut)+(idx===total-1?' – '+esc(s.fin):'')+'</div><div class="display" style="font-size:16px;margin-top:2px;">'+esc(s.etape)+'</div><div class="muted" style="font-size:11px;">'+esc(s.duree)+'</div></div>'+
       (CAN_EDIT?'<div class="row-flex">'+
         (idx>0?'<button class="icon-btn" onclick="moveCeremonyStep('+idx+',-1)">↑</button>':'')+
         (idx<total-1?'<button class="icon-btn" onclick="moveCeremonyStep('+idx+',1)">↓</button>':'')+
@@ -920,14 +918,12 @@ function ceremonyStepHtml(s, idx, total){
       '</div>'+
       (s.details?'<p style="font-size:13px;margin:8px 0 0;">'+esc(s.details)+'</p>':'')+
       (s.musique?'<div class="muted" style="font-size:12px;margin-top:6px;font-style:italic;">'+esc(s.musique)+'</div>':'')+
-    '</div>'+
   '</div>';
 }
 function saveCortegeField(field, value){ save('cortege', Object.assign({},STATE.cortege,{[field]:value})); }
 function viewCeremony(){
   var c = STATE.cortege || {civil:"",laique:"",voiture:""};
   var html='<div class="fade"><h2 class="display" style="font-size:28px;">Cérémonie</h2>'+
-    '<p class="muted" style="font-size:12px;">'+mapsLink('Château des Anges')+' — '+(STATE.ceremony[0]?esc(STATE.ceremony[0].debut):'')+' à '+(STATE.ceremony.length?esc(STATE.ceremony[STATE.ceremony.length-1].fin):'')+'</p>'+
     '<div class="card" style="margin-top:14px;"><div class="eyebrow" style="margin-bottom:10px;">Cortèges</div>'+
     [['civil','Cortège civil (mairie)'],['laique','Cortège laïque'],['voiture','Cortège en voiture']].map(function(f){
       return '<div class="field" style="margin-bottom:12px;"><label>'+f[1]+'</label>'+
