@@ -688,7 +688,7 @@ function updateGuestVinHonneur(id, checked){
 function removeGuest(id){ save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
   var id=uid(STATE.guests);
-  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",notes:""}]));
+  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",famille:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",notes:""}]));
 }
 function setGuestsSearch(v){ UI.guestsSearch=v; render(); }
 function setGuestsFilter(v){ UI.guestsFilter=v; render(); }
@@ -708,6 +708,7 @@ function guestCardMobile(g){
         GUEST_CATEGORIES.map(function(c){return '<option value="'+esc(c)+'" '+(g.groupe===c?'selected':'')+'>'+c+'</option>';}).join('')+
       '</select></div>'+
     '</div>'+
+    (CAN_EDIT?'<div class="mrow"><div style="flex:1;"><label class="mlbl">Famille / Couple (optionnel)</label><input list="familles-list" value="'+esc(g.famille||'')+'" placeholder="ex. Famille Guiot" onchange="updateGuest('+g.id+',\'famille\',this.value)"/></div></div>':'')+
     '<div class="mrow">'+
       '<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.vinHonneur?'checked':'')+' onchange="updateGuestVinHonneur('+g.id+',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Vin d\'honneur</label>'+
       (!vin?'<label style="display:flex;align-items:center;gap:4px;font-size:11px;"><input type="checkbox" '+(g.hebergement?'checked':'')+' onchange="updateGuest('+g.id+',\'hebergement\',this.checked)" '+(CAN_EDIT?'':'disabled')+'/> Hébergé</label>':'')+
@@ -758,9 +759,30 @@ function viewGuests(){
     '<select onchange="setGuestsSortKey(this.value)" style="max-width:170px;border-radius:999px;margin-left:auto;">'+
       sortOptions.map(function(s){return '<option value="'+s[0]+'" '+(sortKey===s[0]?'selected':'')+'>Trier par '+s[1]+'</option>';}).join('')+
     '</select>'+
-  '</div>'+
-  '<div class="guest-grid">'+ filtered.map(guestCardMobile).join('') +'</div>'+
   '</div>';
+
+  var allFamilies = Array.from(new Set(STATE.guests.map(function(g){return (g.famille||'').trim();}).filter(Boolean))).sort();
+  if(CAN_EDIT){
+    html += '<datalist id="familles-list">'+allFamilies.map(function(f){return '<option value="'+esc(f)+'">';}).join('')+'</datalist>';
+  }
+
+  var families = {};
+  var standalone = [];
+  filtered.forEach(function(g){
+    var f=(g.famille||'').trim();
+    if(f){ (families[f]=families[f]||[]).push(g); } else { standalone.push(g); }
+  });
+  var familyNames = Object.keys(families).sort();
+
+  html += '<div class="guest-grid">';
+  familyNames.forEach(function(fname){
+    html += '<div class="card" style="grid-column:1/-1;">'+
+      '<div class="eyebrow" style="margin-bottom:10px;">'+esc(fname)+'</div>'+
+      '<div class="guest-grid">'+ families[fname].map(guestCardMobile).join('') +'</div>'+
+    '</div>';
+  });
+  html += standalone.map(guestCardMobile).join('');
+  html += '</div></div>';
   return html;
 }
 
