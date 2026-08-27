@@ -47,6 +47,9 @@
   .nav-toggle{width:100%;text-align:left;background:var(--paper);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font-size:13px;color:var(--ink);}
   .nav-toggle:hover{border-color:var(--gold);}
   #nav-panel{position:absolute;left:0;right:0;top:44px;background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:6px;z-index:30;box-shadow:0 8px 24px rgba(43,38,34,.12);max-height:70vh;overflow-y:auto;}
+  .maps-choice-panel{position:absolute;top:100%;left:0;margin-top:6px;background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:4px;z-index:40;box-shadow:0 8px 24px rgba(43,38,34,.12);white-space:nowrap;}
+  .maps-choice-panel a{display:block;padding:8px 14px;font-size:13px;color:var(--ink);text-decoration:none;border-radius:6px;}
+  .maps-choice-panel a:hover{background:var(--champagne-soft);color:var(--gold);}
   .nav-item{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:10px;font-size:13px;color:var(--ink-soft);}
   .nav-item:hover{background:var(--champagne-soft);}
   .nav-item.active{background:var(--ink);color:#fff;}
@@ -223,11 +226,34 @@ function parseEventTitle(titre) {
   if (m) { range = m[1].trim(); titre = titre.slice(0, m.index).trim(); }
   return { titre: titre, range: range };
 }
-function mapsUrl(place) {
+function wazeUrl(place) {
   return "https://waze.com/ul?q=" + encodeURIComponent(place) + "&navigate=yes";
 }
+function googleMapsUrl(place) {
+  return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place);
+}
 function mapsLink(place, label) {
-  return '<a href="'+mapsUrl(place)+'" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;text-decoration-color:var(--border);">'+esc(label||place)+'</a>';
+  return '<span style="position:relative;display:inline-block;">'+
+    '<button onclick="toggleMapChoice(event,this)" data-place="'+esc(place)+'" style="all:unset;cursor:pointer;color:inherit;text-decoration:underline;text-decoration-color:var(--border);">'+esc(label||place)+'</button>'+
+  '</span>';
+}
+function toggleMapChoice(e, btn) {
+  e.stopPropagation();
+  var existing = document.querySelector('.maps-choice-panel');
+  var wasThisOne = existing && existing.parentElement === btn.parentElement;
+  if (existing) { existing.remove(); document.removeEventListener('click', closeMapChoice); if (wasThisOne) return; }
+  var place = btn.getAttribute('data-place');
+  var panel = document.createElement('div');
+  panel.className = 'maps-choice-panel';
+  panel.innerHTML =
+    '<a href="'+wazeUrl(place)+'" target="_blank" rel="noopener noreferrer">Ouvrir dans Waze</a>'+
+    '<a href="'+googleMapsUrl(place)+'" target="_blank" rel="noopener noreferrer">Ouvrir dans Google Maps</a>';
+  btn.parentElement.appendChild(panel);
+  setTimeout(function(){ document.addEventListener('click', closeMapChoice); }, 0);
+}
+function closeMapChoice(ev) {
+  var panel = document.querySelector('.maps-choice-panel');
+  if (panel && !panel.contains(ev.target)) { panel.remove(); document.removeEventListener('click', closeMapChoice); }
 }
 function uid(arr) { return arr.reduce(function(m,x){ return Math.max(m, x.id||0); }, 0) + 1; }
 function timeToMinutes(t) {
