@@ -395,9 +395,9 @@ function renderApp() {
     html += '<div class="readonly-banner">🔒 Mode lecture seule — consultation uniquement, aucune modification possible</div>';
   }
   html += '<header id="header"><div class="row">' +
-    '<div id="brand">' + monogramSvg(38) +
+    '<button id="brand" onclick="go(\'dashboard\')" style="all:unset;cursor:pointer;flex-shrink:0;display:flex;align-items:center;gap:10px;">' + monogramSvg(38) +
       '<div><div class="name display" style="font-size:19px;">N &amp; J</div></div>' +
-    '</div>' +
+    '</button>' +
     '<div style="position:relative;flex:1;max-width:280px;">' +
       '<button class="nav-toggle" onclick="toggleNavMenu()">'+ currentLabel +' <span style="float:right;">▾</span></button>' +
       '<div id="nav-panel" style="display:none;"></div>' +
@@ -628,7 +628,7 @@ function myMissionsHtml(person){
       .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); });
     if(!evs.length) return;
     any=true;
-    scheduleHtml += '<div class="gold" style="font-size:11px;text-transform:uppercase;margin:14px 0 6px;">'+d+'</div>';
+    scheduleHtml += '<div class="gold" style="display:flex;align-items:center;gap:10px;font-size:11px;text-transform:uppercase;margin:14px 0 6px;"><span style="flex:1;height:1px;background:var(--border);"></span><span>'+d+'</span><span style="flex:1;height:1px;background:var(--border);"></span></div>';
     scheduleHtml += timelineHtml(groupByHeure(evs));
   });
   if(any){
