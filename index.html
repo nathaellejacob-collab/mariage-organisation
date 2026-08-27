@@ -419,7 +419,7 @@ function toggleNavMenu() {
   if (!open) {
     var visibleTabs = CAN_EDIT ? TABS : TABS.filter(function(t){ return t.key !== "admin"; });
     panel.innerHTML = visibleTabs.map(function(t){
-      return '<button class="nav-item'+(CURRENT_TAB===t.key?' active':'')+'" onclick="go(\''+t.key+'\');toggleNavMenu();">'+t.label+'</button>';
+      return '<button class="nav-item'+(CURRENT_TAB===t.key?' active':'')+'" onclick="go(\''+t.key+'\');">'+t.label+'</button>';
     }).join('');
   }
 }
