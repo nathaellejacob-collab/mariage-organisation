@@ -99,7 +99,7 @@
   .icon-btn.danger:hover{color:var(--rose-deep);}
   .listrow{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;}
   .listrow input,.listrow select{font-size:12px;padding:5px 8px;}
-  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-bottom:5px;}
+  .field label{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:16px;color:var(--ink);margin-bottom:5px;}
   .timegroup{display:flex;gap:12px;}
   .timegroup .time{width:48px;flex-shrink:0;font-size:12px;color:var(--gold);padding-top:10px;font-weight:500;}
   .timegroup .events{flex:1;border-left:1px solid var(--border);padding-left:12px;padding-bottom:12px;}
@@ -601,7 +601,7 @@ function viewDashboard() {
       '<div class="eyebrow" style="margin-bottom:10px;">Contacts prioritaires</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">'+
       urgentVendors.map(function(v){
-        return '<a href="tel:'+esc(v.telephone)+'" class="chip" style="background:var(--champagne-soft);color:var(--gold);font-size:13px;padding:8px 14px;">'+esc(v.categorie)+(v.nom?' — '+esc(v.nom):'')+'</a>';
+        return '<a href="tel:'+esc(v.telephone)+'" class="chip" style="background:var(--champagne-soft);color:var(--gold);font-size:13px;padding:8px 14px;text-decoration:none;">'+esc(v.categorie)+(v.nom?' — '+esc(v.nom):'')+'</a>';
       }).join('')+
       '</div>'+
     '</div>'
