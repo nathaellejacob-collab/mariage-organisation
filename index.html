@@ -649,21 +649,22 @@ function myMissionsHtml(person){
         return '<div class="tl-card"><div class="title">'+esc(m.titre)+'</div>'+(m.notes?'<div class="muted" style="font-size:12px;margin-top:4px;">'+esc(m.notes)+'</div>':'')+'</div>';
       }).join('') + '</div>';
   }
-  var any=false;
-  var scheduleHtml='';
-  DAY_ORDER.forEach(function(d){
-    var evs = STATE.planning.filter(function(e){ return e.jour===d && e.personnes.indexOf(person)>=0; })
-      .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); });
-    if(!evs.length) return;
-    any=true;
-    scheduleHtml += '<div class="gold" style="display:flex;align-items:center;gap:10px;font-size:11px;text-transform:uppercase;margin:14px 0 6px;"><span style="flex:1;height:1px;background:var(--border);"></span><span>'+d+'</span><span style="flex:1;height:1px;background:var(--border);"></span></div>';
-    scheduleHtml += timelineHtml(groupByHeure(evs));
+  var daysWithEvents = DAY_ORDER.filter(function(d){
+    return STATE.planning.some(function(e){ return e.jour===d && e.personnes.indexOf(person)>=0; });
   });
-  if(any){
-    html += '<div style="margin-top:6px;"><div class="eyebrow">Planning de '+esc(person)+'</div>'+scheduleHtml+'</div>';
-  } else if(!missions.length){
-    html += '<p class="muted" style="font-size:12px;margin-top:14px;">Rien de prévu pour '+esc(person)+' pour le moment.</p>';
+  if(!daysWithEvents.length){
+    if(!missions.length){
+      html += '<p class="muted" style="font-size:12px;margin-top:14px;">Rien de prévu pour '+esc(person)+' pour le moment.</p>';
+    }
+    return html;
   }
+  var selDay = UI.missionsDay && daysWithEvents.indexOf(UI.missionsDay)>=0 ? UI.missionsDay : daysWithEvents[0];
+  html += '<div style="margin-top:6px;"><div class="eyebrow">Planning de '+esc(person)+'</div>'+
+    '<div class="tabbar" style="margin-top:8px;">'+daysWithEvents.map(function(d){return '<button class="'+(selDay===d?'active':'')+'" onclick="UI.missionsDay=\''+d+'\';render();">'+d+'</button>';}).join('')+'</div>';
+  var evs = STATE.planning.filter(function(e){ return e.jour===selDay && e.personnes.indexOf(person)>=0; })
+    .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); });
+  html += timelineHtml(groupByHeure(evs));
+  html += '</div>';
   return html;
 }
 
