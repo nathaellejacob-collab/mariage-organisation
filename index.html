@@ -649,23 +649,32 @@ function myMissionsHtml(person){
         return '<div class="tl-card"><div class="title">'+esc(m.titre)+'</div>'+(m.notes?'<div class="muted" style="font-size:12px;margin-top:4px;">'+esc(m.notes)+'</div>':'')+'</div>';
       }).join('') + '</div>';
   }
-  var daysWithEvents = DAY_ORDER.filter(function(d){
-    return STATE.planning.some(function(e){ return e.jour===d && e.personnes.indexOf(person)>=0; });
-  });
-  if(!daysWithEvents.length){
-    if(!missions.length){
-      html += '<p class="muted" style="font-size:12px;margin-top:14px;">Rien de prévu pour '+esc(person)+' pour le moment.</p>';
-    }
-    return html;
-  }
-  var selDay = UI.missionsDay && daysWithEvents.indexOf(UI.missionsDay)>=0 ? UI.missionsDay : daysWithEvents[0];
+  var selDay = UI.missionsDay && DAY_ORDER.indexOf(UI.missionsDay)>=0 ? UI.missionsDay : 'Samedi';
   html += '<div style="margin-top:6px;"><div class="eyebrow">Planning de '+esc(person)+'</div>'+
-    '<div class="tabbar" style="margin-top:8px;">'+daysWithEvents.map(function(d){return '<button class="'+(selDay===d?'active':'')+'" onclick="UI.missionsDay=\''+d+'\';render();">'+d+'</button>';}).join('')+'</div>';
+    '<div class="tabbar" style="margin-top:8px;">'+DAY_ORDER.map(function(d){return '<button class="'+(selDay===d?'active':'')+'" onclick="UI.missionsDay=\''+d+'\';render();">'+d+'</button>';}).join('')+'</div>';
   var evs = STATE.planning.filter(function(e){ return e.jour===selDay && e.personnes.indexOf(person)>=0; })
     .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); });
-  html += timelineHtml(groupByHeure(evs));
+  if(!evs.length){
+    html += '<p class="muted" style="font-size:12px;padding:14px 0;">Rien de prévu pour '+esc(person)+' ce jour-là.</p>';
+  } else {
+    html += timelineHtml(groupByHeure(evs));
+  }
+  if(CAN_EDIT){
+    html += '<div class="row-flex" style="margin-top:10px;flex-wrap:wrap;">'+
+      '<input id="mission-add-ev-heure" placeholder="Heure" style="width:80px;"/>'+
+      '<input id="mission-add-ev-titre" placeholder="Titre" style="flex:1;min-width:140px;"/>'+
+      '<input id="mission-add-ev-lieu" placeholder="Lieu (optionnel, GPS)" style="flex:1;min-width:160px;"/>'+
+      '<button class="btn" onclick="addMissionPlanningEvent(\''+esc(person).replace(/\047/g,"\\'")+'\',\''+selDay+'\')">+ Ajouter pour '+esc(person)+'</button>'+
+    '</div>';
+  }
   html += '</div>';
   return html;
+}
+function addMissionPlanningEvent(person, day){
+  var titre=val('mission-add-ev-titre');
+  if(!titre.trim()) return;
+  var id=uid(STATE.planning);
+  save('planning', STATE.planning.concat([{id:id,jour:day,heure:val('mission-add-ev-heure')||'00h00',titre:titre,lieu:val('mission-add-ev-lieu'),personnes:[person],important:false}]));
 }
 
 /* ============ GUESTS ============ */
@@ -1533,6 +1542,7 @@ document.addEventListener('click', function(e){
   }
 });
 var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','add-ev-heure','add-ev-titre','add-ev-lieu',
+  'mission-add-ev-heure','mission-add-ev-titre','mission-add-ev-lieu',
   'cer-debut','cer-fin','cer-duree','cer-etape','cer-musique','add-cer-debut','add-cer-fin','add-cer-duree','add-cer-etape',
   'an-nom','an-heure','an-resp','an-lieu','an-pers','an-mat','an-mus',
   'add-an-nom','add-an-heure','add-an-resp','add-an-lieu',
