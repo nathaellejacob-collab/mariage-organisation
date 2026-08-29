@@ -882,18 +882,32 @@ function clearEventOverride(id, person){
     return Object.assign({}, e, {overrides: next});
   }));
 }
+function duplicateEventForPerson(id){
+  var target = val('ev-dup-target');
+  if(!target) return;
+  var src = STATE.planning.filter(function(e){return e.id===id;})[0];
+  if(!src) return;
+  var newId = uid(STATE.planning);
+  save('planning', STATE.planning.concat([{id:newId,jour:src.jour,heure:src.heure,titre:src.titre,lieu:src.lieu||'',personnes:[target],important:false,overrides:{}}]));
+  clearEditing();
+}
 function eventCardHtml(e, person){
   var isShared = e.important && (!e.personnes || e.personnes.length===0);
   var overrideHeure = (person && isShared && e.overrides && e.overrides[person]) ? e.overrides[person] : null;
 
   if(EDITING.type==='event'&&EDITING.id===e.id){
     var personArg = person ? "'"+esc(person).replace(/\047/g,"\\'")+"'" : '';
+    var candidates = allKnownPeople();
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       (person&&isShared?'<div class="chip" style="background:var(--champagne-soft);color:var(--gold);margin-bottom:8px;align-self:flex-start;">Événement partagé — visible pour Tout le monde</div>':'')+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
       '<input id="ev-edit-lieu" value="'+esc(e.lieu||'')+'" placeholder="Lieu (optionnel, pour le GPS)" style="margin-top:6px;"/>'+
       (person&&isShared?'<div class="muted" style="font-size:11px;margin-top:8px;">Heure personnalisée pour '+esc(person)+' seulement (n\'affecte pas "Tout le monde") — laisser vide pour garder l\'heure commune</div>'+
         '<input id="ev-edit-override" value="'+esc(overrideHeure||'')+'" placeholder="ex. 12h15" style="margin-top:4px;width:120px;"/>':'')+
+      (!person?'<div class="muted" style="font-size:11px;margin-top:8px;">Dupliquer cet événement pour une personne en particulier</div>'+
+        '<div class="row-flex" style="margin-top:4px;"><select id="ev-dup-target" style="flex:1;">'+
+          candidates.map(function(p){return '<option>'+esc(p)+'</option>';}).join('')+
+        '</select><button class="btn" onclick="duplicateEventForPerson('+e.id+')">Dupliquer</button></div>':'')+
       (person&&isShared?
         '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">'+
           '<button class="icon-btn danger" style="width:100%;text-align:left;" onclick="hideEventForPerson('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">🗑 Retirer uniquement du planning de '+esc(person)+'</button>'+
