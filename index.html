@@ -1177,7 +1177,7 @@ function viewRoleGuide(key, title){
   '<div class="card" style="margin-top:12px;"><div class="eyebrow">Missions</div>'+
     data.missions.map(function(m){
       var done=m.statut==='termine';
-      return '<div class="listrow"><button class="icon-btn" style="font-size:16px;color:'+(done?'#5C8A5A':'#D8CDBB')+';" onclick="toggleMission(\''+key+'\','+m.id+')">'+(done?'☑':'☐')+'</button>'+
+      return '<div class="listrow">'+
         '<span style="flex:1;font-size:13px;'+(done?'text-decoration:line-through;opacity:.5;':'')+'">'+esc(m.titre)+(m.responsable?' <span class="gold">— '+esc(m.responsable)+'</span>':'')+'</span>'+
         (CAN_EDIT?'<button class="icon-btn danger" onclick="removeMission(\''+key+'\','+m.id+')">✕</button>':'')+
       '</div>';
