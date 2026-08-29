@@ -667,12 +667,16 @@ function myMissionsHtml(person){
   var selDay = UI.missionsDay && DAY_ORDER.indexOf(UI.missionsDay)>=0 ? UI.missionsDay : 'Samedi';
   html += '<div style="margin-top:6px;"><div class="eyebrow">Planning de '+esc(person)+'</div>'+
     '<div class="tabbar" style="margin-top:8px;">'+DAY_ORDER.map(function(d){return '<button class="'+(selDay===d?'active':'')+'" onclick="UI.missionsDay=\''+d+'\';render();">'+d+'</button>';}).join('')+'</div>';
-  var evs = STATE.planning.filter(function(e){ return e.jour===selDay && e.personnes.indexOf(person)>=0; })
+  var evs = STATE.planning.filter(function(e){ return e.jour===selDay && (e.personnes.indexOf(person)>=0 || e.important); })
+    .map(function(e){
+      if(e.overrides && e.overrides[person]){ return Object.assign({}, e, {heure: e.overrides[person]}); }
+      return e;
+    })
     .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); });
   if(!evs.length){
     html += '<p class="muted" style="font-size:12px;padding:14px 0;">Rien de prévu pour '+esc(person)+' ce jour-là.</p>';
   } else {
-    html += timelineHtml(groupByHeure(evs));
+    html += timelineHtml(groupByHeure(evs), person);
   }
   if(CAN_EDIT){
     html += '<div class="row-flex" style="margin-top:10px;flex-wrap:wrap;">'+
@@ -838,13 +842,34 @@ function addPlanningEvent(person){
   var id=uid(STATE.planning);
   var personnes = (person && person!=="Tout le monde") ? [person] : [];
   var important = !person || person==="Tout le monde";
-  save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,lieu:val('add-ev-lieu'),personnes:personnes,important:important}]));
+  save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,lieu:val('add-ev-lieu'),personnes:personnes,important:important,overrides:{}}]));
 }
 function saveEventEdit(id){
   updatePlanningEvent(id,{heure:val('ev-edit-heure'),titre:val('ev-edit-titre'),lieu:val('ev-edit-lieu')});
   clearEditing();
 }
-function eventCardHtml(e){
+function setEventOverride(id, person){
+  var v = val('ev-override-heure');
+  save('planning', STATE.planning.map(function(e){
+    if(e.id!==id) return e;
+    var next = Object.assign({}, e.overrides||{});
+    if(v.trim()){ next[person] = v.trim(); } else { delete next[person]; }
+    return Object.assign({}, e, {overrides: next});
+  }));
+  clearEditing();
+}
+function clearEventOverride(id, person){
+  save('planning', STATE.planning.map(function(e){
+    if(e.id!==id) return e;
+    var next = Object.assign({}, e.overrides||{});
+    delete next[person];
+    return Object.assign({}, e, {overrides: next});
+  }));
+}
+function eventCardHtml(e, person){
+  var isShared = e.important && (!e.personnes || e.personnes.length===0);
+  var overrideHeure = (person && isShared && e.overrides && e.overrides[person]) ? e.overrides[person] : null;
+
   if(EDITING.type==='event'&&EDITING.id===e.id){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
@@ -852,17 +877,29 @@ function eventCardHtml(e){
       '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
+  if(EDITING.type==='override'&&EDITING.id===e.id){
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+      '<div class="muted" style="font-size:12px;margin-bottom:4px;">Heure personnalisée pour '+esc(person)+' (n\'affecte pas "Tout le monde")</div>'+
+      '<div class="row-flex"><input id="ev-override-heure" value="'+esc(overrideHeure||e.heure)+'" style="width:90px;" placeholder="Heure"/>'+
+        '<button class="btn" onclick="setEventOverride('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+    '</div>';
+  }
   var parsed = parseEventTitle(e.titre);
   return '<div class="tl-card"><div class="flex-between">'+
-      '<div><div class="title">'+esc(parsed.titre)+'</div>'+(parsed.range?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(parsed.range)+'</div>':'')+(e.lieu?'<div style="font-size:11px;margin-top:2px;">'+mapsLink(e.lieu)+'</div>':'')+'</div>'+
-      (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
+      '<div><div class="title">'+esc(parsed.titre)+'</div>'+(parsed.range?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(parsed.range)+'</div>':'')+(e.lieu?'<div style="font-size:11px;margin-top:2px;">'+mapsLink(e.lieu)+'</div>':'')+
+        (overrideHeure?'<div class="gold" style="font-size:11px;margin-top:2px;">Heure décalée pour '+esc(person)+' : '+esc(overrideHeure)+' <button class="icon-btn" style="padding:0;" onclick="clearEventOverride('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">✕</button></div>':'')+
+      '</div>'+
+      '<div class="row-flex">'+
+        (person&&isShared&&CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;font-size:11px;" onclick="setEditing(\'override\','+e.id+')" title="Décaler l\'heure pour '+esc(person)+'">🕐</button>':'')+
+        (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
+      '</div>'+
   '</div></div>';
 }
-function timelineHtml(groups){
+function timelineHtml(groups, person){
   if(!groups.length) return '';
   return groups.map(function(g){
     return '<div class="tl-group"><div class="tl-time">'+esc(g.heure)+'</div><div class="tl-line">'+
-      g.events.map(function(e){ return eventCardHtml(e); }).join('') +
+      g.events.map(function(e){ return eventCardHtml(e, person); }).join('') +
     '</div></div>';
   }).join('');
 }
@@ -892,7 +929,12 @@ function viewPlanning(){
   var evs = STATE.planning.filter(function(e){
     if(e.jour!==day) return false;
     if(onlyMajor) return e.important;
-    return e.personnes.indexOf(person)>=0;
+    return e.personnes.indexOf(person)>=0 || e.important;
+  }).map(function(e){
+    if(!onlyMajor && e.overrides && e.overrides[person]){
+      return Object.assign({}, e, {heure: e.overrides[person]});
+    }
+    return e;
   }).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
   var groups = groupByHeure(evs);
 
@@ -900,7 +942,7 @@ function viewPlanning(){
   if(!evs.length){
     html+='<p class="muted" style="text-align:center;padding:24px;font-size:13px;">'+(onlyMajor?'Rien de prévu pour ce jour.':'Rien de prévu pour '+esc(person)+' ce jour-là.')+'</p>';
   } else {
-    html += timelineHtml(groups);
+    html += timelineHtml(groups, onlyMajor ? null : person);
   }
   if(CAN_EDIT){
     html+='<div class="row-flex" style="margin-top:14px;flex-wrap:wrap;">'+
@@ -1566,7 +1608,7 @@ document.addEventListener('click', function(e){
     }
   }
 });
-var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','add-ev-heure','add-ev-titre','add-ev-lieu',
+var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','ev-override-heure','add-ev-heure','add-ev-titre','add-ev-lieu',
   'mission-add-ev-heure','mission-add-ev-titre','mission-add-ev-lieu',
   'cer-debut','cer-fin','cer-duree','cer-etape','cer-musique','add-cer-debut','add-cer-fin','add-cer-duree','add-cer-etape',
   'an-nom','an-heure','an-resp','an-lieu','an-pers','an-mat','an-mus',
