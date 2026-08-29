@@ -141,10 +141,19 @@
   .guest-mcard .mrow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;}
   .guest-mcard label.mlbl{font-size:10px;color:var(--ink-soft);display:block;margin-bottom:2px;}
   @media print{
-    #header,.pool,.readonly-banner,footer,.btn,.quickgrid,#search-panel{display:none !important;}
-    body{background:#fff;}
-    .card{border:1px solid #ccc;break-inside:avoid;}
+    #header,.pool,.readonly-banner,footer,.btn,.quickgrid,#search-panel,.icon-btn,.tabbar,select{display:none !important;}
+    input,textarea:not(.auto-grow){display:none !important;}
+    textarea.auto-grow{border:none !important;padding:0 !important;font-size:12px;}
+    body{background:#fff;font-size:11px;}
+    .card{border:1px solid #ccc;break-inside:avoid;padding:8px 10px !important;}
     #main{padding:0;max-width:100%;}
+    .tl-card{padding:5px 8px;margin-bottom:4px;break-inside:avoid;}
+    .tl-group{gap:8px;}
+    .tl-time{width:40px;font-size:10px;padding-top:5px;}
+    .tl-line{padding-left:8px;padding-bottom:5px;}
+    .title,.tl-card .title{font-size:12px;}
+    h2.display{font-size:18px !important;margin:0 0 4px !important;}
+    p.muted{margin:0 0 8px !important;font-size:10px !important;}
   }
 </style>
 </head>
@@ -751,8 +760,18 @@ function guestCardMobile(g){
 }
 var PRESENCE_ORDER = { confirme:0, attente:1, absent:2 };
 function setGuestsSortKey(v){ UI.guestsSortKey=v; render(); }
+function lastWord_(s){
+  var parts=(s||'').trim().split(/\s+/);
+  return parts[parts.length-1] || '';
+}
 function cmpGuests(a,b,key){
   if(key==='presence'){ return PRESENCE_ORDER[a.presence]-PRESENCE_ORDER[b.presence]; }
+  if(key==='famille'){
+    var af=lastWord_(a.nom).toLowerCase(), bf=lastWord_(b.nom).toLowerCase();
+    if(af<bf) return -1;
+    if(af>bf) return 1;
+    return 0;
+  }
   var av=(a[key]||'').toString().toLowerCase();
   var bv=(b[key]||'').toString().toLowerCase();
   if(key==='groupe'){ if(!av&&bv) return 1; if(av&&!bv) return -1; }
@@ -767,7 +786,7 @@ function viewGuests(){
 
   var search=(UI.guestsSearch||'').toLowerCase();
   var filter=UI.guestsFilter||'tous';
-  var sortKey=UI.guestsSortKey||'nom';
+  var sortKey=UI.guestsSortKey||'famille';
   var filtered = STATE.guests.filter(function(g){
     if(search && g.nom.toLowerCase().indexOf(search)<0) return false;
     if(filter==='confirme'&&g.presence!=='confirme') return false;
@@ -778,7 +797,7 @@ function viewGuests(){
     return true;
   }).slice().sort(function(a,b){ return cmpGuests(a,b,sortKey); });
   var filters=[['tous','Tous'],['confirme','Confirmés'],['attente','En attente'],['absent','Absents'],['heberges','Hébergés'],['vin',"Vin d'honneur"]];
-  var sortOptions=[['nom','Nom'],['presence','Présence'],['groupe','Catégorie']];
+  var sortOptions=[['nom','Nom'],['famille','Nom de famille'],['presence','Présence'],['groupe','Catégorie']];
   html += '<p class="muted" style="font-size:12px;margin-top:-6px;">'+filtered.length+'/'+STATE.guests.length+' affichés — regroupés par catégorie</p>';
   html += '<div class="row-flex" style="margin:12px 0;">'+
     '<input id="guests-search" placeholder="Rechercher..." style="max-width:240px;border-radius:999px;" value="'+esc(UI.guestsSearch||'')+'" oninput="setGuestsSearch(this.value)"/>'+
