@@ -667,7 +667,7 @@ function myMissionsHtml(person){
   var selDay = UI.missionsDay && DAY_ORDER.indexOf(UI.missionsDay)>=0 ? UI.missionsDay : 'Samedi';
   html += '<div style="margin-top:6px;"><div class="eyebrow">Planning de '+esc(person)+'</div>'+
     '<div class="tabbar" style="margin-top:8px;">'+DAY_ORDER.map(function(d){return '<button class="'+(selDay===d?'active':'')+'" onclick="UI.missionsDay=\''+d+'\';render();">'+d+'</button>';}).join('')+'</div>';
-  var evs = STATE.planning.filter(function(e){ return e.jour===selDay && (e.personnes.indexOf(person)>=0 || e.important); })
+  var evs = STATE.planning.filter(function(e){ return e.jour===selDay && (e.personnes.indexOf(person)>=0 || (e.important && (!e.hiddenFor || e.hiddenFor.indexOf(person)<0))); })
     .map(function(e){
       if(e.overrides && e.overrides[person]){ return Object.assign({}, e, {heure: e.overrides[person]}); }
       return e;
@@ -835,6 +835,16 @@ function setPlanningDay(d){UI.planningDay=d;render();}
 function setPlanningPerson(p){UI.planningPerson=p;render();}
 function updatePlanningEvent(id,patch){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,patch):e;})); }
 function deletePlanningEvent(id){ if(!confirm('Supprimer cet événement ?')) return; save('planning', STATE.planning.filter(function(e){return e.id!==id;})); }
+function hideEventForPerson(id, person){
+  if(!confirm('Retirer cet événement du planning de '+person+' ? (il restera visible pour "Tout le monde" et les autres)')) return;
+  save('planning', STATE.planning.map(function(e){
+    if(e.id!==id) return e;
+    var hidden = (e.hiddenFor||[]).slice();
+    if(hidden.indexOf(person)<0) hidden.push(person);
+    return Object.assign({}, e, {hiddenFor: hidden});
+  }));
+  clearEditing();
+}
 function toggleImportant(id){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,{important:!e.important}):e;})); }
 function addPlanningEvent(person){
   var titre=val('add-ev-titre');
@@ -876,7 +886,11 @@ function eventCardHtml(e, person){
       '<input id="ev-edit-lieu" value="'+esc(e.lieu||'')+'" placeholder="Lieu (optionnel, pour le GPS)" style="margin-top:6px;"/>'+
       (person&&isShared?'<div class="muted" style="font-size:11px;margin-top:8px;">Heure personnalisée pour '+esc(person)+' (n\'affecte pas "Tout le monde") — laisser vide pour garder l\'heure commune</div>'+
         '<input id="ev-edit-override" value="'+esc(overrideHeure||'')+'" placeholder="ex. 12h15" style="margin-top:4px;width:120px;"/>':'')+
-      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+(personArg?','+personArg:'')+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
+      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;">'+
+        (person&&isShared?
+          '<button class="icon-btn danger" onclick="hideEventForPerson('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">🗑 Retirer pour '+esc(person)+'</button>'
+          :'<button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button>')+
+        '<div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+(personArg?','+personArg:'')+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
   var parsed = parseEventTitle(e.titre);
@@ -921,7 +935,7 @@ function viewPlanning(){
   var evs = STATE.planning.filter(function(e){
     if(e.jour!==day) return false;
     if(onlyMajor) return e.important;
-    return e.personnes.indexOf(person)>=0 || e.important;
+    return e.personnes.indexOf(person)>=0 || (e.important && (!e.hiddenFor || e.hiddenFor.indexOf(person)<0));
   }).map(function(e){
     if(!onlyMajor && e.overrides && e.overrides[person]){
       return Object.assign({}, e, {heure: e.overrides[person]});
