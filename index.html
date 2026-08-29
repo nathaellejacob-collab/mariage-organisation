@@ -1070,7 +1070,7 @@ function viewCeremony(){
     '<div class="card" style="margin-top:14px;"><div class="eyebrow" style="margin-bottom:10px;">Cortèges</div>'+
     [['civil','Cortège civil'],['laique','Cortège laïque'],['voiture','Cortège en voiture']].map(function(f){
       return '<div class="field" style="margin-bottom:12px;"><label>'+f[1]+'</label>'+
-        (CAN_EDIT?'<textarea rows="2" onchange="saveCortegeField(\''+f[0]+'\',this.value)">'+esc(c[f[0]])+'</textarea>':'<p style="font-size:13px;">'+(c[f[0]]?esc(c[f[0]]):'<span class="muted">Non renseigné.</span>')+'</p>')+
+        (CAN_EDIT?'<textarea class="auto-grow" rows="2" oninput="autoGrow(this)" onchange="saveCortegeField(\''+f[0]+'\',this.value)">'+esc(c[f[0]])+'</textarea>':'<p style="font-size:13px;white-space:pre-wrap;">'+(c[f[0]]?esc(c[f[0]]):'<span class="muted">Non renseigné.</span>')+'</p>')+
       '</div>';
     }).join('') +
     '</div>'+
