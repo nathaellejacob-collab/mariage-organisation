@@ -26,6 +26,7 @@
   a{color:inherit;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
   input,select,textarea{font-family:inherit;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;background:var(--paper);color:var(--ink);width:100%;}
+  textarea.auto-grow{overflow:hidden;resize:none;}
   input[type="checkbox"]{accent-color:var(--gold);width:auto;}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);}
   .pill{border-radius:999px;}
@@ -476,6 +477,11 @@ function render() {
       }
     }
   }
+  document.querySelectorAll('.auto-grow').forEach(autoGrow);
+}
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 2) + 'px';
 }
 
 function toggleSearch() {
@@ -1164,7 +1170,7 @@ function viewRoleGuide(key, title){
   '<div class="card" style="margin-top:12px;">'+
     ['role','avant','jourJ'].map(function(f){
       return '<div class="field" style="margin-bottom:14px;"><label>'+labels[f]+'</label>'+
-        (CAN_EDIT?'<textarea rows="3" onchange="saveHonneurField(\''+key+'\',\''+f+'\',this.value)">'+esc(data[f])+'</textarea>':'<p style="font-size:13px;">'+(data[f]?esc(data[f]):'<span class="muted">Non renseigné.</span>')+'</p>')+
+        (CAN_EDIT?'<textarea class="auto-grow" rows="3" oninput="autoGrow(this)" onchange="saveHonneurField(\''+key+'\',\''+f+'\',this.value)">'+esc(data[f])+'</textarea>':'<p style="font-size:13px;white-space:pre-wrap;">'+(data[f]?esc(data[f]):'<span class="muted">Non renseigné.</span>')+'</p>')+
       '</div>';
     }).join('') +
   '</div>'+
