@@ -846,12 +846,13 @@ function hideEventForPerson(id, person){
   clearEditing();
 }
 function toggleImportant(id){ save('planning', STATE.planning.map(function(e){return e.id===id?Object.assign({},e,{important:!e.important}):e;})); }
-function addPlanningEvent(person){
+function addPlanningEvent(){
   var titre=val('add-ev-titre');
   if(!titre.trim()) return;
+  var target = val('add-ev-target');
   var id=uid(STATE.planning);
-  var personnes = (person && person!=="Tout le monde") ? [person] : [];
-  var important = !person || person==="Tout le monde";
+  var personnes = (target && target!=="Tout le monde") ? [target] : [];
+  var important = !target || target==="Tout le monde";
   save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,lieu:val('add-ev-lieu'),personnes:personnes,important:important,overrides:{}}]));
 }
 function saveEventEdit(id, person){
@@ -955,11 +956,19 @@ function viewPlanning(){
     html += timelineHtml(groups, onlyMajor ? null : person);
   }
   if(CAN_EDIT){
-    html+='<div class="row-flex" style="margin-top:14px;flex-wrap:wrap;">'+
-      '<input id="add-ev-heure" placeholder="Heure" style="width:80px;"/>'+
-      '<input id="add-ev-titre" placeholder="Titre" style="flex:1;min-width:140px;"/>'+
-      '<input id="add-ev-lieu" placeholder="Lieu (optionnel, GPS)" style="flex:1;min-width:160px;"/>'+
-      '<button class="btn" onclick="addPlanningEvent(\''+esc(person).replace(/\047/g,"\\'")+'\')">+ Ajouter'+(onlyMajor?'':' pour '+esc(person))+'</button>'+
+    html+='<div style="margin-top:14px;">'+
+      '<div class="row-flex" style="flex-wrap:wrap;">'+
+        '<input id="add-ev-heure" placeholder="Heure" style="width:80px;"/>'+
+        '<input id="add-ev-titre" placeholder="Titre" style="flex:1;min-width:140px;"/>'+
+        '<input id="add-ev-lieu" placeholder="Lieu (optionnel, GPS)" style="flex:1;min-width:160px;"/>'+
+      '</div>'+
+      '<div class="row-flex" style="margin-top:6px;flex-wrap:wrap;">'+
+        '<select id="add-ev-target" style="max-width:220px;">'+
+          '<option '+(person==="Tout le monde"?'selected':'')+'>Tout le monde</option>'+
+          people.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+
+        '</select>'+
+        '<button class="btn" onclick="addPlanningEvent()">+ Ajouter</button>'+
+      '</div>'+
     '</div>';
   }
   html+='</div>';
