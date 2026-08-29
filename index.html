@@ -755,7 +755,7 @@ function updateGuestVinHonneur(id, checked){
 function removeGuest(id){ if(!confirm('Supprimer cet invité ?')) return; save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
   var id=uid(STATE.guests);
-  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",notes:""}]));
+  save('guests', STATE.guests.concat([{id:id,nom:"Nouvel invité",groupe:"",presence:"attente",accompagnants:0,menu:"",vinHonneur:false,hebergement:false,brunch:false,chambre:"",table:"",role:"",adresse:"",notes:""}]));
 }
 function setGuestsSearch(v){ UI.guestsSearch=v; render(); }
 function setGuestsFilter(v){ UI.guestsFilter=v; render(); }
@@ -784,6 +784,7 @@ function guestCardMobile(g){
       '<div style="flex:1;"><label class="mlbl">Chambre</label><input value="'+esc(g.chambre)+'" onchange="updateGuest('+g.id+',\'chambre\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
       '<div style="flex:1;"><label class="mlbl">Table</label><input value="'+esc(g.table)+'" onchange="updateGuest('+g.id+',\'table\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div>'+
     '</div>' : '')+
+    '<div class="mrow"><div style="flex:1;"><label class="mlbl">Adresse</label><input value="'+esc(g.adresse||'')+'" onchange="updateGuest('+g.id+',\'adresse\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div></div>'+
     '<div class="mrow"><div style="flex:1;"><label class="mlbl">Notes</label><input value="'+esc(g.notes)+'" onchange="updateGuest('+g.id+',\'notes\',this.value)" '+(CAN_EDIT?'':'disabled')+'/></div></div>'+
     (CAN_EDIT?'<div style="text-align:right;margin-top:6px;"><button class="icon-btn danger" style="font-size:11px;" onclick="removeGuest('+g.id+')">🗑 Supprimer</button></div>':'')+
   '</div>';
