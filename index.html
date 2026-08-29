@@ -562,18 +562,34 @@ function viewFor(tab) {
 function stat(icon, label, value, sub, tab) {
   return '<button class="stat" onclick="go(\''+tab+'\')"><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
 }
+function normName_(s){ return (s||'').toString().trim().replace(/\s+/g,' '); }
 function isVendorPerson(name){
-  return STATE.vendors.some(function(v){ return (v.categorie && v.categorie===name) || (v.nom && v.nom===name); });
+  var n = normName_(name).toLowerCase();
+  return STATE.vendors.some(function(v){
+    var cat = normName_(v.categorie).toLowerCase();
+    var nom = normName_(v.nom).toLowerCase();
+    if(cat && cat===n) return true;
+    if(nom && nom===n) return true;
+    if(cat && (n.indexOf(cat)>=0 || cat.indexOf(n)>=0)) return true;
+    if(cat && cat.length>=5 && n.length>=5 && cat.slice(0,5)===n.slice(0,5)) return true;
+    return false;
+  });
 }
 function allKnownPeople(){
-  return Array.from(new Set(
-    STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[])
-      .concat((STATE.honneur.demoiselles.missions||[]).map(function(m){return m.responsable;}))
-      .concat((STATE.honneur.temoins.missions||[]).map(function(m){return m.responsable;}))
-      .concat((STATE.honneur.demoiselles.qui||'').split(',').map(function(s){return s.trim();}))
-      .concat((STATE.honneur.temoins.qui||'').split(',').map(function(s){return s.trim();}))
-      .filter(Boolean)
-  )).sort();
+  var seen = {};
+  var out = [];
+  STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[])
+    .concat((STATE.honneur.demoiselles.missions||[]).map(function(m){return m.responsable;}))
+    .concat((STATE.honneur.temoins.missions||[]).map(function(m){return m.responsable;}))
+    .concat((STATE.honneur.demoiselles.qui||'').split(',').map(function(s){return s.trim();}))
+    .concat((STATE.honneur.temoins.qui||'').split(',').map(function(s){return s.trim();}))
+    .forEach(function(raw){
+      var n = normName_(raw);
+      if(!n) return;
+      var key = n.toLowerCase();
+      if(!seen[key]){ seen[key]=true; out.push(n); }
+    });
+  return out.sort();
 }
 function viewDashboard() {
   var now = new Date();
@@ -634,7 +650,8 @@ function viewDashboard() {
     '<div class="flex-between"><div class="eyebrow">Quel est votre programme ?</div>'+(selPerson?'<button class="btn-outline" style="font-size:11px;" onclick="window.print()">🖨️ Imprimer</button>':'')+'</div>'+
     '<select style="max-width:280px;border-radius:999px;margin-top:8px;" onchange="UI.dashPerson=this.value;render();">'+
       '<option value="">Choisir un nom</option>'+
-      knownPeople.map(function(p){return '<option '+(p===selPerson?'selected':'')+'>'+esc(p)+'</option>';}).join('')+
+      '<optgroup label="Personnes">'+knownPeople.filter(function(p){return !isVendorPerson(p);}).map(function(p){return '<option '+(p===selPerson?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>'+
+      (knownPeople.some(isVendorPerson)?'<optgroup label="Prestataires">'+knownPeople.filter(isVendorPerson).map(function(p){return '<option '+(p===selPerson?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>':'')+
     '</select>'+
     (selPerson ? myMissionsHtml(selPerson) : '')+
   '</div>'+
