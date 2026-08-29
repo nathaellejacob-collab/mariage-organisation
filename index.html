@@ -562,6 +562,9 @@ function viewFor(tab) {
 function stat(icon, label, value, sub, tab) {
   return '<button class="stat" onclick="go(\''+tab+'\')"><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
 }
+function isVendorPerson(name){
+  return STATE.vendors.some(function(v){ return (v.categorie && v.categorie===name) || (v.nom && v.nom===name); });
+}
 function allKnownPeople(){
   return Array.from(new Set(
     STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[])
@@ -673,7 +676,7 @@ function myMissionsHtml(person){
   var selDay = UI.missionsDay && DAY_ORDER.indexOf(UI.missionsDay)>=0 ? UI.missionsDay : 'Samedi';
   html += '<div style="margin-top:6px;"><div class="eyebrow">Planning de '+esc(person)+'</div>'+
     '<div class="tabbar" style="margin-top:8px;">'+DAY_ORDER.map(function(d){return '<button class="'+(selDay===d?'active':'')+'" onclick="UI.missionsDay=\''+d+'\';render();">'+d+'</button>';}).join('')+'</div>';
-  var evs = STATE.planning.filter(function(e){ return e.jour===selDay && (e.personnes.indexOf(person)>=0 || (e.important && (!e.hiddenFor || e.hiddenFor.indexOf(person)<0))); })
+  var evs = STATE.planning.filter(function(e){ return e.jour===selDay && (e.personnes.indexOf(person)>=0 || (!isVendorPerson(person) && e.important && (!e.hiddenFor || e.hiddenFor.indexOf(person)<0))); })
     .map(function(e){
       if(e.overrides && e.overrides[person]){ return Object.assign({}, e, {heure: e.overrides[person]}); }
       return e;
@@ -898,6 +901,8 @@ function eventCardHtml(e, person){
   if(EDITING.type==='event'&&EDITING.id===e.id){
     var personArg = person ? "'"+esc(person).replace(/\047/g,"\\'")+"'" : '';
     var candidates = allKnownPeople();
+    var candPersons = candidates.filter(function(p){ return !isVendorPerson(p); });
+    var candVendors = candidates.filter(function(p){ return isVendorPerson(p); });
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       (person&&isShared?'<div class="chip" style="background:var(--champagne-soft);color:var(--gold);margin-bottom:8px;align-self:flex-start;">Événement partagé — visible pour Tout le monde</div>':'')+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
@@ -906,7 +911,8 @@ function eventCardHtml(e, person){
         '<input id="ev-edit-override" value="'+esc(overrideHeure||'')+'" placeholder="ex. 12h15" style="margin-top:4px;width:120px;"/>':'')+
       (!person?'<div class="muted" style="font-size:11px;margin-top:8px;">Dupliquer cet événement pour une personne en particulier</div>'+
         '<div class="row-flex" style="margin-top:4px;"><select id="ev-dup-target" style="flex:1;">'+
-          candidates.map(function(p){return '<option>'+esc(p)+'</option>';}).join('')+
+          '<optgroup label="Personnes">'+candPersons.map(function(p){return '<option>'+esc(p)+'</option>';}).join('')+'</optgroup>'+
+          (candVendors.length?'<optgroup label="Prestataires">'+candVendors.map(function(p){return '<option>'+esc(p)+'</option>';}).join('')+'</optgroup>':'')+
         '</select><button class="btn" onclick="duplicateEventForPerson('+e.id+')">Dupliquer</button></div>':'')+
       (person&&isShared?
         '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">'+
@@ -947,9 +953,12 @@ function viewPlanning(){
     '<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button>'+
   '</div>';
 
+  var peoplePersons = people.filter(function(p){ return !isVendorPerson(p); });
+  var peopleVendors = people.filter(function(p){ return isVendorPerson(p); });
   html+='<select style="max-width:280px;border-radius:999px;margin-top:12px;" onchange="setPlanningPerson(this.value)">'+
     '<option '+(person==="Tout le monde"?'selected':'')+'>Tout le monde</option>'+
-    people.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+
+    '<optgroup label="Personnes">'+peoplePersons.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>'+
+    (peopleVendors.length?'<optgroup label="Prestataires">'+peopleVendors.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>':'')+
   '</select>';
 
   var GENERAL_DAYS = ["Vendredi","Samedi","Dimanche"];
@@ -960,7 +969,7 @@ function viewPlanning(){
   var evs = STATE.planning.filter(function(e){
     if(e.jour!==day) return false;
     if(onlyMajor) return e.important;
-    return e.personnes.indexOf(person)>=0 || (e.important && (!e.hiddenFor || e.hiddenFor.indexOf(person)<0));
+    return e.personnes.indexOf(person)>=0 || (!isVendorPerson(person) && e.important && (!e.hiddenFor || e.hiddenFor.indexOf(person)<0));
   }).map(function(e){
     if(!onlyMajor && e.overrides && e.overrides[person]){
       return Object.assign({}, e, {heure: e.overrides[person]});
@@ -985,7 +994,8 @@ function viewPlanning(){
       '<div class="row-flex" style="margin-top:6px;flex-wrap:wrap;">'+
         '<select id="add-ev-target" style="max-width:220px;">'+
           '<option '+(person==="Tout le monde"?'selected':'')+'>Tout le monde</option>'+
-          people.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+
+          '<optgroup label="Personnes">'+peoplePersons.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>'+
+          (peopleVendors.length?'<optgroup label="Prestataires">'+peopleVendors.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>':'')+
         '</select>'+
         '<button class="btn" onclick="addPlanningEvent()">+ Ajouter</button>'+
       '</div>'+
