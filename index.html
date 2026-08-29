@@ -844,18 +844,17 @@ function addPlanningEvent(person){
   var important = !person || person==="Tout le monde";
   save('planning', STATE.planning.concat([{id:id,jour:UI.planningDay,heure:val('add-ev-heure')||'00h00',titre:titre,lieu:val('add-ev-lieu'),personnes:personnes,important:important,overrides:{}}]));
 }
-function saveEventEdit(id){
+function saveEventEdit(id, person){
   updatePlanningEvent(id,{heure:val('ev-edit-heure'),titre:val('ev-edit-titre'),lieu:val('ev-edit-lieu')});
-  clearEditing();
-}
-function setEventOverride(id, person){
-  var v = val('ev-override-heure');
-  save('planning', STATE.planning.map(function(e){
-    if(e.id!==id) return e;
-    var next = Object.assign({}, e.overrides||{});
-    if(v.trim()){ next[person] = v.trim(); } else { delete next[person]; }
-    return Object.assign({}, e, {overrides: next});
-  }));
+  if(person){
+    var v = val('ev-edit-override');
+    save('planning', STATE.planning.map(function(e){
+      if(e.id!==id) return e;
+      var next = Object.assign({}, e.overrides||{});
+      if(v && v.trim()){ next[person] = v.trim(); } else { delete next[person]; }
+      return Object.assign({}, e, {overrides: next});
+    }));
+  }
   clearEditing();
 }
 function clearEventOverride(id, person){
@@ -871,17 +870,13 @@ function eventCardHtml(e, person){
   var overrideHeure = (person && isShared && e.overrides && e.overrides[person]) ? e.overrides[person] : null;
 
   if(EDITING.type==='event'&&EDITING.id===e.id){
+    var personArg = person ? "'"+esc(person).replace(/\047/g,"\\'")+"'" : '';
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<div class="row-flex"><input id="ev-edit-heure" value="'+esc(e.heure)+'" style="width:70px;" placeholder="Heure"/><input id="ev-edit-titre" value="'+esc(e.titre)+'" style="flex:1;" placeholder="Titre"/></div>'+
       '<input id="ev-edit-lieu" value="'+esc(e.lieu||'')+'" placeholder="Lieu (optionnel, pour le GPS)" style="margin-top:6px;"/>'+
-      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
-    '</div>';
-  }
-  if(EDITING.type==='override'&&EDITING.id===e.id){
-    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
-      '<div class="muted" style="font-size:12px;margin-bottom:4px;">Heure personnalisée pour '+esc(person)+' (n\'affecte pas "Tout le monde")</div>'+
-      '<div class="row-flex"><input id="ev-override-heure" value="'+esc(overrideHeure||e.heure)+'" style="width:90px;" placeholder="Heure"/>'+
-        '<button class="btn" onclick="setEventOverride('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div>'+
+      (person&&isShared?'<div class="muted" style="font-size:11px;margin-top:8px;">Heure personnalisée pour '+esc(person)+' (n\'affecte pas "Tout le monde") — laisser vide pour garder l\'heure commune</div>'+
+        '<input id="ev-edit-override" value="'+esc(overrideHeure||'')+'" placeholder="ex. 12h15" style="margin-top:4px;width:120px;"/>':'')+
+      '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveEventEdit('+e.id+(personArg?','+personArg:'')+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
   var parsed = parseEventTitle(e.titre);
@@ -889,10 +884,7 @@ function eventCardHtml(e, person){
       '<div><div class="title">'+esc(parsed.titre)+'</div>'+(parsed.range?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(parsed.range)+'</div>':'')+(e.lieu?'<div style="font-size:11px;margin-top:2px;">'+mapsLink(e.lieu)+'</div>':'')+
         (overrideHeure?'<div class="gold" style="font-size:11px;margin-top:2px;">Heure décalée pour '+esc(person)+' : '+esc(overrideHeure)+' <button class="icon-btn" style="padding:0;" onclick="clearEventOverride('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">✕</button></div>':'')+
       '</div>'+
-      '<div class="row-flex">'+
-        (person&&isShared&&CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;font-size:11px;" onclick="setEditing(\'override\','+e.id+')" title="Décaler l\'heure pour '+esc(person)+'">🕐</button>':'')+
-        (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
-      '</div>'+
+      (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
   '</div></div>';
 }
 function timelineHtml(groups, person){
@@ -1608,7 +1600,7 @@ document.addEventListener('click', function(e){
     }
   }
 });
-var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','ev-override-heure','add-ev-heure','add-ev-titre','add-ev-lieu',
+var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','ev-edit-override','add-ev-heure','add-ev-titre','add-ev-lieu',
   'mission-add-ev-heure','mission-add-ev-titre','mission-add-ev-lieu',
   'cer-debut','cer-fin','cer-duree','cer-etape','cer-musique','add-cer-debut','add-cer-fin','add-cer-duree','add-cer-etape',
   'an-nom','an-heure','an-resp','an-lieu','an-pers','an-mat','an-mus',
