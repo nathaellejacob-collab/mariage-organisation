@@ -562,6 +562,16 @@ function viewFor(tab) {
 function stat(icon, label, value, sub, tab) {
   return '<button class="stat" onclick="go(\''+tab+'\')"><div><div class="val">'+value+'</div><div class="lbl">'+esc(label)+'</div>'+(sub?'<div class="muted" style="font-size:10px;">'+esc(sub)+'</div>':'')+'</div></button>';
 }
+function allKnownPeople(){
+  return Array.from(new Set(
+    STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[])
+      .concat((STATE.honneur.demoiselles.missions||[]).map(function(m){return m.responsable;}))
+      .concat((STATE.honneur.temoins.missions||[]).map(function(m){return m.responsable;}))
+      .concat((STATE.honneur.demoiselles.qui||'').split(',').map(function(s){return s.trim();}))
+      .concat((STATE.honneur.temoins.qui||'').split(',').map(function(s){return s.trim();}))
+      .filter(Boolean)
+  )).sort();
+}
 function viewDashboard() {
   var now = new Date();
   var diff = WEDDING_DATE.getTime() - now.getTime();
@@ -584,12 +594,7 @@ function viewDashboard() {
     .sort(function(a,b){ return timeToMinutes(a.heure)-timeToMinutes(b.heure); })
     .map(function(e){ var p = parseEventTitle(e.titre); return {h:e.heure, t:p.titre, range:p.range}; });
   var urgentVendors = STATE.vendors.filter(function(v){ return v.urgent && v.telephone; });
-  var knownPeople = Array.from(new Set(
-    STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[])
-      .concat((STATE.honneur.demoiselles.missions||[]).map(function(m){return m.responsable;}))
-      .concat((STATE.honneur.temoins.missions||[]).map(function(m){return m.responsable;}))
-      .filter(Boolean)
-  )).sort();
+  var knownPeople = allKnownPeople();
   var selPerson = UI.dashPerson && knownPeople.indexOf(UI.dashPerson)>=0 ? UI.dashPerson : '';
   return '<div class="fade">'+
   '<div class="card" style="padding:32px;">'+
@@ -606,8 +611,9 @@ function viewDashboard() {
       '</div>'
     )+
     '<div style="height:1px;background:linear-gradient(to right, transparent, var(--gold), transparent);margin:14px 0;"></div>'+
-    '<div class="grid2" style="text-align:center;">'+
+    '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;text-align:center;">'+
       '<div style="font-size:13px;">'+mapsLink('Mairie de Saint-Jean-de-Moirans', 'Mairie de Saint-Jean-de-Moirans')+'</div>'+
+      '<div style="font-size:13px;">'+mapsLink('Mairie de Saint-Romans', 'Mairie de Saint-Romans')+'</div>'+
       '<div style="font-size:13px;">'+mapsLink('Château des Anges', 'Château des Anges')+'</div>'+
     '</div>'+
   '</div>'+
@@ -915,7 +921,7 @@ function timelineHtml(groups, person){
   }).join('');
 }
 function viewPlanning(){
-  var people=Array.from(new Set(STATE.planning.reduce(function(a,e){return a.concat(e.personnes);},[]))).sort();
+  var people = allKnownPeople();
   var person = UI.planningPerson && people.indexOf(UI.planningPerson)>=0 ? UI.planningPerson : "Tout le monde";
   var onlyMajor = person === "Tout le monde";
 
