@@ -1260,21 +1260,19 @@ function addDepense(){
   var titre=val('add-dp-titre');
   if(!titre.trim()) return;
   var montant = parseFloat((val('add-dp-montant')||'').replace(/\s/g,'').replace(',','.'))||0;
+  var montantPaye = parseFloat((val('add-dp-paye')||'').replace(/\s/g,'').replace(',','.'))||0;
   var id=uid(STATE.budget.depenses);
-  var next = STATE.budget.depenses.concat([{id:id,titre:titre,categorie:val('add-dp-cat'),montant:montant,paye:false,prestataire:val('add-dp-prest'),notes:''}]);
+  var next = STATE.budget.depenses.concat([{id:id,titre:titre,categorie:val('add-dp-cat'),montant:montant,montantPaye:montantPaye,prestataire:val('add-dp-prest'),notes:''}]);
   save('budget', Object.assign({},STATE.budget,{depenses:next}));
   UI.addingDepense=false;
 }
 function saveDepenseEdit(id){
   var montant = parseFloat((val('dp-montant')||'').replace(/\s/g,'').replace(',','.'))||0;
-  var patch={titre:val('dp-titre'),categorie:val('dp-cat'),montant:montant,prestataire:val('dp-prest'),notes:val('dp-notes')};
+  var montantPaye = parseFloat((val('dp-paye')||'').replace(/\s/g,'').replace(',','.'))||0;
+  var patch={titre:val('dp-titre'),categorie:val('dp-cat'),montant:montant,montantPaye:montantPaye,prestataire:val('dp-prest'),notes:val('dp-notes')};
   var next = STATE.budget.depenses.map(function(d){return d.id===id?Object.assign({},d,patch):d;});
   save('budget', Object.assign({},STATE.budget,{depenses:next}));
   clearEditing();
-}
-function toggleDepensePaye(id){
-  var next = STATE.budget.depenses.map(function(d){return d.id===id?Object.assign({},d,{paye:!d.paye}):d;});
-  save('budget', Object.assign({},STATE.budget,{depenses:next}));
 }
 function deleteDepense(id){
   if(!confirm('Supprimer cette dépense ?')) return;
@@ -1282,12 +1280,17 @@ function deleteDepense(id){
   save('budget', Object.assign({},STATE.budget,{depenses:next}));
 }
 function depenseRowHtml(d){
+  var montantPaye = Math.min(d.montantPaye||0, d.montant||0);
+  var reste = (d.montant||0)-montantPaye;
   if(EDITING.type==='depense'&&EDITING.id===d.id){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
       '<input id="dp-titre" value="'+esc(d.titre)+'" placeholder="Titre de la dépense"/>'+
       '<div class="row-flex" style="margin-top:6px;">'+
         '<select id="dp-cat" style="flex:1;"><option value="">Catégorie</option>'+BUDGET_CATEGORIES.map(function(c){return '<option '+(d.categorie===c?'selected':'')+'>'+c+'</option>';}).join('')+'</select>'+
-        '<input id="dp-montant" value="'+esc(d.montant)+'" placeholder="Montant" style="width:110px;"/>'+
+        '<input id="dp-montant" value="'+esc(d.montant)+'" placeholder="Montant total" style="width:110px;"/>'+
+      '</div>'+
+      '<div class="row-flex" style="margin-top:6px;">'+
+        '<input id="dp-paye" value="'+esc(d.montantPaye||0)+'" placeholder="Déjà payé" style="flex:1;"/>'+
       '</div>'+
       '<input id="dp-prest" value="'+esc(d.prestataire||'')+'" placeholder="Prestataire (facultatif)" style="margin-top:6px;"/>'+
       '<input id="dp-notes" value="'+esc(d.notes||'')+'" placeholder="Notes" style="margin-top:6px;"/>'+
@@ -1295,19 +1298,21 @@ function depenseRowHtml(d){
     '</div>';
   }
   return '<div class="listrow">'+
-    '<button class="icon-btn" style="font-size:17px;color:'+(d.paye?'#5C8A5A':'#D8CDBB')+';" onclick="toggleDepensePaye('+d.id+')">'+(d.paye?'☑':'☐')+'</button>'+
     '<div style="flex:1;"><div style="font-size:13px;">'+esc(d.titre)+'</div>'+
     '<div class="muted" style="font-size:11px;margin-top:2px;">'+(d.categorie?esc(d.categorie):'')+(d.prestataire?' · '+esc(d.prestataire):'')+'</div></div>'+
-    '<div style="text-align:right;flex-shrink:0;"><div style="font-size:13px;font-weight:500;">'+fmtEUR_(d.montant)+'</div><div class="muted" style="font-size:10px;">'+(d.paye?'Payé':'En attente')+'</div></div>'+
+    '<div style="text-align:right;flex-shrink:0;">'+
+      '<div style="font-size:13px;font-weight:500;">'+fmtEUR_(d.montant)+'</div>'+
+      '<div class="muted" style="font-size:10px;">'+(reste<=0?'<span class="gold">Payé</span>':'Payé '+fmtEUR_(montantPaye)+' · Reste '+fmtEUR_(reste))+'</div>'+
+    '</div>'+
     (CAN_EDIT?'<button class="icon-btn" onclick="setEditing(\'depense\','+d.id+')">✎</button>':'')+
   '</div>';
 }
 function viewBudget(){
   var b = STATE.budget;
   var depenses = b.depenses||[];
-  var paye = depenses.filter(function(d){return d.paye;}).reduce(function(s,d){return s+(d.montant||0);},0);
-  var attente = depenses.filter(function(d){return !d.paye;}).reduce(function(s,d){return s+(d.montant||0);},0);
-  var engage = paye+attente;
+  var paye = depenses.reduce(function(s,d){return s+Math.min(d.montantPaye||0, d.montant||0);},0);
+  var engage = depenses.reduce(function(s,d){return s+(d.montant||0);},0);
+  var attente = engage-paye;
   var total = b.total||0;
   var restant = total-engage;
   var pct = total>0 ? Math.round(engage/total*100) : 0;
@@ -1325,8 +1330,8 @@ function viewBudget(){
       '</div>'+
       '<div style="text-align:left;font-size:13px;">'+
         '<div class="flex-between" style="padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Payé</span><span>'+fmtEUR_(paye)+'</span></div>'+
-        '<div class="flex-between" style="padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">En attente de paiement</span><span>'+fmtEUR_(attente)+'</span></div>'+
-        '<div class="flex-between" style="padding:8px 0;"><span class="muted">Restant</span><span style="font-weight:600;">'+fmtEUR_(restant)+'</span></div>'+
+        '<div class="flex-between" style="padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Reste à payer</span><span>'+fmtEUR_(attente)+'</span></div>'+
+        '<div class="flex-between" style="padding:8px 0;"><span class="muted">Restant du budget</span><span style="font-weight:600;">'+fmtEUR_(restant)+'</span></div>'+
       '</div>'+
     '</div>'+
     '<div class="flex-between" style="margin-top:20px;"><h3 class="display" style="font-size:20px;margin:0;">Dépenses</h3>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingDepense=true;render();">+ Ajouter</button>':'')+'</div>';
@@ -1336,7 +1341,10 @@ function viewBudget(){
       '<input id="add-dp-titre" placeholder="Titre de la dépense"/>'+
       '<div class="row-flex" style="margin-top:6px;">'+
         '<select id="add-dp-cat" style="flex:1;"><option value="">Catégorie</option>'+BUDGET_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'+
-        '<input id="add-dp-montant" placeholder="Montant" style="width:110px;"/>'+
+        '<input id="add-dp-montant" placeholder="Montant total" style="width:110px;"/>'+
+      '</div>'+
+      '<div class="row-flex" style="margin-top:6px;">'+
+        '<input id="add-dp-paye" placeholder="Déjà payé (facultatif)" style="flex:1;"/>'+
       '</div>'+
       '<input id="add-dp-prest" placeholder="Prestataire (facultatif)" style="margin-top:6px;"/>'+
       '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addDepense()">✓</button><button class="btn-outline" onclick="UI.addingDepense=false;render();">✕</button></div>'+
@@ -1825,7 +1833,7 @@ var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','ev-
   'add-an-nom','add-an-heure','add-an-resp','add-an-lieu',
   'vd-cat','vd-nom','vd-tel','vd-email','add-vd-cat','add-vd-nom',
   'add-trousse-item','add-guest-trousse-item',
-  'tk-titre','add-tk-titre','dp-titre','dp-montant','dp-prest','dp-notes','add-dp-titre','add-dp-montant','add-dp-prest'];
+  'tk-titre','add-tk-titre','dp-titre','dp-montant','dp-paye','dp-prest','dp-notes','add-dp-titre','add-dp-montant','add-dp-paye','add-dp-prest'];
 document.addEventListener('keydown', function(e){
   if (e.key !== 'Enter') return;
   var t = e.target;
