@@ -555,7 +555,6 @@ function viewFor(tab) {
     case "moodboard": return viewMoodboard();
     case "tables": return viewTables();
     case "rooms": return viewRooms();
-    case "documents": return viewDocuments();
     case "budget": return CAN_EDIT ? viewBudget() : "";
     case "admin": return CAN_EDIT ? viewAdmin() : "";
     default: return "";
@@ -1508,6 +1507,48 @@ function addVendor(){
   save('vendors', STATE.vendors.concat([{id:id,categorie:cat,nom:val('add-vd-nom'),telephone:'',email:'',urgent:false}]));
   UI.addingVendor=false;
 }
+function addDocForVendor(vendorId, categorie){
+  var nom = val('add-dc-nom-'+vendorId);
+  if(!nom.trim()) return;
+  var id=uid(STATE.documents);
+  var type = val('add-dc-type-'+vendorId) || 'Autre';
+  var lien = val('add-dc-lien-'+vendorId);
+  save('documents', STATE.documents.concat([{id:id,nom:nom,type:type,prestataire:categorie,lien:lien,notes:''}]));
+  UI.addingDocFor = null;
+}
+function vendorDocsHtml(v){
+  var docs = STATE.documents.filter(function(d){ return d.prestataire===v.categorie; });
+  var html = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">'+
+    '<div class="eyebrow" style="margin-bottom:6px;">Documents</div>';
+  html += docs.map(function(d){
+    if(EDITING.type==='doc'&&EDITING.id===d.id){
+      return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+        '<input id="dc-nom" value="'+esc(d.nom)+'" placeholder="Nom du document"/>'+
+        '<div class="row-flex" style="margin-top:6px;"><select id="dc-type" style="flex:1;">'+DOC_TYPES.map(function(t){return '<option '+(d.type===t?'selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'+
+        '<input id="dc-lien" value="'+esc(d.lien)+'" placeholder="Lien (Google Drive, PDF...)" style="margin-top:6px;"/>'+
+        '<input id="dc-notes" value="'+esc(d.notes)+'" placeholder="Notes" style="margin-top:6px;"/>'+
+        '<div class="row-flex" style="justify-content:space-between;margin-top:10px;"><button class="icon-btn danger" onclick="deleteDoc('+d.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveDocEdit('+d.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
+      '</div>';
+    }
+    return '<div class="listrow"><div style="flex:1;"><div style="font-size:13px;">'+esc(d.nom)+'</div>'+
+      '<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(d.type)+(d.notes?' · '+esc(d.notes):'')+'</div></div>'+
+      (d.lien?'<a class="chip" href="'+esc(d.lien)+'" target="_blank" style="background:var(--champagne-soft);color:var(--gold);">↗ Ouvrir</a>':'')+
+      '<button class="icon-btn" onclick="setEditing(\'doc\','+d.id+')">✎</button>'+
+    '</div>';
+  }).join('');
+  if(!docs.length){ html += '<p class="muted" style="font-size:12px;">Aucun document.</p>'; }
+  if(UI.addingDocFor===v.id){
+    html += '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+      '<input id="add-dc-nom-'+v.id+'" placeholder="Nom du document"/>'+
+      '<div class="row-flex" style="margin-top:6px;"><select id="add-dc-type-'+v.id+'" style="flex:1;">'+DOC_TYPES.map(function(t){return '<option>'+t+'</option>';}).join('')+'</select></div>'+
+      '<input id="add-dc-lien-'+v.id+'" placeholder="Lien (Google Drive, PDF...)" style="margin-top:6px;"/>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addDocForVendor('+v.id+',\''+esc(v.categorie).replace(/\047/g,"\\'")+'\')">✓</button><button class="btn-outline" onclick="UI.addingDocFor=null;render();">✕</button></div>'+
+    '</div>';
+  } else {
+    html += '<button class="btn-outline" style="font-size:12px;margin-top:4px;" onclick="UI.addingDocFor='+v.id+';render();">+ Ajouter un document</button>';
+  }
+  return html+'</div>';
+}
 function vendorRowHtml(v){
   if(EDITING.type==='vendor'&&EDITING.id===v.id){
     return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
@@ -1517,14 +1558,17 @@ function vendorRowHtml(v){
       '<div class="row-flex" style="justify-content:space-between;margin-top:6px;"><button class="icon-btn danger" onclick="deleteVendor('+v.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveVendorEdit('+v.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
     '</div>';
   }
-  return '<div class="listrow">'+
-    '<div style="flex:1;min-width:0;">'+
-      '<div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+(v.urgent?' · <span class="gold">prioritaire</span>':'')+'</div>'+
-      '<div style="font-size:13px;">'+(v.nom?(v.categorie==='Lieu'?mapsLink(v.nom):esc(v.nom)):'<span class="muted" style="font-style:italic;">à renseigner</span>')+'</div>'+
-      (v.email?'<div class="muted" style="font-size:11px;">'+esc(v.email)+'</div>':'')+
+  return '<div class="card" style="margin-bottom:10px;">'+
+    '<div class="row-flex">'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div class="muted" style="font-size:10px;text-transform:uppercase;">'+esc(v.categorie)+(v.urgent?' · <span class="gold">prioritaire</span>':'')+'</div>'+
+        '<div style="font-size:13px;">'+(v.nom?(v.categorie==='Lieu'?mapsLink(v.nom):esc(v.nom)):'<span class="muted" style="font-style:italic;">à renseigner</span>')+'</div>'+
+        (v.email?'<div class="muted" style="font-size:11px;">'+esc(v.email)+'</div>':'')+
+      '</div>'+
+      (v.telephone?'<a class="chip" href="tel:'+esc(v.telephone)+'" style="background:var(--champagne-soft);color:var(--gold);flex-shrink:0;">📞 '+esc(v.telephone)+'</a>':'<span class="muted" style="font-size:11px;flex-shrink:0;">pas de numéro</span>')+
+      (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'vendor\','+v.id+')">✎</button>':'')+
     '</div>'+
-    (v.telephone?'<a class="chip" href="tel:'+esc(v.telephone)+'" style="background:var(--champagne-soft);color:var(--gold);flex-shrink:0;">📞 '+esc(v.telephone)+'</a>':'<span class="muted" style="font-size:11px;flex-shrink:0;">pas de numéro</span>')+
-    (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'vendor\','+v.id+')">✎</button>':'')+
+    (CAN_EDIT?vendorDocsHtml(v):'')+
   '</div>';
 }
 function viewVendors(){
@@ -1756,40 +1800,61 @@ function viewRooms(){
 }
 
 /* ============ DOCUMENTS ============ */
-var DOC_CATS=["Contrats","Devis","Factures","Plans","Château","Traiteur","DJ","Cérémonie","Autres"];
+var DOC_TYPES=["Contrat","Devis","Facture","Plan","Autre"];
 function saveDocEdit(id){
-  var patch={nom:val('dc-nom'),categorie:val('dc-cat'),lien:val('dc-lien'),notes:val('dc-notes')};
+  var patch={nom:val('dc-nom'),type:val('dc-type'),prestataire:val('dc-prest'),lien:val('dc-lien'),notes:val('dc-notes')};
   save('documents', STATE.documents.map(function(d){return d.id===id?Object.assign({},d,patch):d;}));
   clearEditing();
 }
-function deleteDoc(id){ save('documents', STATE.documents.filter(function(d){return d.id!==id;})); }
+function deleteDoc(id){ if(!confirm('Supprimer ce document ?')) return; save('documents', STATE.documents.filter(function(d){return d.id!==id;})); }
 function addDoc(){
   var nom=val('add-dc-nom');
   if(!nom.trim()) return;
   var id=uid(STATE.documents);
-  save('documents', STATE.documents.concat([{id:id,nom:nom,categorie:val('add-dc-cat')||'Autres',lien:val('add-dc-lien'),notes:''}]));
+  save('documents', STATE.documents.concat([{id:id,nom:nom,type:val('add-dc-type')||'Autre',prestataire:val('add-dc-prest'),lien:val('add-dc-lien'),notes:''}]));
   UI.addingDoc=false;
 }
 function docRowHtml(d){
+  var vendorNames = STATE.vendors.map(function(v){return v.categorie;}).filter(Boolean);
   if(EDITING.type==='doc'&&EDITING.id===d.id){
-    return '<div class="listrow" style="flex-direction:column;align-items:stretch;"><input id="dc-nom" value="'+esc(d.nom)+'" placeholder="Nom"/><div class="row-flex" style="margin-top:6px;"><select id="dc-cat">'+DOC_CATS.map(function(c){return '<option '+(d.categorie===c?'selected':'')+'>'+c+'</option>';}).join('')+'</select><input id="dc-lien" value="'+esc(d.lien)+'" placeholder="Lien" style="flex:1;"/></div><input id="dc-notes" value="'+esc(d.notes)+'" placeholder="Notes" style="margin-top:6px;"/><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="saveDocEdit('+d.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>';
+    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
+      '<input id="dc-nom" value="'+esc(d.nom)+'" placeholder="Nom du document"/>'+
+      '<div class="row-flex" style="margin-top:6px;">'+
+        '<select id="dc-type" style="flex:1;">'+DOC_TYPES.map(function(c){return '<option '+(d.type===c?'selected':'')+'>'+c+'</option>';}).join('')+'</select>'+
+        '<input id="dc-prest" list="doc-vendors-list" value="'+esc(d.prestataire||'')+'" placeholder="Prestataire" style="flex:1;"/>'+
+      '</div>'+
+      '<input id="dc-lien" value="'+esc(d.lien)+'" placeholder="Lien (Google Drive, PDF...)" style="margin-top:6px;"/>'+
+      '<input id="dc-notes" value="'+esc(d.notes)+'" placeholder="Notes" style="margin-top:6px;"/>'+
+      '<div class="row-flex" style="justify-content:space-between;margin-top:10px;"><button class="icon-btn danger" onclick="deleteDoc('+d.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveDocEdit('+d.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
+    '</div>';
   }
-  return '<div class="listrow"><span>📄</span><div style="flex:1;"><div style="font-size:13px;">'+(d.nom?esc(d.nom):'<span class="muted">Sans nom</span>')+'</div><div class="muted" style="font-size:10px;">'+esc(d.categorie)+(d.notes?' · '+esc(d.notes):'')+'</div></div>'+
+  return '<div class="listrow"><div style="flex:1;"><div style="font-size:13px;">'+(d.nom?esc(d.nom):'<span class="muted">Sans nom</span>')+'</div>'+
+    '<div class="muted" style="font-size:11px;margin-top:2px;">'+(d.type?esc(d.type):'')+(d.prestataire?' · '+esc(d.prestataire):'')+(d.notes?' · '+esc(d.notes):'')+'</div></div>'+
     (d.lien?'<a class="chip" href="'+esc(d.lien)+'" target="_blank" style="background:var(--champagne-soft);color:var(--gold);">↗ Ouvrir</a>':'')+
-    (CAN_EDIT?'<button class="icon-btn" onclick="setEditing(\'doc\','+d.id+')">✎</button><button class="icon-btn danger" onclick="deleteDoc('+d.id+')">🗑</button>':'')+
+    (CAN_EDIT?'<button class="icon-btn" onclick="setEditing(\'doc\','+d.id+')">✎</button>':'')+
   '</div>';
 }
 function viewDocuments(){
   var search=(UI.docSearch||'').toLowerCase();
-  var filtered=STATE.documents.filter(function(d){return !search||d.nom.toLowerCase().indexOf(search)>=0||d.categorie.toLowerCase().indexOf(search)>=0;});
-  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Documents</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingDoc=true;render();">+ Ajouter</button>':'')+'</div>'+
-  '<input id="documents-search" placeholder="Rechercher un document..." style="border-radius:999px;margin:12px 0;" value="'+esc(UI.docSearch||'')+'" oninput="UI.docSearch=this.value;render();"/>'+
-  '<div>'+filtered.map(docRowHtml).join('');
+  var vendorNames = STATE.vendors.map(function(v){return v.categorie;}).filter(Boolean);
+  var filtered=STATE.documents.filter(function(d){return !search||d.nom.toLowerCase().indexOf(search)>=0||(d.prestataire||'').toLowerCase().indexOf(search)>=0;});
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Documents prestataires</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingDoc=true;render();">+ Ajouter</button>':'')+'</div>'+
+  '<datalist id="doc-vendors-list">'+vendorNames.map(function(v){return '<option value="'+esc(v)+'">';}).join('')+'</datalist>'+
+  '<input id="documents-search" placeholder="Rechercher un document..." style="border-radius:999px;margin:12px 0;" value="'+esc(UI.docSearch||'')+'" oninput="UI.docSearch=this.value;render();"/>';
   if(UI.addingDoc){
-    html+='<div class="listrow" style="flex-direction:column;align-items:stretch;"><input id="add-dc-nom" placeholder="Nom du document"/><div class="row-flex" style="margin-top:6px;"><select id="add-dc-cat">'+DOC_CATS.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select><input id="add-dc-lien" placeholder="Lien" style="flex:1;"/></div><div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addDoc()">✓</button><button class="btn-outline" onclick="UI.addingDoc=false;render();">✕</button></div></div>';
+    html+='<div class="listrow" style="flex-direction:column;align-items:stretch;margin-bottom:10px;">'+
+      '<input id="add-dc-nom" placeholder="Nom du document"/>'+
+      '<div class="row-flex" style="margin-top:6px;">'+
+        '<select id="add-dc-type" style="flex:1;">'+DOC_TYPES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'+
+        '<input id="add-dc-prest" list="doc-vendors-list" placeholder="Prestataire" style="flex:1;"/>'+
+      '</div>'+
+      '<input id="add-dc-lien" placeholder="Lien (Google Drive, PDF...)" style="margin-top:6px;"/>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addDoc()">✓</button><button class="btn-outline" onclick="UI.addingDoc=false;render();">✕</button></div>'+
+    '</div>';
   }
+  html+='<div>'+filtered.map(docRowHtml).join('')+'</div>';
   if(!filtered.length && !UI.addingDoc) html+='<p class="muted" style="text-align:center;padding:20px;">Aucun document.</p>';
-  return html+'</div></div>';
+  return html+'</div>';
 }
 
 /* ============ ADMIN ============ */
@@ -1833,13 +1898,15 @@ var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','ev-
   'add-an-nom','add-an-heure','add-an-resp','add-an-lieu',
   'vd-cat','vd-nom','vd-tel','vd-email','add-vd-cat','add-vd-nom',
   'add-trousse-item','add-guest-trousse-item',
-  'tk-titre','add-tk-titre','dp-titre','dp-montant','dp-paye','dp-prest','dp-notes','add-dp-titre','add-dp-montant','add-dp-paye','add-dp-prest'];
+  'tk-titre','add-tk-titre','dp-titre','dp-montant','dp-paye','dp-prest','dp-notes','add-dp-titre','add-dp-montant','add-dp-paye','add-dp-prest',
+  'dc-nom','dc-prest','dc-lien','dc-notes','add-dc-nom','add-dc-prest','add-dc-lien'];
 document.addEventListener('keydown', function(e){
   if (e.key !== 'Enter') return;
   var t = e.target;
   if (!t || t.tagName !== 'INPUT') return;
   var id = t.id || '';
-  var ok = ENTER_TO_VALIDATE_IDS.indexOf(id) >= 0 || id.indexOf('add-mission-titre-')===0 || id.indexOf('add-mission-resp-')===0;
+  var ok = ENTER_TO_VALIDATE_IDS.indexOf(id) >= 0 || id.indexOf('add-mission-titre-')===0 || id.indexOf('add-mission-resp-')===0
+    || id.indexOf('add-dc-nom-')===0 || id.indexOf('add-dc-lien-')===0;
   if (!ok) return;
   var el = t;
   while (el && el !== document.body) {
