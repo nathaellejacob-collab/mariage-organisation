@@ -586,6 +586,7 @@ function allKnownPeople(){
     .concat((STATE.honneur.temoins.missions||[]).map(function(m){return m.responsable;}))
     .concat((STATE.honneur.demoiselles.qui||'').split(',').map(function(s){return s.trim();}))
     .concat((STATE.honneur.temoins.qui||'').split(',').map(function(s){return s.trim();}))
+    .concat(STATE.vendors.map(function(v){return v.categorie;}))
     .forEach(function(raw){
       var n = normName_(raw);
       if(!n) return;
