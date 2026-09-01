@@ -298,7 +298,10 @@ function save(key, value) {
   STATE[key] = value;
   showToast('✓ Enregistré');
   render();
-  api.set(key, value, VERSIONS[key]).then(function(result){
+  api.getAll().then(function(remote){
+    var freshVersion = (remote.versions && remote.versions[key]!==undefined) ? remote.versions[key] : (VERSIONS[key]||0);
+    return api.set(key, value, freshVersion);
+  }).then(function(result){
     if (result && result.ok) {
       VERSIONS[key] = result.newVersion;
     } else if (result && result.conflict) {
@@ -767,31 +770,12 @@ function updateGuestVinHonneur(id, checked){
     if(checked){ next = withField(next,'hebergement',false); next = withField(next,'brunch',false); }
     return next;
   });
-  STATE.guests = nextGuests;
-  showToast('✓ Enregistré');
-  render();
-  api.set('guests', nextGuests, VERSIONS.guests).then(function(result){
-    if (result && result.ok) { VERSIONS.guests = result.newVersion; }
-    else if (result && result.conflict) {
-      STATE.guests = result.currentValue; VERSIONS.guests = result.currentVersion; render();
-      showToast('⚠️ Modifié ailleurs entretemps — réessaie ce changement', 6000);
-    } else {
-      showToast('⚠️ ERREUR guests: ' + (result && result.error ? result.error : JSON.stringify(result)), 15000);
-    }
-  }).catch(function(err){ showToast('⚠️ EXCEPTION guests: ' + err, 15000); });
+  save('guests', nextGuests);
   if(checked){
     var nextTables = STATE.tables.map(function(t){ return Object.assign({},t,{occupants:t.occupants.filter(function(o){return o.guestId!==id;})}); });
     var nextRooms = STATE.rooms.map(function(r){ return Object.assign({},r,{occupants:r.occupants.filter(function(o){return o.guestId!==id;})}); });
-    STATE.tables = nextTables;
-    STATE.rooms = nextRooms;
-    api.set('tables', nextTables, VERSIONS.tables).then(function(result){
-      if (result && result.ok) { VERSIONS.tables = result.newVersion; }
-      else if (result && result.conflict) { STATE.tables = result.currentValue; VERSIONS.tables = result.currentVersion; render(); }
-    });
-    api.set('rooms', nextRooms, VERSIONS.rooms).then(function(result){
-      if (result && result.ok) { VERSIONS.rooms = result.newVersion; }
-      else if (result && result.conflict) { STATE.rooms = result.currentValue; VERSIONS.rooms = result.currentVersion; render(); }
-    });
+    save('tables', nextTables);
+    save('rooms', nextRooms);
   }
 }
 function removeGuest(id){ if(!confirm('Supprimer cet invité ?')) return; save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
@@ -1814,9 +1798,11 @@ function syncGuestFieldAfterPlacement_(guestId, field, value){
         STATE.guests = result.currentValue;
         VERSIONS.guests = result.currentVersion;
         render();
-        showToast('⚠️ Modifié ailleurs entretemps — réessaie ce placement');
+        showToast('⚠️ Modifié ailleurs entretemps — réessaie ce placement', 6000);
+      } else {
+        showToast('⚠️ ERREUR guests: ' + (result && result.error ? result.error : JSON.stringify(result)), 15000);
       }
-    });
+    }).catch(function(err){ showToast('⚠️ EXCEPTION guests: ' + err, 15000); });
   });
 }
 function onDropTable(e,tableId){
