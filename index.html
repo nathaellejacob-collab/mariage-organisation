@@ -1344,8 +1344,15 @@ function viewBudget(){
   var activeCats = BUDGET_CATEGORIES.filter(function(c){ return (byCat[c]||0)>0; });
   Object.keys(byCat).forEach(function(c){ if(activeCats.indexOf(c)<0 && byCat[c]>0) activeCats.push(c); });
 
+  var subTab = UI.budgetSubTab || 'synthese';
   var html='<div class="fade"><h2 class="display" style="font-size:28px;">Budget</h2>'+
-    '<div class="card" style="margin-top:14px;text-align:center;">'+
+    '<div class="tabbar" style="margin-top:12px;">'+
+      '<button class="'+(subTab==='synthese'?'active':'')+'" onclick="UI.budgetSubTab=\'synthese\';render();">Synthèse</button>'+
+      '<button class="'+(subTab==='depenses'?'active':'')+'" onclick="UI.budgetSubTab=\'depenses\';render();">Dépenses</button>'+
+    '</div>';
+
+  if(subTab==='synthese'){
+    html+='<div class="card" style="margin-top:14px;text-align:center;">'+
       '<div class="eyebrow">Budget total</div>'+
       (CAN_EDIT?'<input value="'+esc(total)+'" onchange="saveBudgetTotal(this.value)" style="text-align:center;font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:32px;border:none;margin-top:4px;padding:0;background:transparent;"/>':
         '<div class="display" style="font-size:32px;margin-top:4px;">'+fmtEUR_(total)+'</div>')+
@@ -1361,53 +1368,56 @@ function viewBudget(){
       '</div>'+
     '</div>';
 
-  if(activeCats.length){
-    var cum=0;
-    var stops=activeCats.map(function(c){
-      var start=engage>0?(cum/engage*360):0;
-      cum+=byCat[c];
-      var end=engage>0?(cum/engage*360):0;
-      return budgetColorFor_(c)+' '+start.toFixed(1)+'deg '+end.toFixed(1)+'deg';
-    }).join(', ');
-    html+='<div class="card" style="margin-top:16px;text-align:center;">'+
-      '<div class="eyebrow" style="margin-bottom:14px;">Combien coûte mon mariage ?</div>'+
-      '<div style="width:200px;height:200px;margin:0 auto;border-radius:50%;background:conic-gradient('+stops+');display:flex;align-items:center;justify-content:center;">'+
-        '<div style="width:120px;height:120px;border-radius:50%;background:var(--paper);"></div>'+
-      '</div>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:center;margin-top:18px;">'+
-        activeCats.map(function(c){return '<div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:'+budgetColorFor_(c)+';display:inline-block;"></span>'+esc(c)+'</div>';}).join('')+
-      '</div>'+
-    '</div>';
+    if(activeCats.length){
+      var cum=0;
+      var stops=activeCats.map(function(c){
+        var start=engage>0?(cum/engage*360):0;
+        cum+=byCat[c];
+        var end=engage>0?(cum/engage*360):0;
+        return budgetColorFor_(c)+' '+start.toFixed(1)+'deg '+end.toFixed(1)+'deg';
+      }).join(', ');
+      html+='<div class="card" style="margin-top:16px;text-align:center;">'+
+        '<div class="eyebrow" style="margin-bottom:14px;">Combien coûte mon mariage ?</div>'+
+        '<div style="width:200px;height:200px;margin:0 auto;border-radius:50%;background:conic-gradient('+stops+');display:flex;align-items:center;justify-content:center;">'+
+          '<div style="width:120px;height:120px;border-radius:50%;background:var(--paper);"></div>'+
+        '</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:center;margin-top:18px;">'+
+          activeCats.map(function(c){return '<div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:'+budgetColorFor_(c)+';display:inline-block;"></span>'+esc(c)+'</div>';}).join('')+
+        '</div>'+
+      '</div>';
+    }
   }
 
-  html+='<div class="eyebrow" style="margin-top:20px;margin-bottom:10px;">Répartition par catégorie</div>';
-  html += BUDGET_CATEGORIES.map(function(cat){
-    var spent = byCat[cat]||0;
-    var objectif = objectifs[cat];
-    var color = budgetColorFor_(cat);
-    var catPct = objectif ? Math.min(100, Math.round(spent/objectif*100)) : 0;
-    var catDepenses = depenses.filter(function(d){ return (d.categorie||'') === cat; });
-    var clickAction = !CAN_EDIT ? '' : (catDepenses.length===1
-      ? 'openEditDepenseModal('+catDepenses[0].id+')'
-      : 'openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')');
-    var clickAttr = clickAction ? ' onclick="'+clickAction+'"' : '';
-    return '<div class="card" style="margin-bottom:10px;border-left:3px solid '+color+';'+(clickAttr?'cursor:pointer;':'')+'"'+clickAttr+'>'+
-      '<div class="flex-between"><span class="display" style="font-size:17px;">'+esc(cat)+'</span>'+
-        '<span style="font-size:14px;font-weight:600;color:'+color+';">'+fmtEUR_(spent)+'</span>'+
-      '</div>'+
-      (objectif?'<div class="progressbar" style="margin:8px 0 4px;"><div class="fill" style="width:'+catPct+'%;background:'+color+';"></div></div>'+
-        '<div class="flex-between" style="font-size:11px;"><span class="muted">'+catPct+'%</span>':
-        '<div class="flex-between" style="font-size:11px;margin-top:8px;"><span class="muted" style="font-style:italic;">Définis un objectif pour suivre ta progression</span>')+
-        '<span class="muted">'+(objectif?'Objectif : '+fmtEUR_(objectif):'')+(CAN_EDIT?' <button class="icon-btn" style="padding:0 0 0 4px;" onclick="event.stopPropagation();openObjectifModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">✎</button>':'')+'</span>'+
-      '</div>'+
-      (CAN_EDIT&&catDepenses.length>1?'<button class="btn-outline" style="font-size:11px;margin-top:8px;" onclick="event.stopPropagation();openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">+ Ajouter une autre dépense</button>':'')+
-    '</div>';
-  }).join('');
+  if(subTab==='depenses'){
+    html+='<div class="eyebrow" style="margin-top:14px;margin-bottom:10px;">Répartition par catégorie</div>';
+    html += BUDGET_CATEGORIES.map(function(cat){
+      var spent = byCat[cat]||0;
+      var objectif = objectifs[cat];
+      var color = budgetColorFor_(cat);
+      var catPct = objectif ? Math.min(100, Math.round(spent/objectif*100)) : 0;
+      var catDepenses = depenses.filter(function(d){ return (d.categorie||'') === cat; });
+      var clickAction = !CAN_EDIT ? '' : (catDepenses.length===1
+        ? 'openEditDepenseModal('+catDepenses[0].id+')'
+        : 'openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')');
+      var clickAttr = clickAction ? ' onclick="'+clickAction+'"' : '';
+      return '<div class="card" style="margin-bottom:10px;border-left:3px solid '+color+';'+(clickAttr?'cursor:pointer;':'')+'"'+clickAttr+'>'+
+        '<div class="flex-between"><span class="display" style="font-size:17px;">'+esc(cat)+'</span>'+
+          '<span style="font-size:14px;font-weight:600;color:'+color+';">'+fmtEUR_(spent)+'</span>'+
+        '</div>'+
+        (objectif?'<div class="progressbar" style="margin:8px 0 4px;"><div class="fill" style="width:'+catPct+'%;background:'+color+';"></div></div>'+
+          '<div class="flex-between" style="font-size:11px;"><span class="muted">'+catPct+'%</span>':
+          '<div class="flex-between" style="font-size:11px;margin-top:8px;"><span class="muted" style="font-style:italic;">Définis un objectif pour suivre ta progression</span>')+
+          '<span class="muted">'+(objectif?'Objectif : '+fmtEUR_(objectif):'')+(CAN_EDIT?' <button class="icon-btn" style="padding:0 0 0 4px;" onclick="event.stopPropagation();openObjectifModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">✎</button>':'')+'</span>'+
+        '</div>'+
+        (CAN_EDIT&&catDepenses.length>1?'<button class="btn-outline" style="font-size:11px;margin-top:8px;" onclick="event.stopPropagation();openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">+ Ajouter une autre dépense</button>':'')+
+      '</div>';
+    }).join('');
 
-  html+='<div class="flex-between" style="margin-top:20px;"><h3 class="display" style="font-size:20px;margin:0;">Dépenses</h3>'+(CAN_EDIT?'<button class="btn" onclick="openDepenseModal(null)">+ Ajouter</button>':'')+'</div>';
+    html+='<div class="flex-between" style="margin-top:20px;"><h3 class="display" style="font-size:20px;margin:0;">Dépenses</h3>'+(CAN_EDIT?'<button class="btn" onclick="openDepenseModal(null)">+ Ajouter</button>':'')+'</div>';
 
-  html += '<div style="margin-top:10px;">'+depenses.map(depenseRowHtml).join('')+'</div>';
-  if(!depenses.length) html+='<p class="muted" style="text-align:center;padding:20px;">Aucune dépense pour le moment.</p>';
+    html += '<div style="margin-top:10px;">'+depenses.map(depenseRowHtml).join('')+'</div>';
+    if(!depenses.length) html+='<p class="muted" style="text-align:center;padding:20px;">Aucune dépense pour le moment.</p>';
+  }
 
   if(UI.budgetModal && UI.budgetModal.type==='depense'){
     var mc = UI.budgetModal.categorie;
