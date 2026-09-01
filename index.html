@@ -412,7 +412,7 @@ var TABS = [
   { key:"vendors", label:"Prestataires" },
   { key:"tables", label:"Plan de table" },
   { key:"rooms", label:"Chambres" },
-  { key:"taches", label:"Tâches" },
+  { key:"taches", label:"To do list" },
   { key:"budget", label:"Budget" },
   { key:"admin", label:"Administration" }
 ];
@@ -1207,7 +1207,7 @@ function viewTasks(){
   var aVenir = all.filter(function(t){ var d=taskDate(t); return t.statut!=='termine' && (!d || d>=today); });
   var filter = UI.tasksFilter || 'tous';
   var filters = [['tous','Tous',all.length],['avenir','À venir',aVenir.length],['retard','En retard',enRetard.length],['termine','Terminé',termine.length]];
-  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">Tâches</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingTask=true;render();">+ Ajouter</button>':'')+'</div>'+
+  var html='<div class="fade"><div class="flex-between"><h2 class="display" style="font-size:28px;">To do list</h2>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingTask=true;render();">+ Ajouter</button>':'')+'</div>'+
   '<div class="row-flex" style="margin:14px 0;flex-wrap:wrap;">'+filters.map(function(f){return '<button class="btn-outline" style="'+(filter===f[0]?'background:var(--ink);color:#fff;border-color:var(--ink);':'')+'" onclick="setTasksFilter(\''+f[0]+'\')">'+f[1]+' '+f[2]+'</button>';}).join('')+'</div>';
 
   if(UI.addingTask){
@@ -1649,6 +1649,12 @@ function viewMoodboard(){
 function removeFromAllTables(arr,guestId,label){ return arr.map(function(t){ return Object.assign({},t,{occupants:t.occupants.filter(function(o){return guestId?o.guestId!==guestId:o.label!==label;})}); }); }
 function onDragStartGuest(e,guestId,label){ DRAG={guestId:guestId,label:label}; e.dataTransfer.setData('text/plain','x'); }
 function onDragStartOccupant(e,guestId,label){ DRAG={guestId:guestId||null,label:label}; e.dataTransfer.setData('text/plain','x'); }
+function syncGuestFieldAfterPlacement_(guestId, field, value){
+  if(!CAN_EDIT || !guestId) return;
+  var nextGuests = STATE.guests.map(function(g){ return g.id===guestId ? Object.assign({},g,{[field]:value}) : g; });
+  STATE.guests = nextGuests;
+  api.set('guests', nextGuests);
+}
 function onDropTable(e,tableId){
   e.preventDefault(); e.currentTarget.classList.remove('dragover');
   if(!DRAG) return;
@@ -1657,19 +1663,26 @@ function onDropTable(e,tableId){
   var next=removeFromAllTables(STATE.tables,DRAG.guestId,DRAG.label);
   next=next.map(function(t){return t.id===tableId?Object.assign({},t,{occupants:t.occupants.concat([{guestId:DRAG.guestId||null,label:DRAG.label}])}):t;});
   save('tables', next);
+  syncGuestFieldAfterPlacement_(DRAG.guestId, 'table', target.nom);
   DRAG=null;
 }
 function onDropPoolTables(e){
   e.preventDefault(); e.currentTarget.classList.remove('dragover');
   if(!DRAG) return;
   save('tables', removeFromAllTables(STATE.tables,DRAG.guestId,DRAG.label));
+  syncGuestFieldAfterPlacement_(DRAG.guestId, 'table', '');
   DRAG=null;
 }
 function renameTable(id,nom){ save('tables', STATE.tables.map(function(t){return t.id===id?Object.assign({},t,{nom:nom}):t;})); }
 function tableCapacity(id,delta){ save('tables', STATE.tables.map(function(t){ if(t.id!==id) return t; return Object.assign({},t,{capacity:Math.max(t.occupants.length,t.capacity+delta)}); })); }
 function deleteTable(id){ if(!confirm('Supprimer cette table ?')) return; save('tables', STATE.tables.filter(function(t){return t.id!==id;})); }
 function addTable(){ var id=uid(STATE.tables); save('tables', STATE.tables.concat([{id:id,nom:'Nouvelle table',forme:'ronde',capacity:10,occupants:[]}])); }
-function removeTableOccupant(tableId, idx){ save('tables', STATE.tables.map(function(t){ if(t.id!==tableId) return t; var occ=t.occupants.slice(); occ.splice(idx,1); return Object.assign({},t,{occupants:occ}); })); }
+function removeTableOccupant(tableId, idx){
+  var t = STATE.tables.filter(function(tt){return tt.id===tableId;})[0];
+  var occ = t ? t.occupants[idx] : null;
+  save('tables', STATE.tables.map(function(tt){ if(tt.id!==tableId) return tt; var o=tt.occupants.slice(); o.splice(idx,1); return Object.assign({},tt,{occupants:o}); }));
+  if(occ) syncGuestFieldAfterPlacement_(occ.guestId, 'table', '');
+}
 function tableCardHtml(t){
   var filled=t.occupants.length, cap=t.capacity;
   var seatCount=Math.max(cap,filled);
@@ -1739,19 +1752,26 @@ function onDropRoom(e,roomId){
   var next=removeFromAllRooms(STATE.rooms,DRAG.guestId,DRAG.label);
   next=next.map(function(r){ return r.id===roomId?Object.assign({},r,{occupants:r.occupants.concat([{guestId:DRAG.guestId||null,label:DRAG.label}])}):r; });
   save('rooms', next);
+  syncGuestFieldAfterPlacement_(DRAG.guestId, 'chambre', target.nom);
   DRAG=null;
 }
 function onDropPoolRooms(e){
   e.preventDefault(); e.currentTarget.classList.remove('dragover');
   if(!DRAG) return;
   save('rooms', removeFromAllRooms(STATE.rooms,DRAG.guestId,DRAG.label));
+  syncGuestFieldAfterPlacement_(DRAG.guestId, 'chambre', '');
   DRAG=null;
 }
 function renameRoom(id,nom){ save('rooms', STATE.rooms.map(function(r){return r.id===id?Object.assign({},r,{nom:nom}):r;})); }
 function roomCapacity(id,delta){ save('rooms', STATE.rooms.map(function(r){ if(r.id!==id) return r; return Object.assign({},r,{capacity:Math.max(r.occupants.length,r.capacity+delta)}); })); }
 function deleteRoom(id){ if(!confirm('Supprimer cette chambre ?')) return; save('rooms', STATE.rooms.filter(function(r){return r.id!==id;})); }
 function addRoom(){ var id=uid(STATE.rooms); save('rooms', STATE.rooms.concat([{id:id,nom:'Nouvelle chambre',capacity:4,occupants:[]}])); }
-function removeRoomOccupant(roomId, idx){ save('rooms', STATE.rooms.map(function(r){ if(r.id!==roomId) return r; var occ=r.occupants.slice(); occ.splice(idx,1); return Object.assign({},r,{occupants:occ}); })); }
+function removeRoomOccupant(roomId, idx){
+  var r = STATE.rooms.filter(function(rr){return rr.id===roomId;})[0];
+  var occ = r ? r.occupants[idx] : null;
+  save('rooms', STATE.rooms.map(function(rr){ if(rr.id!==roomId) return rr; var o=rr.occupants.slice(); o.splice(idx,1); return Object.assign({},rr,{occupants:o}); }));
+  if(occ) syncGuestFieldAfterPlacement_(occ.guestId, 'chambre', '');
+}
 function roomCardHtml(r){
   var filled=r.occupants.length, cap=r.capacity;
   var over=filled>cap, full=filled===cap&&cap>0;
