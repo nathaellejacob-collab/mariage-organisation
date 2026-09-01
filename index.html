@@ -1386,7 +1386,11 @@ function viewBudget(){
     var objectif = objectifs[cat];
     var color = budgetColorFor_(cat);
     var catPct = objectif ? Math.min(100, Math.round(spent/objectif*100)) : 0;
-    var clickAttr = CAN_EDIT ? ' onclick="openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')"' : '';
+    var catDepenses = depenses.filter(function(d){ return (d.categorie||'') === cat; });
+    var clickAction = !CAN_EDIT ? '' : (catDepenses.length===1
+      ? 'openEditDepenseModal('+catDepenses[0].id+')'
+      : 'openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')');
+    var clickAttr = clickAction ? ' onclick="'+clickAction+'"' : '';
     return '<div class="card" style="margin-bottom:10px;border-left:3px solid '+color+';'+(clickAttr?'cursor:pointer;':'')+'"'+clickAttr+'>'+
       '<div class="flex-between"><span class="display" style="font-size:17px;">'+esc(cat)+'</span>'+
         '<span style="font-size:14px;font-weight:600;color:'+color+';">'+fmtEUR_(spent)+'</span>'+
@@ -1396,6 +1400,7 @@ function viewBudget(){
         '<div class="flex-between" style="font-size:11px;margin-top:8px;"><span class="muted" style="font-style:italic;">Définis un objectif pour suivre ta progression</span>')+
         '<span class="muted">'+(objectif?'Objectif : '+fmtEUR_(objectif):'')+(CAN_EDIT?' <button class="icon-btn" style="padding:0 0 0 4px;" onclick="event.stopPropagation();openObjectifModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">✎</button>':'')+'</span>'+
       '</div>'+
+      (CAN_EDIT&&catDepenses.length>1?'<button class="btn-outline" style="font-size:11px;margin-top:8px;" onclick="event.stopPropagation();openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">+ Ajouter une autre dépense</button>':'')+
     '</div>';
   }).join('');
 
