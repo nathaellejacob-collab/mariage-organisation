@@ -1267,13 +1267,14 @@ function viewTasks(){
 }
 
 /* ============ BUDGET ============ */
-var BUDGET_CATEGORIES = ["Lieu de réception","Traiteur","Photographie","Vidéaste","Tenue et robe","Fleurs et bouquets","Musique et DJ","Faire-part","Alliances et bijoux","Beauté et coiffure","Gâteau","Divers"];
+var BUDGET_CATEGORIES = ["Lieu de réception","Traiteur","Photographie","Vidéaste","Tenue et robe","Fleurs et décorations","Décoration","Musique et DJ","Faire-part","Alliances et bijoux","Beauté et coiffure","Gâteau","Divers"];
 function fmtEUR_(n){ return Math.round(n||0).toLocaleString('fr-FR')+' €'; }
 function saveBudgetTotal(v){
   var n = parseFloat((v||'').toString().replace(/\s/g,'').replace(',','.'))||0;
   save('budget', Object.assign({},STATE.budget,{total:n}));
 }
 function openDepenseModal(cat){ UI.budgetModal={type:'depense',categorie:cat||null}; render(); setTimeout(function(){var el=document.getElementById('modal-dp-titre');if(el)el.focus();},0); }
+function openEditDepenseModal(id){ UI.budgetModal={type:'editDepense',id:id}; render(); setTimeout(function(){var el=document.getElementById('modal-edp-titre');if(el)el.focus();},0); }
 function openObjectifModal(cat){ UI.budgetModal={type:'objectif',categorie:cat}; render(); setTimeout(function(){var el=document.getElementById('modal-obj-montant');if(el)el.focus();},0); }
 function closeBudgetModal(){ UI.budgetModal=null; render(); }
 function addDepense(){
@@ -1287,51 +1288,33 @@ function addDepense(){
   save('budget', Object.assign({},STATE.budget,{depenses:next}));
   closeBudgetModal();
 }
-function saveDepenseEdit(id){
-  var montant = parseFloat((val('dp-montant')||'').replace(/\s/g,'').replace(',','.'))||0;
-  var montantPaye = parseFloat((val('dp-paye')||'').replace(/\s/g,'').replace(',','.'))||0;
-  var patch={titre:val('dp-titre'),categorie:val('dp-cat'),montant:montant,montantPaye:montantPaye,prestataire:val('dp-prest'),notes:val('dp-notes')};
+function saveDepenseEdit(){
+  var id = UI.budgetModal.id;
+  var montant = parseFloat((val('modal-edp-montant')||'').replace(/\s/g,'').replace(',','.'))||0;
+  var montantPaye = parseFloat((val('modal-edp-paye')||'').replace(/\s/g,'').replace(',','.'))||0;
+  var patch={titre:val('modal-edp-titre'),categorie:val('modal-edp-cat'),montant:montant,montantPaye:montantPaye,prestataire:val('modal-edp-prest'),notes:val('modal-edp-notes')};
   var next = STATE.budget.depenses.map(function(d){return d.id===id?Object.assign({},d,patch):d;});
   save('budget', Object.assign({},STATE.budget,{depenses:next}));
-  clearEditing();
+  closeBudgetModal();
 }
 function deleteDepense(id){
   if(!confirm('Supprimer cette dépense ?')) return;
   var next = STATE.budget.depenses.filter(function(d){return d.id!==id;});
   save('budget', Object.assign({},STATE.budget,{depenses:next}));
+  closeBudgetModal();
 }
 function depenseRowHtml(d){
-  var montantPaye = Math.min(d.montantPaye||0, d.montant||0);
-  var reste = (d.montant||0)-montantPaye;
-  if(EDITING.type==='depense'&&EDITING.id===d.id){
-    return '<div class="listrow" style="flex-direction:column;align-items:stretch;">'+
-      '<input id="dp-titre" value="'+esc(d.titre)+'" placeholder="Titre de la dépense"/>'+
-      '<div class="row-flex" style="margin-top:6px;">'+
-        '<select id="dp-cat" style="flex:1;"><option value="">Catégorie</option>'+BUDGET_CATEGORIES.map(function(c){return '<option '+(d.categorie===c?'selected':'')+'>'+c+'</option>';}).join('')+'</select>'+
-        '<input id="dp-montant" value="'+esc(d.montant)+'" placeholder="Montant total" style="width:110px;"/>'+
-      '</div>'+
-      '<div class="row-flex" style="margin-top:6px;">'+
-        '<input id="dp-paye" value="'+esc(d.montantPaye||0)+'" placeholder="Déjà payé" style="flex:1;"/>'+
-      '</div>'+
-      '<input id="dp-prest" value="'+esc(d.prestataire||'')+'" placeholder="Prestataire (facultatif)" style="margin-top:6px;"/>'+
-      '<input id="dp-notes" value="'+esc(d.notes||'')+'" placeholder="Notes" style="margin-top:6px;"/>'+
-      '<div class="row-flex" style="justify-content:space-between;margin-top:10px;"><button class="icon-btn danger" onclick="deleteDepense('+d.id+')">🗑 Supprimer</button><div class="row-flex"><button class="btn" onclick="saveDepenseEdit('+d.id+')">✓</button><button class="btn-outline" onclick="clearEditing()">✕</button></div></div>'+
-    '</div>';
-  }
-  return '<div class="listrow">'+
+  var clickAttr = CAN_EDIT ? ' onclick="openEditDepenseModal('+d.id+')"' : '';
+  return '<div class="listrow"'+clickAttr+(CAN_EDIT?' style="cursor:pointer;"':'')+'>'+
     '<div style="flex:1;"><div style="font-size:13px;">'+esc(d.titre)+'</div>'+
     '<div class="muted" style="font-size:11px;margin-top:2px;">'+(d.categorie?esc(d.categorie):'')+(d.prestataire?' · '+esc(d.prestataire):'')+'</div></div>'+
-    '<div style="text-align:right;flex-shrink:0;">'+
-      '<div style="font-size:13px;font-weight:500;">'+fmtEUR_(d.montant)+'</div>'+
-      '<div class="muted" style="font-size:10px;">'+(reste<=0?'<span class="gold">Payé</span>':'Payé '+fmtEUR_(montantPaye)+' · Reste '+fmtEUR_(reste))+'</div>'+
-    '</div>'+
-    (CAN_EDIT?'<button class="icon-btn" onclick="setEditing(\'depense\','+d.id+')">✎</button>':'')+
+    (CAN_EDIT?'<span class="muted" style="font-size:11px;">✎</span>':'')+
   '</div>';
 }
 var BUDGET_COLORS = {
   "Lieu de réception":"#7A2E35", "Traiteur":"#C97066", "Photographie":"#D98C93",
-  "Vidéaste":"#9C3D42", "Tenue et robe":"#E8B4B8", "Fleurs et bouquets":"#A8645D",
-  "Musique et DJ":"#8B3A42", "Faire-part":"#C77B87", "Alliances et bijoux":"#6B2C39",
+  "Vidéaste":"#9C3D42", "Tenue et robe":"#E8B4B8", "Fleurs et décorations":"#A8645D",
+  "Décoration":"#B2777A", "Musique et DJ":"#8B3A42", "Faire-part":"#C77B87", "Alliances et bijoux":"#6B2C39",
   "Beauté et coiffure":"#BC5A56", "Gâteau":"#B5615A", "Divers":"#9E5A5F"
 };
 function budgetColorFor_(cat){ return BUDGET_COLORS[cat] || '#B98A82'; }
@@ -1437,6 +1420,26 @@ function viewBudget(){
         '</div>'+
       '</div>'+
     '</div>';
+  }
+  if(UI.budgetModal && UI.budgetModal.type==='editDepense'){
+    var ed = depenses.filter(function(d){return d.id===UI.budgetModal.id;})[0];
+    if(ed){
+      html += '<div class="modal-backdrop" onclick="if(event.target===this)closeBudgetModal();">'+
+        '<div class="modal-card">'+
+          '<h3 class="display" style="font-size:22px;margin:0 0 16px;">Modifier la dépense</h3>'+
+          '<input id="modal-edp-titre" value="'+esc(ed.titre)+'" placeholder="Titre de la dépense"/>'+
+          '<select id="modal-edp-cat" style="margin-top:10px;"><option value="">Catégorie</option>'+BUDGET_CATEGORIES.map(function(c){return '<option '+(ed.categorie===c?'selected':'')+'>'+c+'</option>';}).join('')+'</select>'+
+          '<input id="modal-edp-montant" value="'+esc(ed.montant)+'" placeholder="Montant total (€)" style="margin-top:10px;"/>'+
+          '<input id="modal-edp-paye" value="'+esc(ed.montantPaye||0)+'" placeholder="Déjà payé (facultatif)" style="margin-top:10px;"/>'+
+          '<input id="modal-edp-prest" value="'+esc(ed.prestataire||'')+'" placeholder="Prestataire (facultatif)" style="margin-top:10px;"/>'+
+          '<input id="modal-edp-notes" value="'+esc(ed.notes||'')+'" placeholder="Notes" style="margin-top:10px;"/>'+
+          '<div class="flex-between" style="margin-top:20px;">'+
+            '<button class="icon-btn danger" onclick="deleteDepense('+ed.id+')">🗑 Supprimer</button>'+
+            '<div class="row-flex"><button class="btn-outline" onclick="closeBudgetModal()">Annuler</button><button class="btn" onclick="saveDepenseEdit()">Enregistrer</button></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    }
   }
   if(UI.budgetModal && UI.budgetModal.type==='objectif'){
     var oc = UI.budgetModal.categorie;
@@ -2048,7 +2051,8 @@ var ENTER_TO_VALIDATE_IDS = ['ev-edit-heure','ev-edit-titre','ev-edit-lieu','ev-
   'add-trousse-item','add-guest-trousse-item',
   'tk-titre','add-tk-titre','dp-titre','dp-montant','dp-paye','dp-prest','dp-notes','add-dp-titre','add-dp-montant','add-dp-paye','add-dp-prest',
   'dc-nom','dc-prest','dc-lien','dc-notes','add-dc-nom','add-dc-prest','add-dc-lien',
-  'modal-dp-titre','modal-dp-montant','modal-dp-paye','modal-dp-prest','modal-obj-montant'];
+  'modal-dp-titre','modal-dp-montant','modal-dp-paye','modal-dp-prest','modal-obj-montant',
+  'modal-edp-titre','modal-edp-montant','modal-edp-paye','modal-edp-prest','modal-edp-notes'];
 document.addEventListener('keydown', function(e){
   if (e.key === 'Escape' && UI.budgetModal) { UI.budgetModal=null; render(); return; }
   if (e.key !== 'Enter') return;
