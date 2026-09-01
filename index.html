@@ -1268,6 +1268,7 @@ function addDepense(){
   var next = STATE.budget.depenses.concat([{id:id,titre:titre,categorie:val('add-dp-cat'),montant:montant,montantPaye:montantPaye,prestataire:val('add-dp-prest'),notes:''}]);
   save('budget', Object.assign({},STATE.budget,{depenses:next}));
   UI.addingDepense=false;
+  UI.addingDepenseCat=null;
 }
 function saveDepenseEdit(id){
   var montant = parseFloat((val('dp-montant')||'').replace(/\s/g,'').replace(',','.'))||0;
@@ -1311,10 +1312,10 @@ function depenseRowHtml(d){
   '</div>';
 }
 var BUDGET_COLORS = {
-  "Lieu de réception":"#A8645D", "Traiteur":"#B98A82", "Photographie":"#8B9574",
-  "Vidéaste":"#7C93A3", "Tenue et robe":"#A69580", "Fleurs et bouquets":"#8B6F8C",
-  "Musique et DJ":"#C08552", "Faire-part":"#93A8AC", "Alliances et bijoux":"#B87355",
-  "Beauté et coiffure":"#A594B0", "Gâteau":"#7A8B6F", "Divers":"#71829B"
+  "Lieu de réception":"#A8645D", "Traiteur":"#C9A66B", "Photographie":"#B08968",
+  "Vidéaste":"#9C8478", "Tenue et robe":"#A69580", "Fleurs et bouquets":"#B27B7A",
+  "Musique et DJ":"#C08552", "Faire-part":"#AD9A7C", "Alliances et bijoux":"#B87355",
+  "Beauté et coiffure":"#BC8F8F", "Gâteau":"#9C8460", "Divers":"#8C7A6B"
 };
 function budgetColorFor_(cat){ return BUDGET_COLORS[cat] || '#B98A82'; }
 function saveObjectif(categorie){
@@ -1385,18 +1386,18 @@ function viewBudget(){
     var color = budgetColorFor_(cat);
     var catPct = objectif ? Math.min(100, Math.round(spent/objectif*100)) : 0;
     var safeKey = cat.replace(/[^a-zA-Z0-9]/g,'');
-    return '<div class="card" style="margin-bottom:10px;border-left:3px solid '+color+';">'+
-      '<div class="flex-between"><span style="font-size:14px;font-weight:500;">'+esc(cat)+'</span>'+
-        '<div class="row-flex"><span style="font-size:14px;font-weight:600;color:'+color+';">'+fmtEUR_(spent)+'</span>'+
-        (CAN_EDIT?'<button class="icon-btn" onclick="UI.addingDepense=true;render();">+</button>':'')+
-        '</div>'+
+    var isEditingObj = UI.editingObjectifFor===cat;
+    var clickAttr = (CAN_EDIT && !isEditingObj) ? ' onclick="UI.addingDepense=true;UI.addingDepenseCat=\''+esc(cat).replace(/\047/g,"\\'")+'\';render();"' : '';
+    return '<div class="card" style="margin-bottom:10px;border-left:3px solid '+color+';'+(clickAttr?'cursor:pointer;':'')+'"'+clickAttr+'>'+
+      '<div class="flex-between"><span class="display" style="font-size:17px;">'+esc(cat)+'</span>'+
+        '<span style="font-size:14px;font-weight:600;color:'+color+';">'+fmtEUR_(spent)+'</span>'+
       '</div>'+
-      '<div class="progressbar" style="margin:8px 0 4px;"><div class="fill" style="width:'+catPct+'%;background:'+color+';"></div></div>'+
-      '<div class="flex-between" style="font-size:11px;">'+
-        '<span class="muted">'+catPct+'%</span>'+
-        (UI.editingObjectifFor===cat?
-          '<span class="row-flex"><input id="obj-'+safeKey+'" value="'+(objectif||'')+'" placeholder="Montant" style="width:90px;padding:3px 8px;font-size:11px;"/><button class="btn" style="padding:4px 10px;font-size:11px;" onclick="saveObjectif(\''+esc(cat).replace(/\047/g,"\\'")+'\')">✓</button></span>'
-          :'<span class="muted">Objectif : '+(objectif?fmtEUR_(objectif):'non défini')+(CAN_EDIT?' <button class="icon-btn" style="padding:0 0 0 4px;" onclick="UI.editingObjectifFor=\''+esc(cat).replace(/\047/g,"\\'")+'\';render();">✎</button>':'')+'</span>')+
+      (objectif?'<div class="progressbar" style="margin:8px 0 4px;"><div class="fill" style="width:'+catPct+'%;background:'+color+';"></div></div>'+
+        '<div class="flex-between" style="font-size:11px;"><span class="muted">'+catPct+'%</span>':
+        '<div class="flex-between" style="font-size:11px;margin-top:8px;"><span class="muted" style="font-style:italic;">Définis un objectif pour suivre ta progression</span>')+
+        (isEditingObj?
+          '<span class="row-flex" onclick="event.stopPropagation();"><input id="obj-'+safeKey+'" value="'+(objectif||'')+'" placeholder="Montant" style="width:90px;padding:3px 8px;font-size:11px;"/><button class="btn" style="padding:4px 10px;font-size:11px;" onclick="saveObjectif(\''+esc(cat).replace(/\047/g,"\\'")+'\')">✓</button></span>'
+          :'<span class="muted">'+(objectif?'Objectif : '+fmtEUR_(objectif):'')+(CAN_EDIT?' <button class="icon-btn" style="padding:0 0 0 4px;" onclick="event.stopPropagation();UI.editingObjectifFor=\''+esc(cat).replace(/\047/g,"\\'")+'\';render();">✎</button>':'')+'</span>')+
       '</div>'+
     '</div>';
   }).join('');
@@ -1404,17 +1405,18 @@ function viewBudget(){
   html+='<div class="flex-between" style="margin-top:20px;"><h3 class="display" style="font-size:20px;margin:0;">Dépenses</h3>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingDepense=true;render();">+ Ajouter</button>':'')+'</div>';
 
   if(UI.addingDepense){
+    var presetCat = UI.addingDepenseCat||'';
     html+='<div class="listrow" style="flex-direction:column;align-items:stretch;margin-top:10px;">'+
       '<input id="add-dp-titre" placeholder="Titre de la dépense"/>'+
       '<div class="row-flex" style="margin-top:6px;">'+
-        '<select id="add-dp-cat" style="flex:1;"><option value="">Catégorie</option>'+BUDGET_CATEGORIES.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select>'+
+        '<select id="add-dp-cat" style="flex:1;"><option value="">Catégorie</option>'+BUDGET_CATEGORIES.map(function(c){return '<option '+(c===presetCat?'selected':'')+'>'+c+'</option>';}).join('')+'</select>'+
         '<input id="add-dp-montant" placeholder="Montant total" style="width:110px;"/>'+
       '</div>'+
       '<div class="row-flex" style="margin-top:6px;">'+
         '<input id="add-dp-paye" placeholder="Déjà payé (facultatif)" style="flex:1;"/>'+
       '</div>'+
       '<input id="add-dp-prest" placeholder="Prestataire (facultatif)" style="margin-top:6px;"/>'+
-      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addDepense()">✓</button><button class="btn-outline" onclick="UI.addingDepense=false;render();">✕</button></div>'+
+      '<div class="row-flex" style="justify-content:flex-end;margin-top:6px;"><button class="btn" onclick="addDepense()">✓</button><button class="btn-outline" onclick="UI.addingDepense=false;UI.addingDepenseCat=null;render();">✕</button></div>'+
     '</div>';
   }
   html += '<div style="margin-top:10px;">'+depenses.map(depenseRowHtml).join('')+'</div>';
