@@ -218,21 +218,22 @@ function isSelected(guestId, label) {
 /* ============ API CLIENT ============ */
 var api = {
   getAll: function() {
-    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf("COLLE_ICI") === 0) return Promise.resolve({});
+    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf("COLLE_ICI") === 0) return Promise.resolve({data:{}, versions:{}});
     return fetch(CONFIG.API_URL + "?action=getAll")
       .then(function(r){ return r.json(); })
-      .then(function(r){ return r.ok ? r.data : {}; })
-      .catch(function(){ return {}; });
+      .then(function(r){ return r.ok ? {data:r.data, versions:r.versions||{}} : {data:{}, versions:{}}; })
+      .catch(function(){ return {data:{}, versions:{}}; });
   },
-  set: function(key, value) {
-    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf("COLLE_ICI") === 0) return;
-    fetch(CONFIG.API_URL, {
+  set: function(key, value, expectedVersion) {
+    if (!CONFIG.API_URL || CONFIG.API_URL.indexOf("COLLE_ICI") === 0) return Promise.resolve({ok:true, newVersion:(expectedVersion||0)+1});
+    return fetch(CONFIG.API_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "set", key: key, value: value })
-    }).catch(function(){});
+      body: JSON.stringify({ action: "set", key: key, value: value, expectedVersion: expectedVersion||0 })
+    }).then(function(r){ return r.json(); }).catch(function(){ return {ok:false, networkError:true}; });
   }
 };
+var VERSIONS = {};
 
 /* ============ HELPERS ============ */
 function esc(s) {
@@ -295,9 +296,20 @@ function groupByHeure(events) {
 function save(key, value) {
   if (!CAN_EDIT) return;
   STATE[key] = value;
-  api.set(key, value);
   showToast('✓ Enregistré');
   render();
+  api.set(key, value, VERSIONS[key]).then(function(result){
+    if (result && result.ok) {
+      VERSIONS[key] = result.newVersion;
+    } else if (result && result.conflict) {
+      STATE[key] = result.currentValue;
+      VERSIONS[key] = result.currentVersion;
+      render();
+      showToast('⚠️ Modifié ailleurs entretemps — réessaie ce changement');
+    } else {
+      showToast('⚠️ Non enregistré (connexion) — réessaie');
+    }
+  });
 }
 function showToast(msg) {
   var el = document.getElementById('toast');
@@ -317,12 +329,14 @@ function go(tab) { CURRENT_TAB = tab; window.scrollTo(0,0); render(); }
 /* ============ LOAD ============ */
 function loadAndStart() {
   api.getAll().then(function(remote){
+    var remoteData = remote.data || {};
+    VERSIONS = Object.assign({}, remote.versions || {});
     Object.keys(SEEDS).forEach(function(k){
-      if (remote[k] !== undefined) {
-        STATE[k] = remote[k];
+      if (remoteData[k] !== undefined) {
+        STATE[k] = remoteData[k];
       } else {
         STATE[k] = SEEDS[k];
-        api.set(k, STATE[k]); // first-time init
+        api.set(k, STATE[k], 0).then(function(r){ if (r && r.ok) VERSIONS[k] = r.newVersion; }); // first-time init
       }
     });
     if (STATE.trousse && STATE.trousse.guestItems === undefined) {
@@ -334,11 +348,11 @@ function loadAndStart() {
         {id:5,nom:"Épingles à nourrice",coche:false},
         {id:6,nom:"Mouchoirs",coche:false}
       ]});
-      api.set('trousse', STATE.trousse);
+      api.set('trousse', STATE.trousse, VERSIONS.trousse).then(function(r){ if (r && r.ok) VERSIONS.trousse = r.newVersion; });
     }
     if (STATE.budget && STATE.budget.objectifs === undefined) {
       STATE.budget = Object.assign({}, STATE.budget, {objectifs: {}});
-      api.set('budget', STATE.budget);
+      api.set('budget', STATE.budget, VERSIONS.budget).then(function(r){ if (r && r.ok) VERSIONS.budget = r.newVersion; });
     }
     GATE_NEEDED = !!(STATE.access && STATE.access.passcode);
     if (GATE_NEEDED) {
@@ -749,17 +763,29 @@ function updateGuestVinHonneur(id, checked){
     return next;
   });
   STATE.guests = nextGuests;
-  api.set('guests', nextGuests);
+  showToast('✓ Enregistré');
+  render();
+  api.set('guests', nextGuests, VERSIONS.guests).then(function(result){
+    if (result && result.ok) { VERSIONS.guests = result.newVersion; }
+    else if (result && result.conflict) {
+      STATE.guests = result.currentValue; VERSIONS.guests = result.currentVersion; render();
+      showToast('⚠️ Modifié ailleurs entretemps — réessaie ce changement');
+    }
+  });
   if(checked){
     var nextTables = STATE.tables.map(function(t){ return Object.assign({},t,{occupants:t.occupants.filter(function(o){return o.guestId!==id;})}); });
     var nextRooms = STATE.rooms.map(function(r){ return Object.assign({},r,{occupants:r.occupants.filter(function(o){return o.guestId!==id;})}); });
     STATE.tables = nextTables;
     STATE.rooms = nextRooms;
-    api.set('tables', nextTables);
-    api.set('rooms', nextRooms);
+    api.set('tables', nextTables, VERSIONS.tables).then(function(result){
+      if (result && result.ok) { VERSIONS.tables = result.newVersion; }
+      else if (result && result.conflict) { STATE.tables = result.currentValue; VERSIONS.tables = result.currentVersion; render(); }
+    });
+    api.set('rooms', nextRooms, VERSIONS.rooms).then(function(result){
+      if (result && result.ok) { VERSIONS.rooms = result.newVersion; }
+      else if (result && result.conflict) { STATE.rooms = result.currentValue; VERSIONS.rooms = result.currentVersion; render(); }
+    });
   }
-  showToast('✓ Enregistré');
-  render();
 }
 function removeGuest(id){ if(!confirm('Supprimer cet invité ?')) return; save('guests', STATE.guests.filter(function(g){return g.id!==id;})); }
 function addGuest(){
@@ -1768,11 +1794,22 @@ function onDragStartOccupant(e,guestId,label){ DRAG={guestId:guestId||null,label
 function syncGuestFieldAfterPlacement_(guestId, field, value){
   if(!CAN_EDIT || !guestId) return;
   api.getAll().then(function(remote){
-    var freshGuests = (remote && remote.guests) ? remote.guests : STATE.guests;
+    var remoteData = remote.data || {};
+    var freshGuests = remoteData.guests ? remoteData.guests : STATE.guests;
+    var freshVersion = (remote.versions && remote.versions.guests !== undefined) ? remote.versions.guests : VERSIONS.guests;
     var nextGuests = freshGuests.map(function(g){ return g.id===guestId ? Object.assign({},g,{[field]:value}) : g; });
     STATE.guests = nextGuests;
-    api.set('guests', nextGuests);
     render();
+    api.set('guests', nextGuests, freshVersion).then(function(result){
+      if (result && result.ok) {
+        VERSIONS.guests = result.newVersion;
+      } else if (result && result.conflict) {
+        STATE.guests = result.currentValue;
+        VERSIONS.guests = result.currentVersion;
+        render();
+        showToast('⚠️ Modifié ailleurs entretemps — réessaie ce placement');
+      }
+    });
   });
 }
 function onDropTable(e,tableId){
