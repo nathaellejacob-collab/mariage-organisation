@@ -305,24 +305,29 @@ function save(key, value) {
       STATE[key] = result.currentValue;
       VERSIONS[key] = result.currentVersion;
       render();
-      showToast('⚠️ Modifié ailleurs entretemps — réessaie ce changement');
+      showToast('⚠️ Modifié ailleurs entretemps — réessaie ce changement', 6000);
     } else {
-      showToast('⚠️ Non enregistré (connexion) — réessaie');
+      showToast('⚠️ ERREUR: ' + (result && result.error ? result.error : JSON.stringify(result)), 15000);
     }
+  }).catch(function(err){
+    showToast('⚠️ EXCEPTION JS: ' + err, 15000);
   });
 }
-function showToast(msg) {
+function showToast(msg, duration) {
   var el = document.getElementById('toast');
   if (!el) {
     el = document.createElement('div');
     el.id = 'toast';
     el.className = 'toast';
+    el.style.maxWidth = '90vw';
+    el.style.whiteSpace = 'normal';
+    el.style.textAlign = 'center';
     document.body.appendChild(el);
   }
   el.textContent = msg;
   el.className = 'toast show';
   clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(function(){ el.className = 'toast'; }, 1600);
+  window.__toastTimer = setTimeout(function(){ el.className = 'toast'; }, duration || 1600);
 }
 function go(tab) { CURRENT_TAB = tab; window.scrollTo(0,0); render(); }
 
@@ -769,9 +774,11 @@ function updateGuestVinHonneur(id, checked){
     if (result && result.ok) { VERSIONS.guests = result.newVersion; }
     else if (result && result.conflict) {
       STATE.guests = result.currentValue; VERSIONS.guests = result.currentVersion; render();
-      showToast('⚠️ Modifié ailleurs entretemps — réessaie ce changement');
+      showToast('⚠️ Modifié ailleurs entretemps — réessaie ce changement', 6000);
+    } else {
+      showToast('⚠️ ERREUR guests: ' + (result && result.error ? result.error : JSON.stringify(result)), 15000);
     }
-  });
+  }).catch(function(err){ showToast('⚠️ EXCEPTION guests: ' + err, 15000); });
   if(checked){
     var nextTables = STATE.tables.map(function(t){ return Object.assign({},t,{occupants:t.occupants.filter(function(o){return o.guestId!==id;})}); });
     var nextRooms = STATE.rooms.map(function(r){ return Object.assign({},r,{occupants:r.occupants.filter(function(o){return o.guestId!==id;})}); });
