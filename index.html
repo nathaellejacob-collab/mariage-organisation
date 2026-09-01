@@ -334,6 +334,10 @@ function loadAndStart() {
       ]});
       api.set('trousse', STATE.trousse);
     }
+    if (STATE.budget && STATE.budget.objectifs === undefined) {
+      STATE.budget = Object.assign({}, STATE.budget, {objectifs: {}});
+      api.set('budget', STATE.budget);
+    }
     GATE_NEEDED = !!(STATE.access && STATE.access.passcode);
     if (GATE_NEEDED) {
       var sess = sessionStorage.getItem("wedding_session");
@@ -1306,9 +1310,25 @@ function depenseRowHtml(d){
     (CAN_EDIT?'<button class="icon-btn" onclick="setEditing(\'depense\','+d.id+')">✎</button>':'')+
   '</div>';
 }
+var BUDGET_COLORS = {
+  "Lieu de réception":"#A8645D", "Traiteur":"#B98A82", "Photographie":"#8B9574",
+  "Vidéaste":"#7C93A3", "Tenue et robe":"#A69580", "Fleurs et bouquets":"#8B6F8C",
+  "Musique et DJ":"#C08552", "Faire-part":"#93A8AC", "Alliances et bijoux":"#B87355",
+  "Beauté et coiffure":"#A594B0", "Gâteau":"#7A8B6F", "Divers":"#71829B"
+};
+function budgetColorFor_(cat){ return BUDGET_COLORS[cat] || '#B98A82'; }
+function saveObjectif(categorie){
+  var v = val('obj-'+categorie.replace(/[^a-zA-Z0-9]/g,''));
+  var n = parseFloat((v||'').replace(/\s/g,'').replace(',','.'))||0;
+  var next = Object.assign({}, STATE.budget.objectifs||{});
+  if(n>0){ next[categorie]=n; } else { delete next[categorie]; }
+  save('budget', Object.assign({},STATE.budget,{objectifs:next}));
+  UI.editingObjectifFor=null;
+}
 function viewBudget(){
   var b = STATE.budget;
   var depenses = b.depenses||[];
+  var objectifs = b.objectifs||{};
   var paye = depenses.reduce(function(s,d){return s+Math.min(d.montantPaye||0, d.montant||0);},0);
   var engage = depenses.reduce(function(s,d){return s+(d.montant||0);},0);
   var attente = engage-paye;
@@ -1316,6 +1336,11 @@ function viewBudget(){
   var restant = total-engage;
   var pct = total>0 ? Math.round(engage/total*100) : 0;
   var pctClamped = Math.min(100, Math.max(0,pct));
+
+  var byCat = {};
+  depenses.forEach(function(d){ var c=d.categorie||'Divers'; byCat[c]=(byCat[c]||0)+(d.montant||0); });
+  var activeCats = BUDGET_CATEGORIES.filter(function(c){ return (byCat[c]||0)>0; });
+  Object.keys(byCat).forEach(function(c){ if(activeCats.indexOf(c)<0 && byCat[c]>0) activeCats.push(c); });
 
   var html='<div class="fade"><h2 class="display" style="font-size:28px;">Budget</h2>'+
     '<div class="card" style="margin-top:14px;text-align:center;">'+
@@ -1332,8 +1357,51 @@ function viewBudget(){
         '<div class="flex-between" style="padding:8px 0;border-bottom:1px solid var(--border);"><span class="muted">Reste à payer</span><span>'+fmtEUR_(attente)+'</span></div>'+
         '<div class="flex-between" style="padding:8px 0;"><span class="muted">Restant du budget</span><span style="font-weight:600;">'+fmtEUR_(restant)+'</span></div>'+
       '</div>'+
-    '</div>'+
-    '<div class="flex-between" style="margin-top:20px;"><h3 class="display" style="font-size:20px;margin:0;">Dépenses</h3>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingDepense=true;render();">+ Ajouter</button>':'')+'</div>';
+    '</div>';
+
+  if(activeCats.length){
+    var cum=0;
+    var stops=activeCats.map(function(c){
+      var start=engage>0?(cum/engage*360):0;
+      cum+=byCat[c];
+      var end=engage>0?(cum/engage*360):0;
+      return budgetColorFor_(c)+' '+start.toFixed(1)+'deg '+end.toFixed(1)+'deg';
+    }).join(', ');
+    html+='<div class="card" style="margin-top:16px;text-align:center;">'+
+      '<div class="eyebrow" style="margin-bottom:14px;">Combien coûte mon mariage ?</div>'+
+      '<div style="width:200px;height:200px;margin:0 auto;border-radius:50%;background:conic-gradient('+stops+');display:flex;align-items:center;justify-content:center;">'+
+        '<div style="width:120px;height:120px;border-radius:50%;background:var(--paper);"></div>'+
+      '</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:center;margin-top:18px;">'+
+        activeCats.map(function(c){return '<div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:10px;height:10px;border-radius:50%;background:'+budgetColorFor_(c)+';display:inline-block;"></span>'+esc(c)+'</div>';}).join('')+
+      '</div>'+
+    '</div>';
+  }
+
+  html+='<div class="eyebrow" style="margin-top:20px;margin-bottom:10px;">Répartition par catégorie</div>';
+  html += BUDGET_CATEGORIES.map(function(cat){
+    var spent = byCat[cat]||0;
+    var objectif = objectifs[cat];
+    var color = budgetColorFor_(cat);
+    var catPct = objectif ? Math.min(100, Math.round(spent/objectif*100)) : 0;
+    var safeKey = cat.replace(/[^a-zA-Z0-9]/g,'');
+    return '<div class="card" style="margin-bottom:10px;border-left:3px solid '+color+';">'+
+      '<div class="flex-between"><span style="font-size:14px;font-weight:500;">'+esc(cat)+'</span>'+
+        '<div class="row-flex"><span style="font-size:14px;font-weight:600;color:'+color+';">'+fmtEUR_(spent)+'</span>'+
+        (CAN_EDIT?'<button class="icon-btn" onclick="UI.addingDepense=true;render();">+</button>':'')+
+        '</div>'+
+      '</div>'+
+      '<div class="progressbar" style="margin:8px 0 4px;"><div class="fill" style="width:'+catPct+'%;background:'+color+';"></div></div>'+
+      '<div class="flex-between" style="font-size:11px;">'+
+        '<span class="muted">'+catPct+'%</span>'+
+        (UI.editingObjectifFor===cat?
+          '<span class="row-flex"><input id="obj-'+safeKey+'" value="'+(objectif||'')+'" placeholder="Montant" style="width:90px;padding:3px 8px;font-size:11px;"/><button class="btn" style="padding:4px 10px;font-size:11px;" onclick="saveObjectif(\''+esc(cat).replace(/\047/g,"\\'")+'\')">✓</button></span>'
+          :'<span class="muted">Objectif : '+(objectif?fmtEUR_(objectif):'non défini')+(CAN_EDIT?' <button class="icon-btn" style="padding:0 0 0 4px;" onclick="UI.editingObjectifFor=\''+esc(cat).replace(/\047/g,"\\'")+'\';render();">✎</button>':'')+'</span>')+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  html+='<div class="flex-between" style="margin-top:20px;"><h3 class="display" style="font-size:20px;margin:0;">Dépenses</h3>'+(CAN_EDIT?'<button class="btn" onclick="UI.addingDepense=true;render();">+ Ajouter</button>':'')+'</div>';
 
   if(UI.addingDepense){
     html+='<div class="listrow" style="flex-direction:column;align-items:stretch;margin-top:10px;">'+
@@ -1926,7 +1994,7 @@ document.addEventListener('keydown', function(e){
   if (!t || t.tagName !== 'INPUT') return;
   var id = t.id || '';
   var ok = ENTER_TO_VALIDATE_IDS.indexOf(id) >= 0 || id.indexOf('add-mission-titre-')===0 || id.indexOf('add-mission-resp-')===0
-    || id.indexOf('add-dc-nom-')===0 || id.indexOf('add-dc-lien-')===0;
+    || id.indexOf('add-dc-nom-')===0 || id.indexOf('add-dc-lien-')===0 || id.indexOf('obj-')===0;
   if (!ok) return;
   var el = t;
   while (el && el !== document.body) {
