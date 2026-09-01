@@ -1741,9 +1741,13 @@ function onDragStartGuest(e,guestId,label){ DRAG={guestId:guestId,label:label}; 
 function onDragStartOccupant(e,guestId,label){ DRAG={guestId:guestId||null,label:label}; e.dataTransfer.setData('text/plain','x'); }
 function syncGuestFieldAfterPlacement_(guestId, field, value){
   if(!CAN_EDIT || !guestId) return;
-  var nextGuests = STATE.guests.map(function(g){ return g.id===guestId ? Object.assign({},g,{[field]:value}) : g; });
-  STATE.guests = nextGuests;
-  api.set('guests', nextGuests);
+  api.getAll().then(function(remote){
+    var freshGuests = (remote && remote.guests) ? remote.guests : STATE.guests;
+    var nextGuests = freshGuests.map(function(g){ return g.id===guestId ? Object.assign({},g,{[field]:value}) : g; });
+    STATE.guests = nextGuests;
+    api.set('guests', nextGuests);
+    render();
+  });
 }
 function onDropTable(e,tableId){
   e.preventDefault(); e.currentTarget.classList.remove('dragover');
