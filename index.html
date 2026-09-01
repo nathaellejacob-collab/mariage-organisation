@@ -1203,9 +1203,23 @@ function taskRowHtml(t){
   '</div>';
 }
 function setTasksFilter(f){ UI.tasksFilter=f; render(); }
+var WEDDING_DATE_ = new Date("2027-06-19T00:00:00");
+function taskPeriodLabel_(t){
+  var d = t.date ? new Date(t.date+'T00:00:00') : null;
+  if(!d) return 'Sans date';
+  var diffDays = Math.round((WEDDING_DATE_ - d) / 86400000);
+  if(diffDays > 365) return '12 à 18 mois avant';
+  if(diffDays > 240) return '8 à 12 mois avant';
+  if(diffDays > 180) return '6 à 8 mois avant';
+  if(diffDays > 120) return '4 à 6 mois avant';
+  if(diffDays > 60) return '2 à 4 mois avant';
+  if(diffDays > 20) return '1 mois avant';
+  if(diffDays > 2) return '1 semaine avant';
+  return 'Jour J';
+}
+var TASK_PERIOD_ORDER_ = ['12 à 18 mois avant','8 à 12 mois avant','6 à 8 mois avant','4 à 6 mois avant','2 à 4 mois avant','1 mois avant','1 semaine avant','Jour J','Sans date'];
 function viewTasks(){
   var today = new Date(); today.setHours(0,0,0,0);
-  var weekLater = new Date(today.getTime()+7*86400000);
   function taskDate(t){ return t.date ? new Date(t.date+'T00:00:00') : null; }
   var all = STATE.tasks;
   var enRetard = all.filter(function(t){ var d=taskDate(t); return d && d<today && t.statut!=='termine'; });
@@ -1239,15 +1253,13 @@ function viewTasks(){
     html += termine.length ? termine.map(taskRowHtml).join('') : '<p class="muted" style="text-align:center;padding:20px;">Aucune tâche terminée.</p>';
   } else {
     var pool = filter==='avenir' ? aVenir : all.filter(function(t){return t.statut!=='termine';});
-    var retardInPool = filter==='tous' ? enRetard : [];
-    var cetteSemaine = pool.filter(function(t){ var d=taskDate(t); return d && d>=today && d<=weekLater; });
-    var plusTard = pool.filter(function(t){ var d=taskDate(t); return d && d>weekLater; });
-    var sansDate = pool.filter(function(t){ return !taskDate(t); });
-    html += section('En retard', retardInPool);
-    html += section('Cette semaine', cetteSemaine);
-    html += section('Plus tard', plusTard);
-    html += section('Sans date', sansDate);
-    if(!retardInPool.length && !cetteSemaine.length && !plusTard.length && !sansDate.length && !UI.addingTask){
+    var byPeriod = {};
+    pool.forEach(function(t){ var lbl=taskPeriodLabel_(t); (byPeriod[lbl]=byPeriod[lbl]||[]).push(t); });
+    var any=false;
+    TASK_PERIOD_ORDER_.forEach(function(lbl){
+      if(byPeriod[lbl] && byPeriod[lbl].length){ any=true; html += section(lbl, byPeriod[lbl]); }
+    });
+    if(!any && !UI.addingTask){
       html += '<p class="muted" style="text-align:center;padding:20px;">Aucune tâche.</p>';
     }
   }
