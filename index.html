@@ -1307,7 +1307,7 @@ function depenseRowHtml(d){
   var clickAttr = CAN_EDIT ? ' onclick="openEditDepenseModal('+d.id+')"' : '';
   return '<div class="listrow"'+clickAttr+(CAN_EDIT?' style="cursor:pointer;"':'')+'>'+
     '<div style="flex:1;"><div style="font-size:13px;">'+esc(d.titre)+'</div>'+
-    '<div class="muted" style="font-size:11px;margin-top:2px;">'+(d.categorie?esc(d.categorie):'')+(d.prestataire?' · '+esc(d.prestataire):'')+'</div></div>'+
+    (d.prestataire?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(d.prestataire)+'</div>':'')+'</div>'+
     (CAN_EDIT?'<span class="muted" style="font-size:11px;">✎</span>':'')+
   '</div>';
 }
@@ -1389,18 +1389,18 @@ function viewBudget(){
   }
 
   if(subTab==='depenses'){
-    html+='<div class="eyebrow" style="margin-top:14px;margin-bottom:10px;">Répartition par catégorie</div>';
+    html+='<div class="flex-between" style="margin-top:14px;"><div class="eyebrow" style="margin:0;">Dépenses par catégorie</div>'+(CAN_EDIT?'<button class="btn" style="font-size:12px;padding:6px 12px;" onclick="openDepenseModal(null)">+ Ajouter</button>':'')+'</div>';
     html += BUDGET_CATEGORIES.map(function(cat){
       var spent = byCat[cat]||0;
       var objectif = objectifs[cat];
       var color = budgetColorFor_(cat);
       var catPct = objectif ? Math.min(100, Math.round(spent/objectif*100)) : 0;
       var catDepenses = depenses.filter(function(d){ return (d.categorie||'') === cat; });
-      var clickAction = !CAN_EDIT ? '' : (catDepenses.length===1
+      var headerClickAction = !CAN_EDIT ? '' : (catDepenses.length===1
         ? 'openEditDepenseModal('+catDepenses[0].id+')'
-        : 'openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')');
-      var clickAttr = clickAction ? ' onclick="'+clickAction+'"' : '';
-      return '<div class="card" style="margin-bottom:10px;border-left:3px solid '+color+';'+(clickAttr?'cursor:pointer;':'')+'"'+clickAttr+'>'+
+        : (catDepenses.length===0 ? 'openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')' : ''));
+      var headerClickAttr = headerClickAction ? ' onclick="'+headerClickAction+'"' : '';
+      return '<div class="card" style="margin-top:12px;border-left:3px solid '+color+';'+(headerClickAttr?'cursor:pointer;':'')+'"'+headerClickAttr+'>'+
         '<div class="flex-between"><span class="display" style="font-size:17px;">'+esc(cat)+'</span>'+
           '<span style="font-size:14px;font-weight:600;color:'+color+';">'+fmtEUR_(spent)+'</span>'+
         '</div>'+
@@ -1409,14 +1409,10 @@ function viewBudget(){
           '<div class="flex-between" style="font-size:11px;margin-top:8px;"><span class="muted" style="font-style:italic;">Définis un objectif pour suivre ta progression</span>')+
           '<span class="muted">'+(objectif?'Objectif : '+fmtEUR_(objectif):'')+(CAN_EDIT?' <button class="icon-btn" style="padding:0 0 0 4px;" onclick="event.stopPropagation();openObjectifModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">✎</button>':'')+'</span>'+
         '</div>'+
-        (CAN_EDIT&&catDepenses.length>1?'<button class="btn-outline" style="font-size:11px;margin-top:8px;" onclick="event.stopPropagation();openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">+ Ajouter une autre dépense</button>':'')+
+        (catDepenses.length?'<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);">'+catDepenses.map(depenseRowHtml).join('')+'</div>':'')+
+        (CAN_EDIT?'<button class="btn-outline" style="font-size:11px;margin-top:8px;" onclick="event.stopPropagation();openDepenseModal(\''+esc(cat).replace(/\047/g,"\\'")+'\')">+ Ajouter une dépense</button>':'')+
       '</div>';
     }).join('');
-
-    html+='<div class="flex-between" style="margin-top:20px;"><h3 class="display" style="font-size:20px;margin:0;">Dépenses</h3>'+(CAN_EDIT?'<button class="btn" onclick="openDepenseModal(null)">+ Ajouter</button>':'')+'</div>';
-
-    html += '<div style="margin-top:10px;">'+depenses.map(depenseRowHtml).join('')+'</div>';
-    if(!depenses.length) html+='<p class="muted" style="text-align:center;padding:20px;">Aucune dépense pour le moment.</p>';
   }
 
   if(UI.budgetModal && UI.budgetModal.type==='depense'){
