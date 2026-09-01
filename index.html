@@ -732,7 +732,7 @@ function addMissionPlanningEvent(person, day){
 }
 
 /* ============ GUESTS ============ */
-var GUEST_CATEGORIES = ["Famille Nathaelle","Famille Jérémy","Amis Nathaelle","Amis Jérémy","Travail Nathaelle","Travail Jérémy"];
+var GUEST_CATEGORIES = ["Mariés","Famille Nathaelle","Famille Jérémy","Amis Nathaelle","Amis Jérémy","Travail Nathaelle","Travail Jérémy"];
 var PRESENCE_STYLE = {
   confirme: { bg:"#E4EFE3", c:"#5C8A5A" },
   attente: { bg:"#F6EFE0", c:"#BFA059" },
@@ -1823,8 +1823,20 @@ function tableCardHtml(t){
         (CAN_EDIT?'<div class="row-flex" style="margin-top:6px;"><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',-1)">–</button><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',1)">+</button></div>':'')+
       '</div>'+
     '</div>'+
+    (CAN_EDIT?'<div class="row-flex" style="margin-top:8px;" onclick="event.stopPropagation()"><input id="add-custom-table-'+t.id+'" placeholder="Ajouter un nom (ex. marié·e)" style="flex:1;font-size:12px;"/><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="addCustomTableOccupant('+t.id+')">+</button></div>':'')+
     (CAN_EDIT?'<div style="text-align:center;margin-top:8px;" onclick="event.stopPropagation()"><button class="icon-btn danger" style="font-size:11px;" onclick="deleteTable('+t.id+')">🗑 Supprimer</button></div>':'')+
   '</div>';
+}
+function addCustomTableOccupant(tableId){
+  var v = val('add-custom-table-'+tableId);
+  if(!v || !v.trim()) return;
+  var name = v.trim();
+  var target = STATE.tables.filter(function(t){return t.id===tableId;})[0];
+  if(!target || target.occupants.length>=target.capacity) return;
+  save('tables', STATE.tables.map(function(t){
+    if(t.id!==tableId) return t;
+    return Object.assign({},t,{occupants:t.occupants.concat([{guestId:null,label:name}])});
+  }));
 }
 function viewTables(){
   var placedKeys={};
@@ -1878,6 +1890,15 @@ function removeRoomOccupant(roomId, idx){
   save('rooms', STATE.rooms.map(function(rr){ if(rr.id!==roomId) return rr; var o=rr.occupants.slice(); o.splice(idx,1); return Object.assign({},rr,{occupants:o}); }));
   if(occ) syncGuestFieldAfterPlacement_(occ.guestId, 'chambre', '');
 }
+function addCustomRoomOccupant(roomId){
+  var v = val('add-custom-room-'+roomId);
+  if(!v || !v.trim()) return;
+  var name = v.trim();
+  save('rooms', STATE.rooms.map(function(r){
+    if(r.id!==roomId) return r;
+    return Object.assign({},r,{occupants:r.occupants.concat([{guestId:null,label:name}])});
+  }));
+}
 function roomCardHtml(r){
   var filled=r.occupants.length, cap=r.capacity;
   var over=filled>cap, full=filled===cap&&cap>0;
@@ -1901,6 +1922,7 @@ function roomCardHtml(r){
       }).join('') +
       (r.occupants.length===0?'<span class="muted" style="font-size:12px;">Glissez des invités ici</span>':'')+
     '</div>'+
+    (CAN_EDIT?'<div class="row-flex" style="margin-top:8px;" onclick="event.stopPropagation()"><input id="add-custom-room-'+r.id+'" placeholder="Ajouter un nom (ex. marié·e)" style="flex:1;font-size:12px;"/><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="addCustomRoomOccupant('+r.id+')">+</button></div>':'')+
   '</div>';
 }
 function viewRooms(){
@@ -2034,7 +2056,8 @@ document.addEventListener('keydown', function(e){
   if (!t || t.tagName !== 'INPUT') return;
   var id = t.id || '';
   var ok = ENTER_TO_VALIDATE_IDS.indexOf(id) >= 0 || id.indexOf('add-mission-titre-')===0 || id.indexOf('add-mission-resp-')===0
-    || id.indexOf('add-dc-nom-')===0 || id.indexOf('add-dc-lien-')===0 || id.indexOf('obj-')===0;
+    || id.indexOf('add-dc-nom-')===0 || id.indexOf('add-dc-lien-')===0 || id.indexOf('obj-')===0
+    || id.indexOf('add-custom-room-')===0 || id.indexOf('add-custom-table-')===0;
   if (!ok) return;
   var el = t;
   while (el && el !== document.body) {
