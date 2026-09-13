@@ -298,10 +298,7 @@ function save(key, value) {
   STATE[key] = value;
   showToast('✓ Enregistré');
   render();
-  api.getAll().then(function(remote){
-    var freshVersion = (remote.versions && remote.versions[key]!==undefined) ? remote.versions[key] : (VERSIONS[key]||0);
-    return api.set(key, value, freshVersion);
-  }).then(function(result){
+  api.set(key, value, VERSIONS[key]).then(function(result){
     if (result && result.ok) {
       VERSIONS[key] = result.newVersion;
     } else if (result && result.conflict) {
