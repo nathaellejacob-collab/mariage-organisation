@@ -117,7 +117,8 @@
   .tl-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;width:100%;}
   .tl-card:last-child{margin-bottom:0;}
   .tl-card .title{font-size:13px;color:var(--ink);}
-  .table-round{position:relative;width:100%;max-width:280px;aspect-ratio:1/1;margin:0 auto;}
+  .table-round{position:relative;width:100%;max-width:220px;aspect-ratio:1/1;margin:0 auto;background:var(--paper);border:1px solid var(--border);border-radius:999px;box-shadow:0 2px 8px rgba(43,38,34,.08);}
+  .table-round.rect-shape{max-width:220px;aspect-ratio:16/10;border-radius:16px;}
   .seat{position:absolute;transform:translate(-50%,-50%);}
   .seat-chip{width:100%;aspect-ratio:1/1;border-radius:999px;background:var(--rose-soft);color:var(--rose-deep);border:1px solid rgba(184,116,110,.35);display:flex;align-items:center;justify-content:center;text-align:center;font-size:8px;line-height:1.1;padding:2px;cursor:grab;}
   .seat-empty{width:100%;aspect-ratio:1/1;border-radius:999px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:9px;}
@@ -128,7 +129,7 @@
   .table-drag-handle{cursor:grab;user-select:none;text-align:center;font-size:10px;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;padding:2px 0 6px;}
   .table-card-wrap.dragging-table{z-index:50;opacity:.85;cursor:grabbing;}
   .pool{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:14px;}
-  .pool.dragover, .table-card.dragover, .room-card.dragover{border-color:var(--gold);box-shadow:0 0 0 3px rgba(191,160,89,.15);}
+  .pool.dragover, .table-round.dragover, .room-card.dragover{border-color:var(--gold);box-shadow:0 0 0 3px rgba(191,160,89,.15);}
   .pool-chip{display:flex;align-items:center;gap:6px;background:var(--champagne-soft);border-radius:999px;padding:6px 10px;font-size:12px;margin-bottom:6px;cursor:grab;}
   #gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
   #gate .box{background:var(--paper);border:1px solid var(--border);border-radius:24px;padding:32px;max-width:360px;width:100%;text-align:center;}
@@ -1939,23 +1940,24 @@ function tableCardHtml(t){
   var badgeColor= over?'#B15E56':full?'#5C8A5A':'#BFA059';
   var badgeBg= over?'#F3E3E1':full?'#E4EFE3':'#F6EFE0';
   var x = t.x||0, y = t.y||0;
-  return '<div class="table-card-wrap" style="left:'+x+'px;top:'+y+'px;" ondragover="event.preventDefault();this.querySelector(\'.card\').classList.add(\'dragover\')" ondragleave="this.querySelector(\'.card\').classList.remove(\'dragover\')" ondrop="onDropTable(event,'+t.id+')" onclick="onDropTable(event,'+t.id+')">'+
-    (CAN_EDIT?'<div class="table-drag-handle" onmousedown="onTableHandleDown(event,'+t.id+')" ontouchstart="onTableHandleDown(event,'+t.id+')">⠿⠿ déplacer</div>':'')+
-    '<div class="table-card card">'+
-    '<div class="table-round" style="position:relative;">'+seatsHtml+
+  var panelOpen = UI.openTablePanel===t.id;
+  return '<div class="table-card-wrap" style="left:'+x+'px;top:'+y+'px;" ondragover="event.preventDefault();this.querySelector(\'.table-round\').classList.add(\'dragover\')" ondragleave="this.querySelector(\'.table-round\').classList.remove(\'dragover\')" ondrop="onDropTable(event,'+t.id+')" onclick="onDropTable(event,'+t.id+')">'+
+    (CAN_EDIT?'<div class="table-drag-handle" onmousedown="onTableHandleDown(event,'+t.id+')" ontouchstart="onTableHandleDown(event,'+t.id+')" onclick="event.stopPropagation()">⠿⠿</div>':'')+
+    '<div class="table-round'+(isRect?' rect-shape':'')+'" style="position:relative;">'+seatsHtml+
       '<div class="table-center'+(isRect?' rect':'')+'" onclick="event.stopPropagation()">'+
         (CAN_EDIT? '<input value="'+esc(t.nom)+'" onchange="renameTable('+t.id+',this.value)" style="border:none;background:transparent;text-align:center;font-family:\'Cormorant Garamond\',serif;font-style:italic;padding:0;font-size:13px;width:100%;"/>' : '<div class="display" style="font-size:13px;">'+esc(t.nom)+'</div>')+
         '<span class="chip" style="background:'+badgeBg+';color:'+badgeColor+';margin-top:4px;">'+filled+'/'+cap+'</span>'+
-        (CAN_EDIT?'<div class="row-flex" style="margin-top:6px;"><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',-1)">–</button><button class="btn-outline" style="padding:2px 8px;" onclick="tableCapacity('+t.id+',1)">+</button></div>':'')+
       '</div>'+
     '</div>'+
-    (CAN_EDIT?'<div class="row-flex" style="margin-top:8px;justify-content:center;" onclick="event.stopPropagation()">'+
-      '<button class="btn-outline" style="padding:3px 10px;font-size:11px;'+(!isRect?'background:var(--ink);color:#fff;':'')+'" onclick="setTableShape('+t.id+',\'ronde\')">◯ Ronde</button>'+
+    (CAN_EDIT?'<div style="text-align:center;margin-top:4px;" onclick="event.stopPropagation()"><button class="icon-btn" style="font-size:11px;background:var(--paper);border:1px solid var(--border);border-radius:999px;padding:2px 10px;" onclick="UI.openTablePanel='+(panelOpen?'null':t.id)+';render();">⋯ Réglages</button></div>':'')+
+    (panelOpen?'<div class="card" style="margin-top:6px;padding:12px;" onclick="event.stopPropagation()">'+
+      '<div class="row-flex" style="justify-content:center;"><button class="btn-outline" style="padding:3px 10px;font-size:11px;'+(!isRect?'background:var(--ink);color:#fff;':'')+'" onclick="setTableShape('+t.id+',\'ronde\')">◯ Ronde</button>'+
       '<button class="btn-outline" style="padding:3px 10px;font-size:11px;'+(isRect?'background:var(--ink);color:#fff;':'')+'" onclick="setTableShape('+t.id+',\'rectangle\')">▭ Rectangle</button>'+
+      '<button class="btn-outline" style="padding:3px 8px;" onclick="tableCapacity('+t.id+',-1)">–</button><button class="btn-outline" style="padding:3px 8px;" onclick="tableCapacity('+t.id+',1)">+</button></div>'+
+      '<div class="row-flex" style="margin-top:8px;"><input id="add-custom-table-'+t.id+'" placeholder="Ajouter un nom (ex. marié·e)" style="flex:1;font-size:12px;"/><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="addCustomTableOccupant('+t.id+')">+</button></div>'+
+      '<div style="text-align:center;margin-top:8px;"><button class="icon-btn danger" style="font-size:11px;" onclick="deleteTable('+t.id+')">🗑 Supprimer la table</button></div>'+
     '</div>':'')+
-    (CAN_EDIT?'<div class="row-flex" style="margin-top:8px;" onclick="event.stopPropagation()"><input id="add-custom-table-'+t.id+'" placeholder="Ajouter un nom (ex. marié·e)" style="flex:1;font-size:12px;"/><button class="btn" style="padding:4px 10px;font-size:12px;" onclick="addCustomTableOccupant('+t.id+')">+</button></div>':'')+
-    (CAN_EDIT?'<div style="text-align:center;margin-top:8px;" onclick="event.stopPropagation()"><button class="icon-btn danger" style="font-size:11px;" onclick="deleteTable('+t.id+')">🗑 Supprimer</button></div>':'')+
-  '</div></div>';
+  '</div>';
 }
 function addCustomTableOccupant(tableId){
   var v = val('add-custom-table-'+tableId);
