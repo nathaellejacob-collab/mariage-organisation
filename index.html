@@ -117,7 +117,8 @@
   .tl-card{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;width:100%;}
   .tl-card:last-child{margin-bottom:0;}
   .tl-card .title{font-size:13px;color:var(--ink);}
-  .table-round{position:relative;width:100%;max-width:220px;aspect-ratio:1/1;margin:0 auto;background:var(--paper);border:1px solid var(--border);border-radius:999px;box-shadow:0 2px 8px rgba(43,38,34,.08);}
+  .table-round{position:relative;width:100%;max-width:220px;aspect-ratio:1/1;margin:0 auto;}
+  .table-round.dragover .table-center{outline:3px solid var(--gold);outline-offset:2px;}
   .table-round.rect-shape{max-width:220px;aspect-ratio:16/10;border-radius:16px;}
   .seat{position:absolute;transform:translate(-50%,-50%);}
   .seat-chip{width:100%;aspect-ratio:1/1;border-radius:999px;background:var(--rose-soft);color:var(--rose-deep);border:1px solid rgba(184,116,110,.35);display:flex;align-items:center;justify-content:center;text-align:center;font-size:8px;line-height:1.1;padding:2px;cursor:grab;}
@@ -129,7 +130,7 @@
   .table-drag-handle{cursor:grab;user-select:none;text-align:center;font-size:10px;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;padding:2px 0 6px;}
   .table-card-wrap.dragging-table{z-index:50;opacity:.85;cursor:grabbing;}
   .pool{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:14px;}
-  .pool.dragover, .table-round.dragover, .room-card.dragover{border-color:var(--gold);box-shadow:0 0 0 3px rgba(191,160,89,.15);}
+  .pool.dragover, .room-card.dragover{border-color:var(--gold);box-shadow:0 0 0 3px rgba(191,160,89,.15);}
   .pool-chip{display:flex;align-items:center;gap:6px;background:var(--champagne-soft);border-radius:999px;padding:6px 10px;font-size:12px;margin-bottom:6px;cursor:grab;}
   #gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
   #gate .box{background:var(--paper);border:1px solid var(--border);border-radius:24px;padding:32px;max-width:360px;width:100%;text-align:center;}
