@@ -217,11 +217,95 @@ function signIn(){
   });
 }
 function signOut(){ firebase.auth().signOut(); }
+
+/* ============ SAUVEGARDES AUTOMATIQUES ============ */
+var BACKUP_COLLECTION = 'wedding_backups';
+var BACKUP_KEEP = 30;
+var BACKUP_DONE_TODAY = false;
+function todayId_(){
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function formatBackupDate_(id){
+  var p = String(id).split('-');
+  return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : id;
+}
+function snapshotState_(){
+  var copy = {};
+  Object.keys(STATE).forEach(function(k){ if (k !== 'access') copy[k] = STATE[k]; });
+  return JSON.parse(JSON.stringify(copy));
+}
+function writeBackup_(){
+  var id = todayId_();
+  return db.collection(BACKUP_COLLECTION).doc(id).set({
+    createdAt: new Date().toISOString(),
+    by: AUTH_USER ? AUTH_USER.email : '',
+    data: snapshotState_()
+  }).then(pruneBackups_);
+}
+function pruneBackups_(){
+  return db.collection(BACKUP_COLLECTION).get().then(function(snap){
+    var ids = snap.docs.map(function(d){ return d.id; }).sort().reverse();
+    return Promise.all(ids.slice(BACKUP_KEEP).map(function(id){ return db.collection(BACKUP_COLLECTION).doc(id).delete(); }));
+  });
+}
+function autoBackup_(){
+  if (BACKUP_DONE_TODAY || !APP_READY || !isEditor()) return;
+  BACKUP_DONE_TODAY = true;
+  var ref = db.collection(BACKUP_COLLECTION).doc(todayId_());
+  // Une seule sauvegarde automatique par jour : on ne remplace jamais celle du jour
+  ref.get({source:'server'}).then(function(doc){
+    if (!doc.exists) return writeBackup_();
+  }).catch(function(err){ console.warn('Sauvegarde auto impossible', err); BACKUP_DONE_TODAY = false; });
+}
+function loadBackups_(){
+  if (!isEditor()) return;
+  UI.backupsLoading = true;
+  db.collection(BACKUP_COLLECTION).get({source:'server'}).then(function(snap){
+    UI.backups = snap.docs.map(function(d){
+      var v = d.data() || {};
+      var g = v.data && v.data.guests;
+      return { id: d.id, by: v.by, nbInvites: Array.isArray(g) ? g.length : 0 };
+    }).sort(function(a,b){ return a.id < b.id ? 1 : -1; });
+    UI.backupsLoaded = true; UI.backupsLoading = false;
+    if (CURRENT_TAB === 'admin') render();
+  }).catch(function(err){
+    UI.backupsLoading = false;
+    showToast('⚠️ Sauvegardes illisibles : ' + err, 8000);
+  });
+}
+function backupNow_(){
+  if (!isEditor()) return;
+  writeBackup_().then(function(){
+    showToast('✓ Sauvegarde faite');
+    UI.backupsLoaded = false; render();
+  }).catch(function(err){ showToast('⚠️ Sauvegarde impossible : ' + err, 8000); });
+}
+function restoreBackup_(id){
+  if (!isEditor()) return;
+  if (!confirm('Remettre toutes les données telles qu\'elles étaient le ' + formatBackupDate_(id) + ' ?\n\nLes modifications faites depuis seront remplacées. (Une sauvegarde de l\'état actuel est faite juste avant.)')) return;
+  var ref = db.collection(BACKUP_COLLECTION).doc(id);
+  ref.get({source:'server'}).then(function(doc){
+    if (!doc.exists) throw new Error('sauvegarde introuvable');
+    var data = doc.data().data || {};
+    // Filet de sécurité : on garde l'état actuel sous un nom distinct avant de restaurer
+    return db.collection(BACKUP_COLLECTION).doc(todayId_() + '-avant-restauration').set({
+      createdAt: new Date().toISOString(), by: AUTH_USER ? AUTH_USER.email : '', data: snapshotState_()
+    }).then(function(){
+      return Promise.all(Object.keys(data).map(function(k){
+        return db.collection(WEDDING_COLLECTION).doc(k).set({data: data[k]});
+      }));
+    });
+  }).then(function(){
+    showToast('✓ Données restaurées');
+    UI.backupsLoaded = false; render();
+  }).catch(function(err){ showToast('⚠️ Restauration impossible : ' + err, 10000); });
+}
 firebase.auth().onAuthStateChanged(function(user){
   AUTH_USER = user;
   CAN_EDIT = isEditor();
   if (user && !CAN_EDIT) showToast("Ce compte (" + user.email + ") n'a pas l'accès modification.", 6000);
-  if (APP_READY) render();
+  if (APP_READY) { autoBackup_(); render(); }
 });
 // URL de l'ancien script Google — utilisée UNE SEULE FOIS pour rapatrier
 // automatiquement les vraies données existantes dans Firebase au premier chargement.
@@ -435,6 +519,7 @@ function finishLoad_(remoteData){
     CAN_EDIT = isEditor();
     APP_READY = true;
     renderApp();
+    autoBackup_();
 }
 function attachRealtimeSync(){
   db.collection(WEDDING_COLLECTION).onSnapshot(function(snapshot){
@@ -2180,17 +2265,27 @@ function viewDocuments(){
 /* ============ ADMIN ============ */
 function saveAccessField(field,value){ save('access', withField(STATE.access,field,value)); }
 function viewAdmin(){
-  var a=STATE.access;
+  if (!UI.backupsLoaded && !UI.backupsLoading) { loadBackups_(); }
+  var list = UI.backups || [];
+  var rows = !UI.backupsLoaded
+    ? '<p class="muted" style="font-size:12px;">Chargement…</p>'
+    : (list.length === 0
+      ? '<p class="muted" style="font-size:12px;">Aucune sauvegarde pour l\'instant.</p>'
+      : list.map(function(b){
+          return '<div class="listrow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+            '<div><b>'+esc(formatBackupDate_(b.id))+'</b><div class="muted" style="font-size:11px;">'+esc(b.by||'')+' — '+b.nbInvites+' invités</div></div>'+
+            '<button class="btn-outline" style="font-size:11px;" onclick="restoreBackup_(\''+esc(b.id)+'\')">Restaurer</button>'+
+          '</div>';
+        }).join(''));
   return '<div class="fade"><h2 class="display" style="font-size:28px;">Administration</h2>'+
-  '<div class="card" style="max-width:420px;margin-top:12px;"><div class="eyebrow">🔒 Code complet (modification)</div>'+
-  '<p class="muted" style="font-size:12px;">'+(a.passcode?'Ce code donne un accès complet. Ne le partage qu\'avec les personnes autorisées.':'Aucun code défini : tout le monde peut modifier le site.')+'</p>'+
-  '<div class="row-flex"><input id="admin-pass" value="'+esc(a.passcode)+'" placeholder="Code d\'accès"/><button class="btn" onclick="saveAccessField(\'passcode\',val(\'admin-pass\'))">✓</button></div>'+
+  '<div class="card" style="max-width:520px;margin-top:12px;"><div class="eyebrow">👤 Accès</div>'+
+  '<p class="muted" style="font-size:12px;">Connecté avec <b>'+esc(AUTH_USER?AUTH_USER.email:'')+'</b>. Seuls les comptes Google autorisés peuvent modifier le site ; tout le monde peut le consulter.</p>'+
   '</div>'+
-  '<div class="card" style="max-width:420px;margin-top:12px;"><div class="eyebrow">Code lecture seule</div>'+
-  '<p class="muted" style="font-size:12px;">'+(a.readonlyPasscode?'Ce second code permet de consulter sans modifier.':'Pas encore de code lecture seule.')+'</p>'+
-  '<div class="row-flex"><input id="admin-pass-ro" value="'+esc(a.readonlyPasscode)+'" placeholder="Code lecture seule"/><button class="btn" onclick="saveAccessField(\'readonlyPasscode\',val(\'admin-pass-ro\'))">✓</button></div>'+
+  '<div class="card" style="max-width:520px;margin-top:12px;"><div class="eyebrow">💾 Sauvegardes</div>'+
+  '<p class="muted" style="font-size:12px;">Une copie complète est faite automatiquement chaque jour où vous ouvrez le site connectés. Les '+BACKUP_KEEP+' derniers jours sont conservés.</p>'+
+  '<div class="row-flex" style="margin:8px 0 12px;"><button class="btn" onclick="backupNow_()">Sauvegarder maintenant</button></div>'+
+  rows+
   '</div>'+
-  '<p class="muted" style="font-size:11px;max-width:420px;margin-top:10px;">Ces deux codes sont partagés (pas de comptes individuels) : quiconque connaît le code complet peut aussi les modifier ici.</p>'+
   '</div>';
 }
 
