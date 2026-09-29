@@ -112,7 +112,8 @@
   .eventcard{background:var(--ivory);border-radius:10px;padding:8px 12px;margin-bottom:6px;}
   .eventcard .title{font-size:13px;}
   .tl-group{display:flex;gap:12px;}
-  .tl-card.tl-mine{background:var(--rose-soft);border-color:var(--rose);border-left:4px solid var(--rose-deep);}
+  #printall{display:none;}
+  .tl-card.tl-mine{background:var(--champagne-soft);border-color:var(--rose);border-left:4px solid var(--rose-deep);}
   .tl-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);margin:12px 0 0;align-items:center;}
   .tl-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px;}
   .tl-time{width:52px;flex-shrink:0;font-size:12px;color:var(--gold);font-weight:600;padding-top:11px;text-align:right;}
@@ -179,7 +180,15 @@
     .tl-card{border:0 !important;background:none !important;box-shadow:none !important;border-radius:0 !important;padding:5px 0 9px !important;margin:0 !important;break-inside:avoid;border-bottom:1px dotted var(--border) !important;}
     .title,.tl-card .title{font-size:13.5px;font-weight:500;}
     .tl-card .muted,.tl-card span,.tl-card button{font-size:10.5px;color:var(--ink-soft) !important;text-decoration:none !important;border:0 !important;background:none !important;padding:0 !important;font-family:inherit;line-height:1.5;}
-    .tl-card.tl-mine{background:var(--rose-soft) !important;border-left:4px solid var(--rose-deep) !important;padding-left:10px !important;}
+    body.printing-all #app{display:none !important;}
+    body.printing-all #printall{display:block;}
+    .pa-day{break-after:page;page-break-after:always;}
+    .pa-day:last-child{break-after:auto;page-break-after:auto;}
+    .pa-head{text-align:center;border-bottom:1px solid var(--rose);padding-bottom:10px;margin-bottom:18px;}
+    .pa-head h2.display{font-size:34px !important;font-weight:500;letter-spacing:.04em;margin:0 !important;}
+    .pa-head p{margin:2px 0 0;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+    .pa-dayname{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--rose-deep);margin-top:4px;}
+    .tl-card.tl-mine{background:var(--champagne-soft) !important;border-left:4px solid var(--rose-deep) !important;padding-left:10px !important;}
     .tl-legend label{display:none !important;}
     h2.display{font-size:18px;margin:0 0 4px !important;}
     p.muted{margin:0 0 8px !important;font-size:10px !important;}
@@ -360,6 +369,8 @@ var STATE = {};
 var CAN_EDIT = false;
 var GATE_NEEDED = false;
 var CURRENT_TAB = "dashboard";
+var DEEP_PERSON = "";
+try{ DEEP_PERSON = new URLSearchParams(location.search).get("personne") || ""; if(DEEP_PERSON) CURRENT_TAB = "planning"; }catch(e){}
 var DRAG = null;
 function selectGuestForDrag(e, guestId, label) {
   e.stopPropagation();
@@ -652,6 +663,7 @@ function toggleNavMenu() {
   }
 }
 var UI = {};
+if(DEEP_PERSON) UI.planningPerson = DEEP_PERSON;
 var EDITING = { type: null, id: null };
 var EDIT_FOCUS_FIELD = { event:'ev-edit-titre', ceremony:'cer-etape', anim:'an-nom', vendor:'vd-nom' };
 function setEditing(type, id) {
@@ -1140,7 +1152,7 @@ function eventCardHtml(e, person){
   var parsed = parseEventTitle(e.titre);
   return '<div class="tl-card'+(person&&!isShared?' tl-mine':'')+'"><div class="flex-between">'+
       '<div><div class="title">'+esc(parsed.titre)+'</div>'+(parsed.range?'<div class="muted" style="font-size:11px;margin-top:2px;">'+esc(parsed.range)+'</div>':'')+(e.lieu?'<div style="font-size:11px;margin-top:2px;">'+mapsLink(e.lieu)+'</div>':'')+
-        (person&&isShared&&!overrideHeure?'<div class="muted" style="font-size:10px;margin-top:2px;">Partagé avec Tout le monde</div>':'')+
+        (CAN_EDIT&&person&&isShared&&!overrideHeure?'<div class="muted" style="font-size:10px;margin-top:2px;">Partagé avec Tout le monde</div>':'')+
         (overrideHeure?'<div class="gold" style="font-size:11px;margin-top:2px;">Heure décalée pour '+esc(person)+' : '+esc(overrideHeure)+' <button class="icon-btn" style="padding:0;" onclick="clearEventOverride('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">✕</button></div>':'')+
       '</div>'+
       (CAN_EDIT?'<button class="icon-btn" style="flex-shrink:0;" onclick="setEditing(\'event\','+e.id+')">✎</button>':'')+
@@ -1154,6 +1166,44 @@ function timelineHtml(groups, person){
     '</div></div>';
   }).join('');
 }
+function planningEvsFor(person, day){
+  var onlyMajor = person==="Tout le monde";
+  return STATE.planning.filter(function(e){
+    if(e.jour!==day) return false;
+    if(onlyMajor) return e.important;
+    if(UI.planningOnlyMine) return e.personnes.indexOf(person)>=0;
+    return e.personnes.indexOf(person)>=0 || (!isVendorPerson(person) && e.important && (!e.hiddenFor || e.hiddenFor.indexOf(person)<0));
+  }).map(function(e){
+    if(!onlyMajor && e.overrides && e.overrides[person]) return Object.assign({}, e, {heure: e.overrides[person]});
+    return e;
+  }).sort(function(a,b){return timeToMinutes(a.heure)-timeToMinutes(b.heure);});
+}
+function printAllDays(){
+  var people = allKnownPeople();
+  var person = UI.planningPerson && people.indexOf(UI.planningPerson)>=0 ? UI.planningPerson : "Tout le monde";
+  var onlyMajor = person === "Tout le monde";
+  var days = onlyMajor ? ["Vendredi","Samedi","Dimanche"] : DAY_ORDER;
+  var sub = onlyMajor ? "Déroulé de la journée" : "Planning détaillé de "+esc(person);
+  var pages = days.map(function(d){
+    var evs = planningEvsFor(person, d);
+    if(!evs.length) return '';
+    return '<section class="pa-day"><div class="pa-head"><h2 class="display">Planning</h2><p>'+sub+'</p><div class="pa-dayname">'+d+'</div></div>'+timelineHtml(groupByHeure(evs), onlyMajor ? null : person)+'</section>';
+  }).join('');
+  if(!pages){ window.print(); return; }
+  var box = document.getElementById('printall');
+  if(!box){ box = document.createElement('div'); box.id = 'printall'; document.body.appendChild(box); }
+  box.innerHTML = pages;
+  document.body.classList.add('printing-all');
+  var done = function(){ document.body.classList.remove('printing-all'); box.innerHTML = ''; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  window.print();
+}
+function copyPersonLink(btn){
+  var url = location.origin + location.pathname + '?personne=' + encodeURIComponent(UI.planningPerson || '');
+  var ok = function(){ if(btn){ var t = btn.textContent; btn.textContent = '✓ Lien copié'; setTimeout(function(){ btn.textContent = t; }, 2000); } };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(ok, function(){ window.prompt('Copiez ce lien :', url); }); }
+  else { window.prompt('Copiez ce lien :', url); }
+}
 function viewPlanning(){
   var people = allKnownPeople();
   var person = UI.planningPerson && people.indexOf(UI.planningPerson)>=0 ? UI.planningPerson : "Tout le monde";
@@ -1164,7 +1214,7 @@ function viewPlanning(){
 
   var html='<div class="fade"><div class="flex-between">'+
     '<div><h2 class="display" style="font-size:28px;margin:0;">Planning</h2><p class="muted" style="font-size:12px;margin-top:2px;">'+(onlyMajor?"Déroulé de la journée":"Planning détaillé de "+esc(person))+'</p></div>'+
-    '<button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-outline" onclick="window.print()">🖨️ Ce jour</button><button class="btn-outline" onclick="printAllDays()">🖨️ Tous les jours</button></div>'+
   '</div>';
 
   var peoplePersons = people.filter(function(p){ return !isVendorPerson(p); });
@@ -1174,7 +1224,7 @@ function viewPlanning(){
     '<optgroup label="Personnes">'+peoplePersons.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>'+
     (peopleVendors.length?'<optgroup label="Prestataires">'+peopleVendors.map(function(p){return '<option '+(p===person?'selected':'')+'>'+esc(p)+'</option>';}).join('')+'</optgroup>':'')+
   '</select>';
-  if(person!=="Tout le monde"){ html+='<div class="tl-legend"><span><i style="background:var(--rose-soft);border-left:4px solid var(--rose-deep)"></i>Mes missions</span><span><i style="background:#fff;border:1px solid var(--border)"></i>Moments communs</span><label style="cursor:pointer"><input type="checkbox" style="width:auto;display:inline;margin-right:4px" '+(UI.planningOnlyMine?'checked':'')+' onchange="UI.planningOnlyMine=this.checked;render();"/>Uniquement mes missions</label></div>'; }
+  if(person!=="Tout le monde"){ html+='<div class="tl-legend"><span><i style="background:var(--rose-soft);border-left:4px solid var(--rose-deep)"></i>Mes missions</span><span><i style="background:#fff;border:1px solid var(--border)"></i>Moments communs</span><label style="cursor:pointer"><input type="checkbox" style="width:auto;display:inline;margin-right:4px" '+(UI.planningOnlyMine?'checked':'')+' onchange="UI.planningOnlyMine=this.checked;render();"/>Uniquement mes missions</label><button class="btn-outline" style="font-size:11px;padding:4px 10px;" onclick="copyPersonLink(this)">🔗 Copier le lien</button></div>'; }
 
   var GENERAL_DAYS = ["Vendredi","Samedi","Dimanche"];
   var dayOptions = onlyMajor ? GENERAL_DAYS : DAY_ORDER;
