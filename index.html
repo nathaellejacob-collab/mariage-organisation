@@ -179,6 +179,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
 /* ============ CONFIG ============ */
 var FIREBASE_CONFIG = {
@@ -192,10 +193,40 @@ var FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 var db = firebase.firestore();
 var WEDDING_COLLECTION = 'wedding';
+
+/* ============ ÉDITEURS AUTORISÉS ============ */
+// Seuls ces comptes Google peuvent modifier le site (même liste que dans les règles Firestore).
+var EDITORS = [
+  "nathaelleetjeremy@gmail.com",
+  "jeremy29052002@gmail.com"
+];
+var AUTH_USER = null;
+var APP_READY = false;
+function isEditor(){
+  return !!(AUTH_USER && AUTH_USER.email && EDITORS.map(function(e){return e.toLowerCase();}).indexOf(AUTH_USER.email.toLowerCase()) !== -1);
+}
+function signIn(){
+  var provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({prompt:'select_account'});
+  firebase.auth().signInWithPopup(provider).catch(function(err){
+    if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment')) {
+      firebase.auth().signInWithRedirect(provider);
+    } else if (err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+      showToast('⚠️ Connexion impossible : ' + (err.message || err), 8000);
+    }
+  });
+}
+function signOut(){ firebase.auth().signOut(); }
+firebase.auth().onAuthStateChanged(function(user){
+  AUTH_USER = user;
+  CAN_EDIT = isEditor();
+  if (user && !CAN_EDIT) showToast("Ce compte (" + user.email + ") n'a pas l'accès modification.", 6000);
+  if (APP_READY) render();
+});
 // URL de l'ancien script Google — utilisée UNE SEULE FOIS pour rapatrier
 // automatiquement les vraies données existantes dans Firebase au premier chargement.
 // Ensuite, plus jamais utilisée.
-var LEGACY_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyRxwOLeVFCiK2pbELBWKvYSq1ZEt3b87x2AuGLrPfPVU_8hS-OV-Mh5MADJUB4eI8/exec";
+var LEGACY_SHEETS_URL = ""; // migration terminée — désactivée pour ne plus jamais réécrire la base
 
 var WEDDING_DATE = new Date("2027-06-19T14:00:00");
 var DAY_ORDER = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
@@ -224,7 +255,7 @@ var SEEDS = {
 
 /* ============ STATE ============ */
 var STATE = {};
-var CAN_EDIT = true;
+var CAN_EDIT = false;
 var GATE_NEEDED = false;
 var CURRENT_TAB = "dashboard";
 var DRAG = null;
@@ -338,11 +369,10 @@ function go(tab) { CURRENT_TAB = tab; window.scrollTo(0,0); render(); }
 
 /* ============ LOAD ============ */
 function loadAndStart() {
-  db.collection(WEDDING_COLLECTION).get().then(function(snapshot){
+  db.collection(WEDDING_COLLECTION).get({source:'server'}).then(function(snapshot){
     if (snapshot.empty) {
-      return migrateFromLegacySheets_().then(function(legacyData){
-        return finishLoad_(legacyData || {});
-      });
+      // Base vide ou illisible : on affiche les valeurs par défaut SANS rien écrire dans Firebase
+      return finishLoad_({});
     }
     var remoteData = {};
     snapshot.forEach(function(doc){ remoteData[doc.id] = doc.data().data; });
@@ -375,11 +405,10 @@ function finishLoad_(remoteData){
       if (remoteData[k] !== undefined) {
         STATE[k] = remoteData[k];
       } else {
-        STATE[k] = SEEDS[k];
-        api.set(k, STATE[k]); // première initialisation
+        STATE[k] = SEEDS[k]; // valeur par défaut affichée localement, jamais écrite automatiquement
       }
     });
-    if (STATE.trousse && STATE.trousse.guestItems === undefined) {
+    if (isEditor() && remoteData.trousse !== undefined && STATE.trousse && STATE.trousse.guestItems === undefined) {
       STATE.trousse = Object.assign({}, STATE.trousse, {guestItems: [
         {id:1,nom:"Doliprane / Paracétamol",coche:false},
         {id:2,nom:"Pansements",coche:false},
@@ -390,34 +419,22 @@ function finishLoad_(remoteData){
       ]});
       api.set('trousse', STATE.trousse);
     }
-    if (STATE.budget && STATE.budget.objectifs === undefined) {
+    if (isEditor() && remoteData.budget !== undefined && STATE.budget && STATE.budget.objectifs === undefined) {
       STATE.budget = Object.assign({}, STATE.budget, {objectifs: {}});
       api.set('budget', STATE.budget);
     }
-    if (STATE.tables && STATE.tables.some(function(t){ return t.x===undefined; })) {
+    if (isEditor() && remoteData.tables !== undefined && STATE.tables && STATE.tables.some(function(t){ return t.x===undefined; })) {
       STATE.tables = STATE.tables.map(function(t, idx){
         if (t.x!==undefined) return t;
         return Object.assign({}, t, { x: 20 + (idx % 4) * 240, y: 20 + Math.floor(idx / 4) * 260 });
       });
       api.set('tables', STATE.tables);
     }
-    GATE_NEEDED = !!(STATE.access && STATE.access.passcode);
+    GATE_NEEDED = false; // l'accès modification passe maintenant par la connexion Google
     attachRealtimeSync();
-    if (GATE_NEEDED) {
-      var sess = sessionStorage.getItem("wedding_session");
-      if (sess) {
-        try {
-          var parsed = JSON.parse(sess);
-          CAN_EDIT = !!parsed.canEdit;
-          renderApp();
-          return;
-        } catch(e) {}
-      }
-      renderGate();
-    } else {
-      CAN_EDIT = true;
-      renderApp();
-    }
+    CAN_EDIT = isEditor();
+    APP_READY = true;
+    renderApp();
 }
 function attachRealtimeSync(){
   db.collection(WEDDING_COLLECTION).onSnapshot(function(snapshot){
@@ -511,6 +528,9 @@ function renderApp() {
       '<button class="icon-btn" style="font-size:18px;" onclick="toggleSearch()">🔍</button>' +
       '<div id="search-panel" style="display:none;"></div>' +
     '</div>' +
+    (AUTH_USER
+      ? '<button class="icon-btn" style="flex-shrink:0;font-size:11px;" title="'+esc(AUTH_USER.email)+'" onclick="signOut()">'+(CAN_EDIT?'✎ ':'')+'Déconnexion</button>'
+      : '<button class="icon-btn" style="flex-shrink:0;font-size:11px;" onclick="signIn()">🔑 Connexion</button>') +
   '</div></header>' +
   '<main id="main">' + viewFor(CURRENT_TAB) + '</main>' +
   '<footer style="text-align:center;padding:28px;"><div class="muted" style="font-size:11px;">Espace privé d\'organisation — Nathaelle &amp; Jérémy — 19 juin 2027</div></footer>';
