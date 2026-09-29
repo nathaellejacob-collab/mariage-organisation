@@ -153,18 +153,28 @@
   .guest-mcard .mrow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;}
   .guest-mcard label.mlbl{font-size:10px;color:var(--ink-soft);display:block;margin-bottom:2px;}
   @media print{
-    #header,.pool,.readonly-banner,footer,.btn,.quickgrid,#search-panel,.icon-btn,.tabbar,select{display:none !important;}
+    #header,.pool,.readonly-banner,footer,.btn,.btn-outline,.quickgrid,#search-panel,.icon-btn,.tabbar,select{display:none !important;}
     input,textarea:not(.auto-grow){display:none !important;}
     textarea.auto-grow{border:none !important;padding:0 !important;font-size:12px;}
-    body{background:#fff;font-size:11px;}
+    @page{size:A4;margin:16mm 14mm;}
+    html,body{background:#fff !important;}
+    body{font-size:11px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .card{border:1px solid #ccc;break-inside:avoid;padding:8px 10px !important;}
     #main{padding:0;max-width:100%;}
-    .tl-card{padding:5px 8px;margin-bottom:4px;break-inside:avoid;}
-    .tl-group{gap:8px;}
-    .tl-time{width:40px;font-size:10px;padding-top:5px;}
-    .tl-line{padding-left:8px;padding-bottom:5px;}
-    .title,.tl-card .title{font-size:12px;}
-    h2.display{font-size:18px !important;margin:0 0 4px !important;}
+    /* --- Planning (frise) --- */
+    #main:has(.tl-group) .flex-between:has(h2.display){display:block !important;text-align:center;border-bottom:1px solid var(--rose);padding-bottom:10px;margin-bottom:18px;}
+    #main:has(.tl-group) h2.display{font-size:34px !important;font-weight:500;letter-spacing:.04em;margin:0 0 2px !important;}
+    #main:has(.tl-group) p.muted{margin:0 !important;font-size:11px !important;letter-spacing:.18em;text-transform:uppercase;color:var(--gold) !important;}
+    #main:has(.tl-group) p.muted::after{content:attr(data-day);display:block;margin-top:4px;font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:.05em;text-transform:none;color:var(--rose-deep);}
+    #main:has(.tl-group) .card{border:0 !important;box-shadow:none !important;background:none !important;padding:0 !important;border-radius:0 !important;}
+    .tl-group{display:flex;gap:14px;break-inside:avoid;}
+    .tl-time{width:46px;flex:none;text-align:right;font-size:12px;font-weight:600;color:var(--rose-deep);padding-top:6px;}
+    .tl-line{flex:1;position:relative;border-left:1.5px solid var(--rose) !important;padding:0 0 0 16px !important;}
+    .tl-line::before{content:'';position:absolute;left:-5px;top:10px;width:8px;height:8px;border-radius:50%;background:#fff;border:1.5px solid var(--gold);}
+    .tl-card{border:0 !important;background:none !important;box-shadow:none !important;border-radius:0 !important;padding:5px 0 9px !important;margin:0 !important;break-inside:avoid;border-bottom:1px dotted var(--border) !important;}
+    .title,.tl-card .title{font-size:13.5px;font-weight:500;}
+    .tl-card .muted,.tl-card span,.tl-card button{font-size:10.5px;color:var(--ink-soft) !important;text-decoration:none !important;border:0 !important;background:none !important;padding:0 !important;font-family:inherit;line-height:1.5;}
+    h2.display{font-size:18px;margin:0 0 4px !important;}
     p.muted{margin:0 0 8px !important;font-size:10px !important;}
   }
 </style>
@@ -181,6 +191,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
+window.addEventListener("beforeprint",function(){var p=document.querySelector("p.muted");var t=document.querySelector(".tabbar .active");if(p&&t)p.dataset.day=t.textContent;});
 /* ============ CONFIG ============ */
 var FIREBASE_CONFIG = {
   apiKey: "AIzaSyATLv8lJNnEbTJkLnmvxDOL6a4TyMJZnxk",
