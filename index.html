@@ -167,6 +167,8 @@
     #main:has(.tl-group) p.muted{margin:0 !important;font-size:11px !important;letter-spacing:.18em;text-transform:uppercase;color:var(--gold) !important;}
     #main:has(.tl-group) p.muted::after{content:attr(data-day);display:block;margin-top:4px;font-family:'Cormorant Garamond',serif;font-size:18px;letter-spacing:.05em;text-transform:none;color:var(--rose-deep);}
     #main:has(.tl-group) .card{border:0 !important;box-shadow:none !important;background:none !important;padding:0 !important;border-radius:0 !important;}
+    #main:has(.tl-group) *:has(.tl-group){break-inside:auto !important;page-break-inside:auto !important;overflow:visible !important;animation:none !important;transform:none !important;}
+    #main:has(.tl-group) .flex-between:has(h2.display){break-after:avoid;}
     .tl-group{display:flex;gap:14px;break-inside:avoid;}
     .tl-time{width:46px;flex:none;text-align:right;font-size:12px;font-weight:600;color:var(--rose-deep);padding-top:6px;}
     .tl-line{flex:1;position:relative;border-left:1.5px solid var(--rose) !important;padding:0 0 0 16px !important;}
