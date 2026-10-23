@@ -728,13 +728,7 @@ function renderGate() {
   pinInput.addEventListener("keydown", function(e){ if (e.key === "Enter") tryUnlock(pinInput.value); });
 }
 
-function monogramSvg(size) {
-  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100" fill="none">' +
-    '<circle cx="50" cy="50" r="47" stroke="#B98A82" stroke-width="1"/>' +
-    '<circle cx="50" cy="50" r="42" stroke="#B98A82" stroke-width="0.5" opacity="0.5"/>' +
-    '<text x="50" y="58" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="30" fill="#2B2622" font-style="italic">N&amp;J</text>' +
-    '</svg>';
-}
+function monogramSvg(size) { var k = '#2B2622', r = '#B98A82'; var star = 'M50 7Q52.5 47.5 93 50Q52.5 52.5 50 93Q47.5 52.5 7 50Q47.5 47.5 50 7Z'; return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100" fill="none" style="width:'+size+'px;height:'+size+'px;overflow:visible">' + '<circle cx="50" cy="50" r="48" stroke="'+k+'" stroke-width="2.2" style="display:inline"/>' + '<circle cx="50" cy="50" r="43.5" stroke="'+r+'" stroke-width="1" style="display:inline"/>' + '<path d="'+star+'" stroke="'+k+'" stroke-width="1.4" stroke-linejoin="round"/>' + '<path d="'+star+'" stroke="'+r+'" stroke-width="1" stroke-linejoin="round" transform="translate(50 50) rotate(45) scale(0.66) translate(-50 -50)"/>' + '<circle cx="50" cy="50" r="25" fill="#FAF7F2" stroke="'+k+'" stroke-width="1.2" style="display:inline"/>' + '<text x="50" y="61" text-anchor="middle" style="font-family:Pinyon Script,Cormorant Garamond,cursive;font-style:normal;font-size:38px;fill:'+k+'">NJ</text>' + '</svg>'; }
 
 /* ============ RENDER: SHELL ============ */
 var TABS = [
