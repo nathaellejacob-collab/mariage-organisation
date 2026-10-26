@@ -41,3 +41,8 @@ hr::after{content:'\2726';position:absolute;left:50%;top:-8px;transform:translat
 @media (prefers-reduced-motion:reduce){.hero-countdown .display{animation:none}}
 .mot-jour{font-family:'Cormorant Garamond','EB Garamond',serif;font-style:italic;font-size:17px;color:#EBCBC8!important;text-align:center;margin-top:8px;position:relative;letter-spacing:.02em;animation:cPage 1.2s ease both}
 @media print{.mot-jour{display:none!important}}
+h1.display.cwrite{position:relative;animation:cWrite 2.6s cubic-bezier(.45,.1,.35,1) both!important}
+@keyframes cWrite{0%{clip-path:inset(-30px 100% -30px -30px)}100%{clip-path:inset(-30px -30px -30px -30px)}}
+.cpen{position:absolute;top:50%;left:0;color:#fff;font-size:26px;line-height:1;text-shadow:0 0 10px #EBCBC8,0 0 22px #EBCBC8;transform:translate(-50%,-50%);animation:cPen 2.6s cubic-bezier(.45,.1,.35,1) both;pointer-events:none;-webkit-text-fill-color:#fff}
+@keyframes cPen{0%{left:0;opacity:1}92%{opacity:1}100%{left:100%;opacity:0}}
+@media (prefers-reduced-motion:reduce){h1.display.cwrite,.cpen{animation:none!important}}
