@@ -63,3 +63,4 @@ button,a,select,summary,label,.btn,.btn-outline,.chip,[onclick]{cursor:pointer}
 #sndbtn.off{color:#B9A9A6;border-color:#E3AAA5;opacity:.6}
 @media (prefers-reduced-motion:reduce){.progressbar .fill,.progressbar .fill::after{animation:none}#conte-bg .stars{transition:none}}
 @media print{#sndbtn,.cshoot{display:none!important}}
+html body #main > .fade > .card:first-child,html body #main > .fade > .card:first-child:hover{border:0!important;box-shadow:none!important}
