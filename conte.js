@@ -33,7 +33,7 @@ function sky(){var b=document.getElementById('conte-bg');if(!b)return;var h=docu
 window.addEventListener('scroll',sky,{passive:true});window.addEventListener('resize',sky);
 function shootStar(){var s=el('div','cshoot');s.style.top=(8+Math.random()*30)+'%';document.body.appendChild(s);setTimeout(function(){s.remove()},1500)}
 document.addEventListener('change',function(e){var t=e.target;if(t&&t.type==='checkbox'&&t.checked&&window.CURRENT_TAB==='taches'){shootStar();chime()}},true);
-var AC=null,SND=false;try{SND=localStorage.getItem('conte_snd')==='1'}catch(e){}
+var AC=null,SND=true;try{SND=localStorage.getItem('conte_snd')!=='0'}catch(e){}
 function chime(){if(!SND)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();[1318.5,1976,2637].forEach(function(f,i){var o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.07;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.06,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+1.1);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+1.2)})}catch(e){}}
 document.addEventListener('click',function(e){if(SND&&e.target.closest&&e.target.closest('.btn'))chime()},true);
 function sndBtn(){if(document.getElementById('sndbtn'))return;var b=el('button','',SND?'\u266A':'\u266A');b.id='sndbtn';b.type='button';b.title='Tintement magique';b.setAttribute('aria-pressed',SND?'true':'false');if(!SND)b.className='off';b.onclick=function(){SND=!SND;try{localStorage.setItem('conte_snd',SND?'1':'0')}catch(e){}b.className=SND?'':'off';b.setAttribute('aria-pressed',SND?'true':'false');if(SND)chime()};document.body.appendChild(b)}
