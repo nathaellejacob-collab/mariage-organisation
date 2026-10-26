@@ -47,6 +47,6 @@ function intro(){var ok=true;try{ok=!sessionStorage.getItem('conte_intro');sessi
 if(!ok||document.getElementById('conte-intro'))return;var d=el('div');d.id='conte-intro';d.innerHTML='<div class="fs"></div><div class="t">Il était une fois…</div>';for(var i=0;i<46;i++){var s=el('span','is',i%3?'\u2726':'\u2727');s.style.left=(Math.random()*96+1)+'%';s.style.top=(Math.random()*94+2)+'%';s.style.fontSize=(10+Math.random()*20)+'px';s.style.color=i%5===0?'#ffd6e6':'#fff';s.style.animationDelay=(Math.random()*2.8)+'s';s.style.animationDuration=(2+Math.random()*2)+'s';d.appendChild(s)}document.body.appendChild(d);
 function go(){chime(.8);d.classList.add('out');setTimeout(function(){d.remove()},1100)}d.addEventListener('click',go);setTimeout(go,2900)}
 function run(){bg();sub();toastFix();tabFx();cdWatch();motJour();plume();sky();sndBtn();tilt()}
-function init(){bg();intro();run();new MutationObserver(function(){run()}).observe(document.body,{childList:true,subtree:true,characterData:true})}
+function init(){try{localStorage.removeItem('theme')}catch(e){}document.documentElement.removeAttribute('data-theme');bg();intro();run();new MutationObserver(function(){run()}).observe(document.body,{childList:true,subtree:true,characterData:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
