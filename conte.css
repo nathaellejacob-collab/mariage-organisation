@@ -77,3 +77,4 @@ html body #main > .fade > .card:first-child,html body #main > .fade > .card:firs
 #conte-fin .s{margin-top:14px;font-size:26px;color:#ffd6e6;opacity:0;animation:cIn 1.2s 1.1s ease forwards}
 #conte-fin .is{position:absolute;line-height:1;opacity:0;animation:cIs 2.8s ease-in-out infinite}
 #conte-fin .t .fs3{font-family:serif;font-size:.38em;vertical-align:.55em;margin-left:.15em;color:#ffd6e6;letter-spacing:.12em}
+.chip *{background:transparent!important}
