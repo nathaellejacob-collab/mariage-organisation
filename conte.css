@@ -3,7 +3,6 @@
 #conte-bg i{position:absolute;color:#E3AAA5;font-style:normal;line-height:1;animation:cTw 3.4s ease-in-out infinite alternate}
 @keyframes cTw{0%{opacity:.15;transform:scale(.8)}100%{opacity:.8;transform:scale(1.15)}}
 .conte-sub{font-family:'Cormorant Garamond','EB Garamond',serif;font-style:italic;font-size:19px;color:#8A6A65;margin:4px 0 6px;text-align:left;letter-spacing:.02em}
-.conte-sub::first-letter{font-family:'Waltograph',cursive;font-style:normal;font-size:2.1em;color:#2B2622;line-height:.8;padding-right:2px}
 .conte-sep{height:14px;margin:6px 0 18px;max-width:300px;position:relative;background:linear-gradient(90deg,transparent,#E3AAA5 35%,#E3AAA5 65%,transparent) center/100% 1px no-repeat}
 .conte-sep::after{content:'\2726';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;padding:0 12px;color:#D49A94;font-size:13px}
 #main .card{border:1px solid rgba(227,170,165,.75)!important;border-radius:20px!important;box-shadow:0 6px 22px rgba(227,170,165,.18)!important;position:relative}
