@@ -86,3 +86,8 @@ h2.display::before{color:#E58BAB!important}
 h2.display::after,#main > .fade > .card:first-child::after{background:#E58BAB!important}
 .fin{color:#C96F93!important}
 input[type=checkbox],input[type=radio]{accent-color:#E58BAB}
+/* petits textes un peu plus grands */
+body:not([data-tab="tables"]) #main [style*="font-size:10px"],body:not([data-tab="tables"]) #main [style*="font-size:10.5px"]{font-size:12px!important}
+body:not([data-tab="tables"]) #main [style*="font-size:11px"]{font-size:12.5px!important}
+body:not([data-tab="tables"]) #main [style*="font-size:12px"]{font-size:13px!important}
+body:not([data-tab="tables"]) #main .muted{font-size:max(1em,12.5px)}
