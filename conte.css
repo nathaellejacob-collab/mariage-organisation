@@ -1,5 +1,5 @@
 #conte-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-#conte-bg .castle{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(1150px,118vw);height:min(86vh,900px);background:url("castle.svg?v=1") center bottom/contain no-repeat;opacity:.3}
+#conte-bg .castle{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(1150px,118vw);height:min(86vh,900px);background:url("castle.svg?v=2") center bottom/contain no-repeat;opacity:.3}
 #conte-bg i{position:absolute;color:#E3AAA5;font-style:normal;line-height:1;animation:cTw 3.4s ease-in-out infinite alternate}
 @keyframes cTw{0%{opacity:.15;transform:scale(.8)}100%{opacity:.8;transform:scale(1.15)}}
 .conte-sub{font-family:'Cormorant Garamond','EB Garamond',serif;font-style:italic;font-size:19px;color:#8A6A65;margin:4px 0 6px;text-align:center;letter-spacing:.02em}

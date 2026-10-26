@@ -1,40 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" preserveAspectRatio="xMidYMax meet">
-<defs><mask id="m"><rect width="800" height="640" fill="#fff"/>
-<g fill="#000">
-<path d="M388 560v-48a12 12 0 0 1 24 0v48z"/>
-<path d="M392 330v-30a8 8 0 0 1 16 0v30z"/>
-<path d="M392 420v-26a8 8 0 0 1 16 0v26z"/>
-<path d="M272 400v-24a7 7 0 0 1 14 0v24z"/><path d="M514 400v-24a7 7 0 0 1 14 0v24z"/>
-<path d="M160 520v-22a6 6 0 0 1 12 0v22z"/><path d="M628 520v-22a6 6 0 0 1 12 0v22z"/>
-<path d="M300 560v-26a7 7 0 0 1 14 0v26z"/><path d="M486 560v-26a7 7 0 0 1 14 0v26z"/>
-<path d="M226 560v-20a6 6 0 0 1 12 0v20z"/><path d="M562 560v-20a6 6 0 0 1 12 0v20z"/>
-</g></mask></defs>
-<g fill="#E3AAA5" mask="url(#m)">
-<!-- keep -->
-<rect x="358" y="230" width="84" height="410"/>
-<polygon points="346,238 400,56 454,238"/>
-<rect x="397" y="22" width="2.4" height="40"/><polygon points="399,22 430,32 399,42"/>
-<!-- inner towers -->
-<rect x="258" y="340" width="56" height="300"/><polygon points="248,348 286,196 324,348"/>
-<rect x="285" y="168" width="2" height="32"/><polygon points="286,168 310,176 286,184"/>
-<rect x="486" y="340" width="56" height="300"/><polygon points="476,348 514,196 552,348"/>
-<rect x="513" y="168" width="2" height="32"/><polygon points="514,168 538,176 514,184"/>
-<!-- slim turrets -->
-<rect x="322" y="300" width="26" height="340"/><polygon points="318,304 335,226 352,304"/>
-<rect x="452" y="300" width="26" height="340"/><polygon points="448,304 465,226 482,304"/>
-<!-- outer towers -->
-<rect x="140" y="440" width="64" height="200"/><polygon points="130,448 172,330 214,448"/>
-<rect x="171" y="306" width="2" height="30"/><polygon points="172,306 192,313 172,320"/>
-<rect x="596" y="440" width="64" height="200"/><polygon points="586,448 628,330 670,448"/>
-<rect x="627" y="306" width="2" height="30"/><polygon points="628,306 648,313 628,320"/>
-<rect x="206" y="500" width="40" height="140"/><polygon points="200,506 226,440 252,506"/>
-<rect x="554" y="500" width="40" height="140"/><polygon points="548,506 574,440 600,506"/>
-<!-- walls with battlements -->
-<rect x="90" y="540" width="620" height="100"/>
-<g><rect x="90" y="522" width="16" height="20"/><rect x="118" y="522" width="16" height="20"/><rect x="674" y="522" width="16" height="20"/><rect x="694" y="522" width="16" height="20"/></g>
-<rect x="60" y="600" width="680" height="40"/>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 700" preserveAspectRatio="xMidYMax meet">
 <g fill="#E3AAA5">
-<circle cx="120" cy="240" r="2.4"/><circle cx="680" cy="270" r="2.4"/><circle cx="90" cy="360" r="1.8"/><circle cx="710" cy="380" r="1.8"/><circle cx="230" cy="120" r="2"/><circle cx="570" cy="110" r="2"/><circle cx="400" cy="8" r="2.6"/>
-</g>
-</svg>
+<rect x="372" y="250" width="56" height="450"/><polygon points="364,258 400,40 436,258"/><rect x="399" y="6" width="2.4" height="40"/><polygon points="400,6 424,14 400,22"/>
+<rect x="296" y="360" width="40" height="340"/><polygon points="290,366 316,180 342,366"/><rect x="315" y="150" width="2" height="34"/>
+<rect x="464" y="360" width="40" height="340"/><polygon points="458,366 484,180 510,366"/><rect x="483" y="150" width="2" height="34"/>
+<rect x="238" y="430" width="38" height="270"/><polygon points="232,436 257,262 282,436"/><rect x="256" y="236" width="2" height="30"/>
+<rect x="524" y="430" width="38" height="270"/><polygon points="518,436 543,262 568,436"/><rect x="542" y="236" width="2" height="30"/>
+<rect x="180" y="490" width="40" height="210"/><polygon points="174,496 200,350 226,496"/><rect x="199" y="326" width="2" height="28"/>
+<rect x="580" y="490" width="40" height="210"/><polygon points="574,496 600,350 626,496"/><rect x="599" y="326" width="2" height="28"/>
+<rect x="132" y="560" width="30" height="140"/><polygon points="126,566 147,462 168,566"/>
+<rect x="638" y="560" width="30" height="140"/><polygon points="632,566 653,462 674,566"/>
+<rect x="340" y="320" width="22" height="380"/><polygon points="337,326 351,236 365,326"/>
+<rect x="438" y="320" width="22" height="380"/><polygon points="435,326 449,236 463,326"/>
+<path d="M60 700V610q40-30 80-20 40-40 120-30 60-30 140-10 80-20 140 10 80-12 120 30 40-10 80 20V700z"/>
+</g></svg>
