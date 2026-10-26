@@ -23,5 +23,7 @@ hr::after{content:'\2726';position:absolute;left:50%;top:-8px;transform:translat
 #conte-intro .t{font-family:'Waltograph',cursive;font-size:clamp(44px,9vw,92px);color:#2B2622;-webkit-text-stroke:1px #2B2622;opacity:0;animation:cIn 1.4s .3s ease forwards}
 #conte-intro .s{margin-top:14px;font-size:28px;color:#E3AAA5;opacity:0;animation:cIn 1.2s 1s ease forwards}
 @keyframes cIn{to{opacity:1}}
+#conte-intro .is{position:absolute;line-height:1;opacity:0;animation:cIs 2.8s ease-in-out infinite}
+@keyframes cIs{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(25deg)}}
 @media (prefers-reduced-motion:reduce){#conte-bg i,#main > .fade{animation:none}}
 @media print{#conte-bg,#conte-intro,.conte-sep,.cspark{display:none!important}#main .card::after,hr::after{display:none}}

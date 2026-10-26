@@ -18,7 +18,7 @@ function toastFix(){var t=document.querySelector('.toast');if(!t||t.dataset.c===
 var last=null;function tabFx(){var c=window.CURRENT_TAB;if(last!==null&&c!==last){var m=document.getElementById('main');if(m){var r=m.getBoundingClientRect();spark(r.left+r.width/2,Math.max(r.top,60)+30,14)}}last=c}
 /* intro */
 function intro(){var ok=true;try{ok=!sessionStorage.getItem('conte_intro');sessionStorage.setItem('conte_intro','1')}catch(e){}
-if(!ok||document.getElementById('conte-intro'))return;var d=el('div');d.id='conte-intro';d.innerHTML='<div class="t">Il était une fois…</div><div class="s">✦</div>';document.body.appendChild(d);
+if(!ok||document.getElementById('conte-intro'))return;var d=el('div');d.id='conte-intro';d.innerHTML='<div class="t">Il était une fois…</div>';for(var i=0;i<46;i++){var s=el('span','is',i%3?'\u2726':'\u2727');s.style.left=(Math.random()*96+1)+'%';s.style.top=(Math.random()*94+2)+'%';s.style.fontSize=(10+Math.random()*20)+'px';s.style.color=i%7===0?'#2B2622':'#E3AAA5';s.style.animationDelay=(Math.random()*2.8)+'s';s.style.animationDuration=(2+Math.random()*2)+'s';d.appendChild(s)}document.body.appendChild(d);
 function go(){d.classList.add('out');setTimeout(function(){d.remove()},1100)}d.addEventListener('click',go);setTimeout(go,2900)}
 function run(){bg();sub();toastFix();tabFx()}
 function init(){bg();intro();run();new MutationObserver(function(){run()}).observe(document.body,{childList:true,subtree:true,characterData:true})}
