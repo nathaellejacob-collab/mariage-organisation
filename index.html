@@ -1266,7 +1266,7 @@ function eventCardHtml(e, person){
           (candVendors.length?'<optgroup label="Prestataires">'+candVendors.map(function(p){return '<option>'+esc(p)+'</option>';}).join('')+'</optgroup>':'')+
         '</select><button class="btn" onclick="duplicateEventForPerson('+e.id+')">Dupliquer</button></div>':'')+
       (person&&isShared?
-        '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">'
+        '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">'+
           '<button class="icon-btn danger" style="width:100%;text-align:left;" onclick="hideEventForPerson('+e.id+',\''+esc(person).replace(/\047/g,"\\'")+'\')">🗑 Retirer uniquement du planning de '+esc(person)+'</button>'+
           '<button class="icon-btn danger" style="width:100%;text-align:left;margin-top:4px;opacity:.7;" onclick="deletePlanningEvent('+e.id+')">🗑 Supprimer définitivement pour tout le monde</button>'+
         '</div>'
