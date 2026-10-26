@@ -27,3 +27,9 @@ hr::after{content:'\2726';position:absolute;left:50%;top:-8px;transform:translat
 @keyframes cIs{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(25deg)}}
 @media (prefers-reduced-motion:reduce){#conte-bg i,#main > .fade{animation:none}}
 @media print{#conte-bg,#conte-intro,.conte-sep,.cspark{display:none!important}#main .card::after,hr::after{display:none}}
+.cwave{position:fixed;top:0;bottom:0;left:-30%;width:30%;z-index:99998;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(235,203,200,.35),transparent);animation:cWv 1.1s ease-out forwards}
+@keyframes cWv{to{left:110%}}
+.cwst{position:fixed;z-index:99999;pointer-events:none;color:#E3AAA5;opacity:0;line-height:1;animation:cWs .9s ease-in-out forwards}
+@keyframes cWs{0%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.2) rotate(30deg)}100%{opacity:0;transform:scale(.5) rotate(60deg)}}
+@media (prefers-reduced-motion:reduce){.cwave,.cwst{display:none}}
+@media print{.cwave,.cwst{display:none!important}}
