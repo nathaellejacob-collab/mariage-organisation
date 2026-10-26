@@ -39,3 +39,5 @@ hr::after{content:'\2726';position:absolute;left:50%;top:-8px;transform:translat
 .hero-countdown > div:nth-child(3) .display{animation-delay:.8s}
 .cspark.cdw{color:#fff;text-shadow:0 0 6px #EBCBC8}
 @media (prefers-reduced-motion:reduce){.hero-countdown .display{animation:none}}
+.mot-jour{font-family:'Cormorant Garamond','EB Garamond',serif;font-style:italic;font-size:17px;color:#EBCBC8!important;text-align:center;margin-top:8px;position:relative;letter-spacing:.02em;animation:cPage 1.2s ease both}
+@media print{.mot-jour{display:none!important}}

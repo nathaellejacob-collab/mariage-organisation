@@ -20,11 +20,14 @@ var last=null;function tabFx(){var c=window.CURRENT_TAB;if(last!==null&&c!==last
 /* compte a rebours scintillant */
 var cdPrev=null;function cdWatch(){var n=document.querySelectorAll('.hero-countdown .display');if(!n.length){cdPrev=null;return}var v=[].map.call(n,function(e){return e.textContent});if(cdPrev&&cdPrev.length===v.length){for(var i=0;i<v.length;i++){if(v[i]!==cdPrev[i]){var r=n[i].getBoundingClientRect();cdBurst(r.left+r.width/2,r.top+r.height/2)}}}cdPrev=v}
 function cdBurst(x,y){for(var i=0;i<12;i++){var s=el('span','cspark cdw',i%2?'\u2726':'\u2727');var a=Math.random()*6.28,d=24+Math.random()*34;s.style.left=x+'px';s.style.top=y+'px';s.style.fontSize=(9+Math.random()*9)+'px';s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');document.body.appendChild(s);setTimeout(function(e){e.remove()},1200,s)}}
+/* mot du jour */
+var MOTS=['Chaque jour, une étoile de plus s\u2019allume dans le ciel du conte','Les cloches du château s\u2019accordent déjà','Dans le royaume, on prépare la plus belle des fêtes','Un voeu fait aujourd\u2019hui se réalisera le grand jour','La fée marraine veille sur chaque détail','Les carrosses sont presque prêts','Le bal approche, le coeur du prince bat plus fort','La princesse choisit sa plus belle étoile','Tout le royaume attend le grand jour','Un peu de magie et tout s\u2019arrange','Les invités du royaume se préparent à venir','Le conte s\u2019écrit un peu plus chaque jour','Bientôt, la plus belle page du livre','Les lanternes du château s\u2019allument une à une'];
+function motJour(){var c=document.querySelector('#main > .fade > .card:first-child');if(!c||!c.querySelector('h1.display'))return;var d=new Date(),k=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()))/864e5)%MOTS.length;var m=c.querySelector('.mot-jour');if(!m){m=el('div','mot-jour');c.appendChild(m)}if(m.textContent!==MOTS[k])m.textContent=MOTS[k]}
 /* intro */
 function intro(){var ok=true;try{ok=!sessionStorage.getItem('conte_intro');sessionStorage.setItem('conte_intro','1')}catch(e){}
 if(!ok||document.getElementById('conte-intro'))return;var d=el('div');d.id='conte-intro';d.innerHTML='<div class="t">Il était une fois…</div>';for(var i=0;i<46;i++){var s=el('span','is',i%3?'\u2726':'\u2727');s.style.left=(Math.random()*96+1)+'%';s.style.top=(Math.random()*94+2)+'%';s.style.fontSize=(10+Math.random()*20)+'px';s.style.color=i%7===0?'#2B2622':'#E3AAA5';s.style.animationDelay=(Math.random()*2.8)+'s';s.style.animationDuration=(2+Math.random()*2)+'s';d.appendChild(s)}document.body.appendChild(d);
 function go(){d.classList.add('out');setTimeout(function(){d.remove()},1100)}d.addEventListener('click',go);setTimeout(go,2900)}
-function run(){bg();sub();toastFix();tabFx();cdWatch()}
+function run(){bg();sub();toastFix();tabFx();cdWatch();motJour()}
 function init(){bg();intro();run();new MutationObserver(function(){run()}).observe(document.body,{childList:true,subtree:true,characterData:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
