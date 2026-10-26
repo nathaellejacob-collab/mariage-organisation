@@ -33,3 +33,9 @@ hr::after{content:'\2726';position:absolute;left:50%;top:-8px;transform:translat
 @keyframes cWs{0%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.2) rotate(30deg)}100%{opacity:0;transform:scale(.5) rotate(60deg)}}
 @media (prefers-reduced-motion:reduce){.cwave,.cwst{display:none}}
 @media print{.cwave,.cwst{display:none!important}}
+@keyframes cdGlow{0%{text-shadow:0 0 4px rgba(255,255,255,.2)}100%{text-shadow:0 0 14px rgba(235,203,200,.95),0 0 3px #fff}}
+.hero-countdown .display{animation:cdGlow 2.4s ease-in-out infinite alternate}
+.hero-countdown > div:nth-child(2) .display{animation-delay:.4s}
+.hero-countdown > div:nth-child(3) .display{animation-delay:.8s}
+.cspark.cdw{color:#fff;text-shadow:0 0 6px #EBCBC8}
+@media (prefers-reduced-motion:reduce){.hero-countdown .display{animation:none}}

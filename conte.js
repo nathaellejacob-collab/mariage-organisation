@@ -17,11 +17,14 @@ function toastFix(){var t=document.querySelector('.toast');if(!t||t.dataset.c===
 /* changement d'onglet */
 function wave(){var W=window.innerWidth,H=window.innerHeight,b=el('div','cwave');document.body.appendChild(b);setTimeout(function(){b.remove()},1300);for(var i=0;i<38;i++){var x=Math.random()*W,s=el('span','cwst',i%2?'✦':'✧');s.style.left=x+'px';s.style.top=(Math.random()*H)+'px';s.style.fontSize=(10+Math.random()*16)+'px';s.style.color=i%6===0?'#2B2622':'#E3AAA5';s.style.animationDelay=(x/W*0.7)+'s';document.body.appendChild(s);setTimeout(function(e){e.remove()},1800,s)}}
 var last=null;function tabFx(){var c=window.CURRENT_TAB;if(last!==null&&c!==last){var m=document.getElementById('main');if(m){var r=m.getBoundingClientRect();wave()}}last=c}
+/* compte a rebours scintillant */
+var cdPrev=null;function cdWatch(){var n=document.querySelectorAll('.hero-countdown .display');if(!n.length){cdPrev=null;return}var v=[].map.call(n,function(e){return e.textContent});if(cdPrev&&cdPrev.length===v.length){for(var i=0;i<v.length;i++){if(v[i]!==cdPrev[i]){var r=n[i].getBoundingClientRect();cdBurst(r.left+r.width/2,r.top+r.height/2)}}}cdPrev=v}
+function cdBurst(x,y){for(var i=0;i<12;i++){var s=el('span','cspark cdw',i%2?'\u2726':'\u2727');var a=Math.random()*6.28,d=24+Math.random()*34;s.style.left=x+'px';s.style.top=y+'px';s.style.fontSize=(9+Math.random()*9)+'px';s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');document.body.appendChild(s);setTimeout(function(e){e.remove()},1200,s)}}
 /* intro */
 function intro(){var ok=true;try{ok=!sessionStorage.getItem('conte_intro');sessionStorage.setItem('conte_intro','1')}catch(e){}
 if(!ok||document.getElementById('conte-intro'))return;var d=el('div');d.id='conte-intro';d.innerHTML='<div class="t">Il était une fois…</div>';for(var i=0;i<46;i++){var s=el('span','is',i%3?'\u2726':'\u2727');s.style.left=(Math.random()*96+1)+'%';s.style.top=(Math.random()*94+2)+'%';s.style.fontSize=(10+Math.random()*20)+'px';s.style.color=i%7===0?'#2B2622':'#E3AAA5';s.style.animationDelay=(Math.random()*2.8)+'s';s.style.animationDuration=(2+Math.random()*2)+'s';d.appendChild(s)}document.body.appendChild(d);
 function go(){d.classList.add('out');setTimeout(function(){d.remove()},1100)}d.addEventListener('click',go);setTimeout(go,2900)}
-function run(){bg();sub();toastFix();tabFx()}
+function run(){bg();sub();toastFix();tabFx();cdWatch()}
 function init(){bg();intro();run();new MutationObserver(function(){run()}).observe(document.body,{childList:true,subtree:true,characterData:true})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
