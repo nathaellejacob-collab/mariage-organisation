@@ -46,7 +46,7 @@ h1.display.cwrite{position:relative;animation:cWrite 2.6s cubic-bezier(.45,.1,.3
 .cpen{position:absolute;top:50%;left:0;color:#fff;font-size:26px;line-height:1;text-shadow:0 0 10px #EBCBC8,0 0 22px #EBCBC8;transform:translate(-50%,-50%);animation:cPen 2.6s cubic-bezier(.45,.1,.35,1) both;pointer-events:none;-webkit-text-fill-color:#fff}
 @keyframes cPen{0%{left:0;opacity:1}92%{opacity:1}100%{left:100%;opacity:0}}
 @media (prefers-reduced-motion:reduce){h1.display.cwrite,.cpen{animation:none!important}}
-#conte-bg{background:linear-gradient(180deg,#ffffff 0%,#fbeff3 38%,#f3d5e6 68%,#dcc6ea 100%)}
+#conte-bg{background:linear-gradient(180deg,#ffffff 0%,#fdf0f2 38%,#f8dde2 68%,#f2cdd6 100%)}
 :root[data-theme="dark"] #conte-bg{background:none}
 #conte-bg .stars{position:absolute;inset:-30px;transform:translate3d(var(--px,0px),var(--py,0px),0);transition:transform .35s ease-out}
 .cshoot{position:fixed;left:-10%;width:160px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#E3AAA5 60%,#fff);box-shadow:0 0 10px 2px rgba(235,203,200,.9);transform:rotate(18deg);z-index:99999;pointer-events:none;animation:cShoot 1.2s ease-in forwards}
@@ -65,3 +65,4 @@ button,a,select,summary,label,.btn,.btn-outline,.chip,[onclick]{cursor:pointer}
 @media (prefers-reduced-motion:reduce){.progressbar .fill,.progressbar .fill::after{animation:none}#conte-bg .stars{transition:none}}
 @media print{#sndbtn,.cshoot{display:none!important}}
 html body #main > .fade > .card:first-child,html body #main > .fade > .card:first-child:hover{border:0!important;box-shadow:none!important}
+.fin{color:#C4837F!important}
