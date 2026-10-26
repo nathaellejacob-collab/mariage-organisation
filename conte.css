@@ -7,7 +7,7 @@
 .conte-sep{height:14px;margin:6px 0 18px;max-width:300px;position:relative;background:linear-gradient(90deg,transparent,#E3AAA5 35%,#E3AAA5 65%,transparent) center/100% 1px no-repeat}
 .conte-sep::after{content:'\2726';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;padding:0 12px;color:#D49A94;font-size:13px}
 #main .card{border:1px solid rgba(227,170,165,.75)!important;border-radius:20px!important;box-shadow:0 6px 22px rgba(227,170,165,.18)!important;position:relative}
-#main .card::after{content:'\2726';position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#fff;color:#D49A94;font-size:11px;line-height:1;padding:0 8px;pointer-events:none}
+#main .card::after{display:none!important}
 hr{border:0!important;height:1px;overflow:visible;position:relative;margin:22px 0!important;background:linear-gradient(90deg,transparent,#E3AAA5,transparent)!important}
 hr::after{content:'\2726';position:absolute;left:50%;top:-8px;transform:translateX(-50%);background:#fff;padding:0 10px;color:#D49A94;font-size:12px;line-height:1}
 .btn{position:relative;overflow:hidden}
