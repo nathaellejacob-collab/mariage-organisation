@@ -144,3 +144,11 @@ html body .seat-chip span:not(#zz){border-color:rgba(229,139,171,.5)!important;c
 #conte-cal .ca-f2{display:flex;gap:8px}#conte-cal .ca-f2 input{flex:1;min-width:0}
 #conte-cal .ca-add{all:unset;cursor:pointer;text-align:center;background:#2B2A25;color:#fff;border-radius:999px;padding:10px;font:12px Poppins,sans-serif;letter-spacing:1px;text-transform:uppercase}
 @media print{#calbtn,#conte-cal{display:none!important}}
+
+/* le nom ne doit pas apparaitre avant l'ecriture */
+body:has(#conte-intro:not(.out)) #main > .fade > .card:first-child h1.display{visibility:hidden!important}
+
+#conte-conf .cc-s{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font:12.5px Poppins,sans-serif;color:#7A3F57}
+#conte-conf .cc-s span{display:inline-flex;align-items:center;gap:6px}
+#conte-conf .cc-s i{width:9px;height:9px;border-radius:50%;display:inline-block}
+#conte-conf .cc-s .d1{background:#E58BAB}#conte-conf .cc-s .d2{background:#F2C14E}#conte-conf .cc-s .d3{background:#9A8FB8}
