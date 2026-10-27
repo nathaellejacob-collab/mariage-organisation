@@ -68,7 +68,6 @@ var h='<div class="ca-hd"><div class="ca-ti">Dates importantes</div><button clas
 h+='<div class="ca-big"><span>✦</span> Le grand jour — '+W.getDate()+' '+MOIS[W.getMonth()]+' '+W.getFullYear()+'<small>'+(wd>0?'J-'+wd:(wd===0?'C’est aujourd’hui !':''))+'</small></div>';
 h+='<div class="ca-sec">À venir</div>';
 h+=up.length?up.map(function(x){var hh=(x.a.heure?x.a.heure+(x.a.note?' · ':''):'')+(x.a.note||'');return calRow(x.a.date,x.a.titre,hh,can?x.i:null)}).join(''):'<div class="ca-em">Aucune date pour le moment.</div>';
-if(can){var tk=((window.STATE&&STATE.tasks)||[]).filter(function(t){return t.date&&t.statut!=='termine'&&agDate(t.date)}).sort(function(p,q){return agDate(p.date)-agDate(q.date)});if(tk.length){h+='<div class="ca-sec">Échéances des tâches <i>(visible par toi uniquement)</i></div>'+tk.map(function(t){return calRow(t.date,t.titre,t.categorie||'',null,'ca-tk')}).join('')}}
 if(past.length)h+='<details class="ca-past"><summary>Passées ('+past.length+')</summary>'+past.map(function(x){return calRow(x.a.date,x.a.titre,x.a.note||'',can?x.i:null,'ca-ps')}).join('')+'</details>';
 if(can)h+='<div class="ca-sec">Ajouter une date</div><div class="ca-fm"><input id="ca-ti" placeholder="Réunion, essayage, rendez-vous…" maxlength="80"><div class="ca-f2"><input id="ca-dt" type="date"><input id="ca-hr" type="time"></div><input id="ca-nt" placeholder="Note (lieu, avec qui…)" maxlength="120"><button id="ca-add" class="ca-add">+ Ajouter</button></div>';
 h+='</div>';P.querySelector('.ca-p').innerHTML=h;

@@ -111,10 +111,10 @@ html body .seat-chip span:not(#zz){border-color:rgba(229,139,171,.5)!important;c
 @media print{#conte-conf{display:none}}
 
 /* calendrier */
-#calbtn{all:unset;box-sizing:border-box;cursor:pointer;flex-shrink:0;width:34px;height:36px;border-radius:9px;background:#fff;border:1px solid rgba(235,169,191,.7);box-shadow:0 2px 6px rgba(229,139,171,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;transition:transform .2s}
+#calbtn{all:unset;box-sizing:border-box;cursor:pointer;flex-shrink:0;position:relative;width:34px;height:37px;border-radius:9px;background:#fff;box-shadow:0 2px 8px rgba(229,139,171,.4);overflow:hidden;transition:transform .2s}
 #calbtn:hover{transform:translateY(-1px) rotate(-3deg)}
-#calbtn .cb-m{font:600 8.5px Poppins,sans-serif;color:#fff;background:#E58BAB;width:100%;text-align:center;line-height:12px;letter-spacing:.3px}
-#calbtn .cb-d{font:600 17px/20px 'Cormorant Garamond',serif;color:#2B2A25}
+#calbtn .cb-m{position:absolute;top:0;left:0;right:0;height:15px;display:flex;align-items:center;justify-content:center;padding-top:1px;font:600 8.5px/1 Poppins,sans-serif;color:#fff;background:#E58BAB;letter-spacing:.3px}
+#calbtn .cb-d{position:absolute;left:0;right:0;top:15px;bottom:0;display:flex;align-items:center;justify-content:center;font:600 16px/1 Poppins,sans-serif;font-variant-numeric:lining-nums;color:#2B2A25}
 #conte-cal{position:fixed;inset:0;z-index:500;background:rgba(43,30,50,.38);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px}
 #conte-cal .ca-p{width:min(460px,100%);max-height:86vh;overflow:auto;background:#fff;border-radius:20px;border:1px solid rgba(235,169,191,.7);box-shadow:0 20px 60px rgba(120,60,100,.3)}
 #conte-cal .ca-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px}
