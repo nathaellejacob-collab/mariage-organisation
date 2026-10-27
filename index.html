@@ -1500,7 +1500,7 @@ function animCardHtml(a){
     (open?'<div style="padding:0 16px 16px;border-top:1px solid var(--border);font-size:13px;">'+
       (a.lieu?'<p>'+mapsLink(a.lieu)+'</p>':'')+
       (a.description?'<p>'+esc(a.description)+'</p>':'')+
-      (a.personnes?'<p><span class="muted">Personnes impliquées : </span>'+esc(a.personnes)+'</p>':'')+
+      ((a.personnes&&(CAN_EDIT||!/12 mois/i.test(a.nom||'')))?'<p><span class="muted">Personnes impliquées : </span>'+esc(a.personnes)+'</p>':'')+
       (a.materiel?'<p><span class="muted">Matériel : </span>'+esc(a.materiel)+'</p>':'')+
       (a.musique?'<p style="color:var(--rose-deep);font-style:italic;">'+esc(a.musique)+'</p>':'')+
       (a.instructions?'<p><span class="muted">Instructions : </span>'+esc(a.instructions).replace(/\n/g,'<br>')+'</p>':'')+
