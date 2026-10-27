@@ -273,6 +273,17 @@ a.tag:hover{filter:brightness(.95)}
   .tl>li.next .tl-b p::after{content:none}
   .sv-g{grid-template-columns:repeat(4,1fr)}
 }
+/* couverture : fond nuit profond, titre clair, touches dorées (contraste) */
+.cover{background:radial-gradient(120% 70% at 50% 108%,rgba(196,60,108,.55) 0%,rgba(196,60,108,0) 62%),linear-gradient(175deg,#0A1033 0%,#141C54 45%,#241F63 100%)}
+.title span{background:linear-gradient(90deg,#CFE6FF 0%,#FFFFFF 50%,#FFD3E4 100%);-webkit-background-clip:text;background-clip:text}
+.title{filter:drop-shadow(0 0 16px rgba(150,170,255,.6))}
+.once,.sub{color:#F6D27A;text-shadow:0 0 14px rgba(246,210,122,.45)}
+.dates,.cdpre,.cdpost{color:#F6D27A}
+.names{color:#fff}
+.names::after{content:"";display:block;width:70px;height:2px;margin:14px auto 0;background:linear-gradient(90deg,transparent,#F6D27A,transparent)}
+.where{color:#E9EEFF}
+.count b{color:#fff;text-shadow:0 0 18px rgba(150,170,255,.55)}
+.count span{color:#B9C6F5}
 </style>
 
 </head><body>
