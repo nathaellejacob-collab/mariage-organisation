@@ -97,10 +97,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .ch-bd li::before{content:"✦";position:absolute;left:0;top:3px;font-size:14px;color:var(--a)}
 .tag{font-family:var(--sans);font-size:11.5px;background:var(--gold-bg);color:var(--gold-ink);border:1px solid var(--gold-line);border-radius:999px;padding:1px 10px;white-space:nowrap}
 .ch.raiponce{--a:#6C3F8E;--a-soft:#F2EAF7;--a-line:rgba(108,63,142,.35);--h:linear-gradient(110deg,#4F2F86 0%,#7C3E87 55%,#A24A92 130%)}
-.ch.vaiana{--a:#3E5199;--a-soft:#E9ECF8;--a-line:rgba(62,81,153,.35);--h:linear-gradient(110deg,#222F78 0%,#3E5199 55%,#5F72C4 130%)}
+.ch.vaiana{--a:#0E8A9A;--a-soft:#E2F5F5;--a-line:rgba(14,138,154,.35);--h:linear-gradient(110deg,#064B5E 0%,#0E8A9A 45%,#27B7B5 75%,#F28C6B 135%)}
 .ch.cendrillon{--a:#2F6FB5;--a-soft:#E6F1FB;--a-line:rgba(47,111,181,.35);--h:linear-gradient(110deg,#2A62A8 0%,#4FA3DC 60%,#9FD2F2 125%)}
 .ch.mulan{--a:#B0508F;--a-soft:#FAEAF4;--a-line:rgba(176,80,143,.35);--h:linear-gradient(110deg,#8E3F94 0%,#D86CA8 60%,#F4A9CB 130%)}
-.ch.belle{--a:#B03466;--a-soft:#FBE8EF;--a-line:rgba(176,52,102,.35);--h:linear-gradient(110deg,#8A2255 0%,#C43C6C 60%,#E0698F 130%)}
+.ch.belle{--a:#B03466;--a-soft:#FBE8EF;--a-line:rgba(176,52,102,.35);--h:linear-gradient(110deg,#7A1B3F 0%,#B8294F 45%,#D9783A 78%,#F2C14E 120%)}
 .ch .tag{background:var(--a-soft);color:var(--a);border-color:var(--a-line)}
 .ch-bd{background:linear-gradient(180deg,var(--a-soft) 0,#fff 90px)}
 .lant{position:absolute;width:14px;height:19px;border-radius:42% 42% 48% 48%;background:linear-gradient(180deg,#fff3b0,#F2C14E 60%,#e8932d);box-shadow:0 0 14px 4px rgba(255,214,102,.65);animation:drift 6s ease-in-out infinite alternate}
@@ -125,13 +125,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 #t-lundi{--th:linear-gradient(135deg,#4F2F86,#A24A92)}
 #t-mardi{--th:linear-gradient(135deg,#2A62A8,#6DB6E8)}
 #t-mercredi{--th:linear-gradient(135deg,#8E3F94,#F4A9CB)}
-#t-jeudi{--th:linear-gradient(135deg,#8A2255,#E0698F)}
-#t-vendredi{--th:linear-gradient(135deg,#222F78,#5F72C4)}
+#t-jeudi{--th:linear-gradient(135deg,#7A1B3F,#F2C14E)}
+#t-vendredi{--th:linear-gradient(135deg,#064B5E,#27B7B5)}
 .ch.mulan .petal{background:#fff;opacity:.75}
 .ch-hd .ch-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}
-.ch-hd::before{content:"";position:absolute;inset:0;z-index:1;background:var(--h);opacity:var(--ov,.62);pointer-events:none}
+
 .ch.raiponce{--ov:.5}.ch.belle{--ov:.5}.ch.vaiana{--ov:.6}.ch.cendrillon{--ov:.58}.ch.mulan{--ov:.6}
 .credit{font-size:14.5px;color:var(--ink-soft);text-align:center;margin-top:16px;font-style:italic}
+.trip{border:1px solid var(--rose-line);border-radius:18px;padding:20px 22px;background:#fffafc;min-width:0;box-shadow:0 8px 24px rgba(60,40,100,.06)}
+.trip .pill{margin-top:12px}
+@media(max-width:560px){.trip{padding:18px 14px}}
 
 /* Tables */
 .resto{display:flex;flex-direction:column;gap:5px}
@@ -178,7 +181,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
   </header>
 
   <nav class="nav" aria-label="Sections">
-    <a href="#sejour">Le séjour</a><a href="#voyage">Les trains</a><a href="#planning">Les contes</a><a href="#tables">Les tables</a><a href="#spa">Le spa</a><a href="#afaire">À faire</a>
+    <a href="#sejour">Le séjour</a><a href="#voyage">Les trains</a><a href="#planning">Les contes</a><a href="#tables">Les tables</a><a href="#spa">Le spa</a>
   </nav>
 
   <section class="card" id="sejour">
@@ -205,7 +208,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
     <p class="lead">De Valence à Chessy, et retour</p>
     <div class="sep" aria-hidden="true"><i></i><b>✦</b><i></i></div>
     <div class="two">
-      <div>
+      <div class="trip">
         <p class="sub-h">Aller, lundi 21 juin</p>
         <ul class="line">
           <li><time>5h30</time><p>Départ de Saint-Just-de-Claix avec Julian</p></li>
@@ -217,7 +220,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
         </ul>
         <span class="pill wait">Vente non ouverte, créer l'alerte SNCF</span>
       </div>
-      <div>
+      <div class="trip">
         <p class="sub-h">Retour, vendredi 25 juin</p>
         <ul class="line">
           <li><time>matin</time><p>Chambre libérée, valises à la conciergerie</p></li>
@@ -248,7 +251,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
     <div class="book">
 
       <article class="ch raiponce" id="j-lundi" role="tabpanel" aria-labelledby="t-lundi">
-        <div class="ch-hd"><img class="ch-img" src="https://images.unsplash.com/photo-1510673825466-302bc330ab95?auto=format&fit=crop&w=1400&q=70" alt="" loading="lazy" decoding="async" style="object-position:50% 50%"><div class="fx" id="fx1"></div>
+        <div class="ch-hd"><div class="fx" id="fx1"></div>
           <div><p class="ch-conte">Raiponce</p><h3 class="ch-name">Le jour des lanternes</h3><p class="ch-epi">Le jour où tout s'allume.</p></div>
           <div class="ch-date"><span>Lundi</span><b>21 juin</b></div></div>
         <div class="ch-bd"><h3>Walt Disney Studios, en douceur après le mariage</h3>
@@ -261,7 +264,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
       </article>
 
       <article class="ch cendrillon" id="j-mardi" role="tabpanel" aria-labelledby="t-mardi" hidden>
-        <div class="ch-hd"><img class="ch-img" src="https://images.unsplash.com/photo-1787074549296-ac84420c5e8f?auto=format&fit=crop&w=1400&q=70" alt="" loading="lazy" decoding="async" style="object-position:50% 35%"><div class="fx" id="fx2"></div>
+        <div class="ch-hd"><div class="fx" id="fx2"></div>
           <div><p class="ch-conte">Cendrillon</p><h3 class="ch-name">Le bal de Fantasyland</h3><p class="ch-epi">Un déjeuner avec les princesses.</p></div>
           <div class="ch-date"><span>Mardi</span><b>22 juin</b></div></div>
         <div class="ch-bd"><h3>Disneyland Park, du château à Fantasyland</h3>
@@ -273,7 +276,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
       </article>
 
       <article class="ch mulan" id="j-mercredi" role="tabpanel" aria-labelledby="t-mercredi" hidden>
-        <div class="ch-hd"><img class="ch-img" src="https://images.unsplash.com/photo-1745563115146-aec349b7cadf?auto=format&fit=crop&w=1400&q=70" alt="" loading="lazy" decoding="async" style="object-position:50% 18%"><div class="fx" id="fx3"></div>
+        <div class="ch-hd"><div class="fx" id="fx3"></div>
           <div><p class="ch-conte">Mulan</p><h3 class="ch-name">La fleur qui éclot</h3><p class="ch-epi">Le spa, puis une table face au château.</p></div>
           <div class="ch-date"><span>Mercredi</span><b>23 juin</b></div></div>
         <div class="ch-bd"><h3>Matin libre, spa, grand dîner</h3>
@@ -285,7 +288,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
       </article>
 
       <article class="ch belle" id="j-jeudi" role="tabpanel" aria-labelledby="t-jeudi" hidden>
-        <div class="ch-hd"><img class="ch-img" src="https://images.unsplash.com/photo-1760550339263-2c6a386ec09b?auto=format&fit=crop&w=1400&q=70" alt="" loading="lazy" decoding="async" style="object-position:50% 50%"><div class="fx" id="fx4"></div>
+        <div class="ch-hd"><div class="fx" id="fx4"></div>
           <div><p class="ch-conte">La Belle et la Bête</p><h3 class="ch-name">Le grand dîner</h3><p class="ch-epi">Un dîner de clôture, comme dans un conte.</p></div>
           <div class="ch-date"><span>Jeudi</span><b>24 juin</b></div></div>
         <div class="ch-bd"><h3>Les coups de cœur, puis le dîner de clôture</h3>
@@ -297,7 +300,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
       </article>
 
       <article class="ch vaiana" id="j-vendredi" role="tabpanel" aria-labelledby="t-vendredi" hidden>
-        <div class="ch-hd"><img class="ch-img" src="https://images.unsplash.com/photo-1772424131868-6b9f154b59ce?auto=format&fit=crop&w=1400&q=70" alt="" loading="lazy" decoding="async" style="object-position:50% 40%"><div class="fx" id="fx5"></div>
+        <div class="ch-hd"><div class="fx" id="fx5"></div>
           <div><p class="ch-conte">Vaiana</p><h3 class="ch-name">Cap sur l'horizon</h3><p class="ch-epi">Dernières magies, puis cap sur le train de 18h13.</p></div>
           <div class="ch-date"><span>Vendredi</span><b>25 juin</b></div></div>
         <div class="ch-bd"><h3>Dernières magies, puis le train de 18h13</h3>
@@ -309,8 +312,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
       </article>
 
     </div>
-    <p class="credit">Photos libres de droits, sur Unsplash : Leon Contreras, Daniel Seßler, Ved Shrawak, Marwan Abdalah et Buddy AN.</p>
-  </section>
+      </section>
 
   <section class="card" id="tables">
     <div class="orn" aria-hidden="true">✦ ✧ ✦</div>
@@ -338,45 +340,6 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
     </div>
   </section>
 
-  <section class="card" id="afaire">
-    <div class="orn" aria-hidden="true">✦ ✧ ✦</div>
-    <h2>À faire</h2>
-    <p class="lead">Avant de partir</p>
-    <div class="sep" aria-hidden="true"><i></i><b>✦</b><i></i></div>
-    <ul class="todo" id="todo">
-      <li><label><input type="checkbox" id="t-hotel" data-k="hotel"><span>Réserver et payer l'hôtel sur le site Disney<small>Chambre Deluxe avec terrasse, 21 au 25 juin 2027</small></span></label></li>
-      <li><label><input type="checkbox" id="t-mail" data-k="mail"><span>Envoyer le message à Disney<small>Accueil royal, valises, heure de la chambre, Disney Express, restaurants, spa</small></span></label></li>
-      <li><label><input type="checkbox" id="t-alerte" data-k="alerte"><span>Créer l'alerte SNCF Connect<small>Trajet Valence TGV vers Marne-la-Vallée Chessy du 21 juin 2027</small></span></label></li>
-      <li><label><input type="checkbox" id="t-train" data-k="train"><span>Réserver les trains dès l'ouverture<small>Aller 6h45 depuis Valence TGV, retour 18h13 depuis Chessy</small></span></label></li>
-      <li><label><input type="checkbox" id="t-julian" data-k="julian"><span>Confirmer avec Julian<small>Dépose à Valence TGV le lundi, récupération à Lyon le vendredi</small></span></label></li>
-      <li><label><input type="checkbox" id="t-resto" data-k="resto"><span>Réserver les quatre restaurants<small>Ouverture vers fin avril 2027, être connectés le matin même</small></span></label></li>
-      <li><label><input type="checkbox" id="t-spa" data-k="spa"><span>Réserver le soin du spa<small>Mercredi 23 juin vers 15h</small></span></label></li>
-    </ul>
-    <details>
-      <summary>Le message à envoyer à Disney</summary>
-      <button class="copy" id="copy" type="button">Copier le message</button>
-      <p class="msg" id="msg">Bonjour,
-
-Nous souhaitons venir à Disneyland Paris pour notre voyage de noces. Nous voulons partir 5 jours et 4 nuits, du lundi 21 au vendredi 25 juin 2027, avec un moment de spa, et réserver une chambre Deluxe avec terrasse au Disneyland Hotel pour 2 adultes.
-
-1. Sur le site, il est écrit que la chambre Deluxe comprend « un accueil royal », avec une réception et un service de conciergerie privés. Que comprend concrètement cet accueil ?
-
-2. Nous arriverons en train à la gare de Marne-la-Vallée Chessy le lundi 21 juin vers 9h30. Devons-nous apporter nos valises nous-mêmes jusqu'à l'hôtel ? Pourrons-nous les déposer dès notre arrivée, avant l'heure de remise de la chambre ?
-
-3. À quelle heure aurons-nous accès à notre chambre le lundi 21 juin ?
-
-4. Le service Disney Express est-il disponible pour le Disneyland Hotel ? Si oui, quel est le tarif ?
-
-5. Nous repartirons le vendredi 25 juin par un train à 18h13 depuis Chessy. Après avoir libéré la chambre le matin, pourrons-nous laisser nos valises à l'hôtel jusqu'à environ 17h30 ?
-
-6. Les réservations de restaurants ne sont pas encore ouvertes dans l'application pour juin 2027. Est-il possible de les réserver à l'avance par téléphone, ou par la conciergerie ? Nous souhaitons La Forêt Secrète, La Table de Lumière, l'Auberge de Cendrillon et le Bistrot Chez Rémy.
-
-7. Pour le spa, faut-il réserver à l'avance, par téléphone ou directement sur le site ? À partir de quelle date peut-on réserver un soin pour notre séjour de juin 2027 ?
-
-Merci beaucoup pour votre aide, cela nous permettra de finaliser notre réservation.</p>
-    </details>
-  </section>
-
   <p class="foot">Informations relevées le 27 octobre 2026 sur les sites Disneyland Paris et SNCF Connect, à confirmer avant le départ.<span class="script">Et ils vécurent heureux…</span></p>
 </div>
 
@@ -391,7 +354,7 @@ Merci beaucoup pour votre aide, cela nous permettra de finaliser notre réservat
   stars('sky',38,['#fff','#fff','#ffd6e6','#F2C14E'],9,22);
   function lant(id,n){var h=document.getElementById(id);if(!h)return;for(var i=0;i<n;i++){var l=document.createElement('span');l.className='lant';l.style.left=(6+Math.random()*60)+'%';l.style.top=(8+Math.random()*60)+'%';l.style.transform='scale('+(.6+Math.random()*.7)+')';l.style.animationDelay=(Math.random()*4)+'s';l.style.animationDuration=(4+Math.random()*4)+'s';h.appendChild(l)}}
   function petals(id,n){var h=document.getElementById(id);if(!h)return;for(var i=0;i<n;i++){var p=document.createElement('span');p.className='petal';p.style.left=(4+Math.random()*58)+'%';p.style.top=(6+Math.random()*70)+'%';p.style.animationDelay=(Math.random()*5)+'s';p.style.animationDuration=(5+Math.random()*4)+'s';h.appendChild(p)}}
-  lant('fx1',7);petals('fx3',9);petals('fx4',9);stars('fx2',12,['#fff','#CFE6FB'],9,18);stars('fx5',14,['#fff','#BFE3F7','#F2C14E'],9,20);
+  lant('fx1',7);petals('fx3',9);petals('fx4',9);stars('fx2',12,['#fff','#CFE6FB'],9,18);stars('fx5',14,['#fff','#C8F3F0','#FFB199'],9,20);
 
   var dayIds=["lundi","mardi","mercredi","jeudi","vendredi"];
   function showDay(d,focus){
@@ -411,14 +374,6 @@ Merci beaucoup pour votre aide, cela nous permettra de finaliser notre réservat
   });
   function fromHash(){var m=location.hash.match(/^#j-(\w+)$/);if(m&&dayIds.indexOf(m[1])>=0){showDay(m[1]);var el=document.getElementById("planning");if(el)el.scrollIntoView()}}
   fromHash();window.addEventListener("hashchange",fromHash);
-  var KEY="voyage-noces-todo",saved={};
-  try{saved=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){saved={}}
-  document.querySelectorAll("#todo input").forEach(function(b){b.checked=!!saved[b.dataset.k];b.addEventListener("change",function(){saved[b.dataset.k]=b.checked;try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}})});
-  var btn=document.getElementById("copy"),msg=document.getElementById("msg");
-  btn.addEventListener("click",function(){
-    function selectIt(){var r=document.createRange();r.selectNodeContents(msg);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent="Texte sélectionné, copiez-le"}
-    try{navigator.clipboard.writeText(msg.textContent).then(function(){btn.textContent="Message copié";setTimeout(function(){btn.textContent="Copier le message"},2200)},selectIt)}catch(e){selectIt()}
-  });
 })();
 </script>
 
