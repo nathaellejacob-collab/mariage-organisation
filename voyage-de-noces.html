@@ -13,8 +13,8 @@
 /* Concept : un livre de contes. Une couverture nuit étoilée, puis un chapitre par jour, chacun aux couleurs d'un conte (Raiponce, Cendrillon, La Belle et la Bête). */
 :root{
   color-scheme:light;
-  --ink:#25233A;--ink-soft:#675F82;--paper:#fff;--blue:#4F8FCB;--indigo:#5B4BA8;--berry:#C43C6C;
-  --rose:#6A4BB0;--rose-d:#4E3A94;--rose-m:#8E7AD0;--rose-soft:#EFEBFA;--rose-line:rgba(110,90,190,.28);
+  --ink:#25233A;--ink-soft:#6B5F75;--paper:#fff;--blue:#4F8FCB;--indigo:#5B4BA8;--berry:#C43C6C;
+  --rose:#D4679B;--rose-d:#B33F7E;--rose-m:#EE9DBF;--rose-soft:#FDEEF5;--rose-line:rgba(226,120,166,.35);
   --gold:#F2C14E;--gold-bg:#FFF5D9;--gold-ink:#8A6A12;--gold-line:#F2D98C;
   --mint-bg:#E3F6F3;--mint-ink:#2F7F76;--mint-line:#A8E0D8;
   --script:"Waltograph","Brush Script MT",cursive;
@@ -24,7 +24,7 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;color:var(--ink);font-family:var(--serif);font-weight:500;font-size:19.5px;line-height:1.5;
-  background:#e6def8 linear-gradient(135deg,#cfe3fb 0%,#ddd8fa 38%,#ecd6f3 70%,#f8d3e2 100%) fixed;
+  background:#f6dfe9 linear-gradient(135deg,#d3e5fb 0%,#e9dcf6 33%,#f8d6e6 68%,#fcd9e0 100%) fixed;
   padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
 .wrap{max-width:940px;margin:0 auto;display:grid;gap:26px;position:relative;z-index:1}
 h1,h2,h3,p{margin:0}h2,h3{text-wrap:balance}
@@ -56,16 +56,16 @@ h1,h2,h3,p{margin:0}h2,h3{text-wrap:balance}
 a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--rose-m);outline-offset:2px}
 
 /* Cartes générales */
-.card{position:relative;background:var(--paper);border:1px solid var(--rose-line);border-radius:22px;padding:30px 26px 28px;box-shadow:0 10px 34px rgba(100,90,190,.16);overflow:hidden}
-.card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#4F8FCB,#5B4BA8 50%,#C43C6C)}
+.card{position:relative;background:var(--paper);border:1px solid var(--rose-line);border-radius:22px;padding:30px 26px 28px;box-shadow:0 10px 34px rgba(229,139,171,.2);overflow:hidden}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,#4F8FCB,#E0719F)}
 .orn{text-align:center;color:var(--rose-m);font-size:13px;letter-spacing:.5em;margin-bottom:4px}
 .card>h2{font-family:var(--script);font-weight:400;font-size:clamp(32px,6.4vw,44px);line-height:1.2;text-align:center;padding-bottom:6px}
-.card>.lead{text-align:center;font-style:italic;color:#6D6296;font-size:22px;margin-top:6px}
+.card>.lead{text-align:center;font-style:italic;color:#9A5F82;font-size:22px;margin-top:6px}
 .sep{display:flex;align-items:center;gap:12px;max-width:260px;margin:6px auto 20px}
 .sep i{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--rose-m))}.sep i:last-child{transform:scaleX(-1)}
 .sep b{color:var(--rose-m);font-size:14px;font-weight:400}
 .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-.tile{border:1px solid var(--rose-line);border-radius:16px;padding:18px 20px;background:#faf9ff;min-width:0}
+.tile{border:1px solid var(--rose-line);border-radius:16px;padding:18px 20px;background:#fffafc;min-width:0}
 .tile h3{font-family:var(--sans);font-weight:500;font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--rose-d);margin-bottom:6px}
 .tile p{font-size:19px;color:var(--ink-soft)}
 .tile .big{font-size:29px;font-weight:600;color:var(--ink);line-height:1.15;margin-bottom:4px}
@@ -122,7 +122,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .daytabs button span{font-size:11.5px;letter-spacing:.22em;text-transform:uppercase}
 .daytabs button b{font-family:var(--script);font-weight:400;font-size:28px;line-height:1.15}
 .daytabs button:hover{background:#fff}
-.daytabs button[aria-selected="true"]{background:linear-gradient(135deg,#4F8FCB,#5B4BA8 55%,#C43C6C);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(108,63,142,.35)}
+.daytabs button[aria-selected="true"]{background:linear-gradient(135deg,#4F8FCB,#E58BB8);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(108,63,142,.35)}
 .daytabs button:focus-visible{outline:2px solid var(--rose-d);outline-offset:2px}
 @media(max-width:560px){.daytabs{gap:6px}.daytabs button{padding:8px 2px;border-radius:14px}.daytabs button span{font-size:10.5px;letter-spacing:.12em}.daytabs button b{font-size:25px}}
 .daytabs button[aria-selected="true"]{background:var(--th)}
@@ -136,7 +136,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 
 .ch.raiponce{--ov:.5}.ch.belle{--ov:.5}.ch.vaiana{--ov:.6}.ch.cendrillon{--ov:.58}.ch.mulan{--ov:.6}
 .credit{font-size:14.5px;color:var(--ink-soft);text-align:center;margin-top:16px;font-style:italic}
-.trip{border:1px solid var(--rose-line);border-radius:18px;padding:20px 22px;background:#faf9ff;min-width:0;box-shadow:0 8px 24px rgba(60,40,100,.06)}
+.trip{border:1px solid var(--rose-line);border-radius:18px;padding:20px 22px;background:#fffafc;min-width:0;box-shadow:0 8px 24px rgba(60,40,100,.06)}
 .trip .pill{margin-top:12px}
 @media(max-width:560px){.trip{padding:18px 14px}}
 
@@ -155,7 +155,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{o
 .todo input:checked::after{transform:scale(1)}
 .todo input:checked+span{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:var(--rose-line)}
 .todo small{display:block;font-size:16.5px;color:var(--ink-soft);text-decoration:none}
-details{border:1px solid var(--rose-line);border-radius:16px;background:#faf9ff;padding:4px 20px;margin-top:18px}
+details{border:1px solid var(--rose-line);border-radius:16px;background:#fffafc;padding:4px 20px;margin-top:18px}
 summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:14px 0;cursor:pointer;color:var(--rose-d)}
 .msg{white-space:pre-wrap;font-size:18.5px;padding:4px 0 14px}
 .copy{font-family:var(--sans);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--ink);border:0;border-radius:999px;padding:11px 22px;cursor:pointer;margin-bottom:14px}
@@ -167,7 +167,7 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
 /* ===== v2 : teintes du logo, outils, frise, secrets, budget, souvenirs ===== */
 .title{text-shadow:none;filter:drop-shadow(0 0 14px rgba(170,150,255,.55))}
 .title span{background:linear-gradient(90deg,#8CC4FF 0%,#B9A6FF 50%,#FF9CC2 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:.3em .1em}
-.card>h2{background:linear-gradient(90deg,#4F8FCB,#5B4BA8 50%,#C43C6C);-webkit-background-clip:text;background-clip:text;color:transparent}
+.card>h2{background:linear-gradient(90deg,#4F8FCB,#E0719F);-webkit-background-clip:text;background-clip:text;color:transparent}
 .orn,.sep b{color:var(--rose-m)}
 .sep i{background:linear-gradient(90deg,transparent,var(--rose-m))}
 .cdpre,.cdpost{font-family:var(--sans);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#e4e0ff;margin-top:22px}
@@ -181,14 +181,14 @@ summary{font-family:var(--sans);font-size:13px;letter-spacing:.14em;text-transfo
 .nav::-webkit-scrollbar{display:none}
 @media(min-width:860px){.nav{justify-content:center}}
 .nav a:first-child{margin-left:auto}.nav a:last-child{margin-right:auto}
-.btn{display:inline-block;font-family:var(--sans);font-size:12px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:#fff;background:linear-gradient(135deg,#4F8FCB,#5B4BA8 60%,#8E3F94);border:0;border-radius:999px;padding:10px 18px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.btn{display:inline-block;font-family:var(--sans);font-size:12px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:#fff;background:linear-gradient(135deg,#4F8FCB,#D9689E);border:0;border-radius:999px;padding:10px 18px;cursor:pointer;transition:transform .2s,box-shadow .2s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(91,75,168,.35)}
 .btn:focus-visible{outline:2px solid var(--rose-d);outline-offset:2px}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .tag{text-decoration:none}
 a.tag:hover{filter:brightness(.95)}
 /* bandeau aujourd'hui */
-.today{display:grid;gap:2px;margin:0 0 16px;padding:14px 20px;border-radius:18px;color:#fff;background:linear-gradient(110deg,#4F8FCB,#5B4BA8 55%,#C43C6C);box-shadow:0 10px 28px rgba(91,75,168,.3)}
+.today{display:grid;gap:2px;margin:0 0 16px;padding:14px 20px;border-radius:18px;color:#fff;background:linear-gradient(110deg,#4F8FCB,#E58BB8);box-shadow:0 10px 28px rgba(91,75,168,.3)}
 .today[hidden]{display:none}
 .td-k{font-family:var(--sans);font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;opacity:.9}
 .today b{font-family:var(--script);font-weight:400;font-size:28px;line-height:1.2}
@@ -220,12 +220,12 @@ a.tag:hover{filter:brightness(.95)}
 .sc-b small{color:var(--a);opacity:1}
 /* budget */
 .bg{display:grid;gap:10px}
-.bg-r{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--rose-line);border-radius:16px;background:#faf9ff}
+.bg-r{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 16px;border:1px solid var(--rose-line);border-radius:16px;background:#fffafc}
 .bg-l{min-width:0}.bg-l b{display:block;font-weight:600;font-size:20px;line-height:1.2}.bg-l small{display:block;font-size:16px;color:var(--ink-soft);line-height:1.3}
 .bg-p{display:grid;justify-items:center;gap:2px;font-family:var(--sans);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);cursor:pointer}
 .bg-p input{appearance:none;-webkit-appearance:none;width:24px;height:24px;margin:0;border:1.5px solid var(--rose-m);border-radius:8px;background:#fff;display:grid;place-content:center;cursor:pointer}
 .bg-p input::after{content:"✦";font-size:14px;line-height:1;color:#fff;transform:scale(0);transition:transform .18s}
-.bg-p input:checked{background:linear-gradient(135deg,#4F8FCB,#5B4BA8)}
+.bg-p input:checked{background:linear-gradient(135deg,#E0719F,#F08DB5)}
 .bg-p input:checked::after{transform:scale(1)}
 .bg-r.paid .bg-l b{color:var(--ink-soft)}
 .bg-v{display:flex;align-items:center;gap:6px}
@@ -233,15 +233,15 @@ a.tag:hover{filter:brightness(.95)}
 .bg-v i{font-style:normal;color:var(--ink-soft)}
 .bg-v input:focus-visible,.sv textarea:focus-visible{outline:2px solid var(--rose-m);outline-offset:1px}
 .bg-t{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
-.bg-t div{text-align:center;border-radius:16px;padding:14px 8px;color:#fff;background:linear-gradient(135deg,#4F8FCB,#5B4BA8)}
-.bg-t div:nth-child(2){background:linear-gradient(135deg,#5B4BA8,#8E3F94)}
-.bg-t div:nth-child(3){background:linear-gradient(135deg,#8E3F94,#C43C6C)}
+.bg-t div{text-align:center;border-radius:16px;padding:14px 8px;color:#fff;background:linear-gradient(135deg,#4F8FCB,#6FA8E0)}
+.bg-t div:nth-child(2){background:linear-gradient(135deg,#9A8EDB,#D98BC8)}
+.bg-t div:nth-child(3){background:linear-gradient(135deg,#E0719F,#F08DB5)}
 .bg-t span{display:block;font-family:var(--sans);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.9}
 .bg-t b{display:block;font-weight:600;font-size:clamp(19px,4.6vw,27px);line-height:1.25}
 @media(max-width:560px){.bg-r{grid-template-columns:auto 1fr;gap:10px 12px}.bg-v{grid-column:1/-1;justify-content:flex-end}.bg-v input{width:100%}}
 /* souvenirs */
 .svs{display:grid;gap:16px}
-.sv{border:1px solid var(--rose-line);border-radius:18px;padding:16px 18px;background:#faf9ff}
+.sv{border:1px solid var(--rose-line);border-radius:18px;padding:16px 18px;background:#fffafc}
 .sv h3{font-family:var(--script);font-weight:400;font-size:27px;color:var(--rose);margin:0 0 8px}
 .sv textarea{width:100%;font:inherit;font-size:19px;color:var(--ink);padding:10px 12px;border:1px solid var(--rose-line);border-radius:12px;background:#fff;resize:vertical}
 .sv-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:12px 0}
@@ -284,6 +284,20 @@ a.tag:hover{filter:brightness(.95)}
 .where{color:#E9EEFF}
 .count b{color:#fff;text-shadow:0 0 18px rgba(150,170,255,.55)}
 .count span{color:#B9C6F5}
+
+.show{margin-top:16px;padding:14px 18px;border-radius:16px;background:var(--a-soft);border:1px solid var(--a-line)}
+.show h4{margin:0 0 6px;font-family:var(--sans);font-weight:500;font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--a)}
+.show p{font-size:18.5px;line-height:1.4;margin:3px 0}
+.show b{font-family:var(--sans);font-size:13.5px;font-weight:500;letter-spacing:.04em;color:var(--a);margin-right:6px}
+.show .show-n{font-style:italic;color:var(--ink-soft)}
+.spa{text-align:center}
+.spa-h{font-family:var(--sans);font-size:11.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--rose-d);margin:14px 0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0}
+.chips button{font-family:var(--sans);font-size:14px;color:var(--rose-d);background:var(--rose-soft);border:1px solid var(--rose-line);border-radius:999px;padding:9px 16px;cursor:pointer;min-width:58px}
+.chips button[aria-pressed="true"]{color:#fff;border-color:transparent;background:linear-gradient(135deg,#4F8FCB,#E0719F)}
+.chips button:focus-visible{outline:2px solid var(--rose-d);outline-offset:2px}
+.spa-r{font-size:22px;font-style:italic;margin:16px 0 4px;color:var(--ink)}
+@media print{.show{break-inside:avoid}.chips{display:none}}
 </style>
 
 </head><body>
@@ -326,7 +340,6 @@ a.tag:hover{filter:brightness(.95)}
       <div class="tile"><h3>L'hôtel</h3><p class="big">Disneyland Hotel</p><p>5 étoiles, à l'entrée du Parc Disneyland, décor des princes et princesses Disney.</p></div>
       <div class="tile"><h3>La chambre</h3><p class="big">Deluxe avec terrasse</p><p>1 grand lit double et 1 lit mural, pour 2 adultes.</p></div>
       <div class="tile"><h3>La durée</h3><p class="big">5 jours, 4 nuits</p><p>Du lundi 21 au vendredi 25 juin 2027, billets 2 parcs sur 5 jours inclus.</p></div>
-      <div class="tile"><h3>Le prix simulé</h3><p class="big">6 376,32 €</p><p>Taxes comprises, relevé le 27 octobre 2026. Annulation sans frais jusqu'à 7 jours avant l'arrivée.</p><span class="pill wait">À payer sur le site Disney</span></div>
     </div>
     <div class="grid" style="margin-top:14px">
       <div class="tile"><h3>Avec la chambre Deluxe</h3><p>Petit-déjeuner buffet et Tea Time inclus, accès au Deluxe Lounge avec vue sur Fantasia Gardens, accueil royal avec réception et conciergerie privées.</p></div>
@@ -360,7 +373,7 @@ a.tag:hover{filter:brightness(.95)}
           <li><time>matin</time><p>Chambre libérée, valises à la conciergerie</p></li>
           <li><time>17h30</time><p>Récupération des valises, direction la gare de Chessy</p></li>
           <li><time>18h13</time><p>TGV direct Chessy vers Lyon Part-Dieu</p></li>
-          <li><time>20h</time><p>Arrivée à Lyon, environ 20h02<small>Julian vous récupère, puis route vers Saint-Just-de-Claix</small></p></li>
+          <li><time>20h</time><p>Arrivée à Lyon, environ 20h02<small>Julian vous récupère, puis route vers Voiron</small></p></li>
         </ul>
         <span class="pill wait">Horaires indicatifs, à confirmer à l'ouverture</span>
         <div class="acts"><a class="btn" href="https://www.sncf-connect.com/" target="_blank" rel="noopener">Ouvrir SNCF Connect</a></div>
@@ -374,7 +387,7 @@ a.tag:hover{filter:brightness(.95)}
       <h2>Cinq jours, cinq contes</h2>
       <p class="lead">Chaque journée a son histoire</p>
       <div class="sep" aria-hidden="true"><i></i><b>✦</b><i></i></div>
-      <p class="note" style="margin-top:0">Raiponce ouvre le séjour, Cendrillon tient le mardi, Mulan fleurit le mercredi, la Belle et la Bête s'invite pour le dîner du jeudi et Vaiana embarque le dernier jour vers l'horizon. Les attractions citées sont indicatives, les horaires des parcs et des spectacles de juin 2027 ne sont pas encore connus.</p>
+      <p class="note" style="margin-top:0">Raiponce ouvre le séjour, Cendrillon tient le mardi, Mulan fleurit le mercredi, la Belle et la Bête s'invite pour le dîner du jeudi et Vaiana embarque le dernier jour vers l'horizon. Les attractions citées sont indicatives, les horaires des parcs et des spectacles de juin 2027 ne sont pas encore connus. Les heures de parade et de spectacle du soir sont celles de l'été 2026, à vérifier dans l'application Disney environ une semaine avant.</p>
     </div>
     <div class="today" id="today" hidden aria-live="polite"><span class="td-k">Aujourd'hui</span><b id="td-t"></b><span id="td-n"></span></div>
     <div class="daytabs" role="tablist" aria-label="Les jours du séjour">
@@ -396,23 +409,27 @@ a.tag:hover{filter:brightness(.95)}
             <li data-t="12:30"><time>12h30</time><div class="tl-b"><p>Déjeuner au Bistrot Chez Rémy <a class="tag" href="#tables">à réserver</a></p></div></li>
             <li data-t="15:00"><time>15h</time><div class="tl-b"><p>Remise de la chambre et temps de repos</p></div></li>
             <li data-t="19:30"><time>Soir</time><div class="tl-b"><p>Dîner simple à l'hôtel</p></div></li>
-            <li data-t="22:00"><time>Nuit</time><div class="tl-b"><p>Spectacle de nuit</p></div></li>
+            <li data-t="22:40"><time>22h40</time><div class="tl-b"><p>Disney Tales of Magic sur le château, à la fermeture du parc</p></div></li>
           </ol>
+          <div class="show"><h4>Parade et spectacle du soir</h4><p><b>vers 17h30</b> Disney Stars on Parade, Disneyland Park</p><p><b>vers 22h40</b> Disney Tales of Magic, sur le château, à la fermeture du parc</p><p><b>Studios</b> pas de spectacle nocturne, spectacles de scène en journée</p></div>
           <button type="button" class="secret" aria-pressed="false"><span class="sc-in"><span class="sc-f"><small>Le secret du jour</small><b>Touchez pour le découvrir ✦</b></span><span class="sc-b"><small>Le secret du jour</small><span>Au coucher du soleil, une photo à deux sur la terrasse : la première de votre vie de mariés à Disney.</span></span></span></button>
         </div>
       </article>
 
       <article class="ch cendrillon" id="j-mardi" role="tabpanel" aria-labelledby="t-mardi" hidden>
         <div class="ch-hd"><div class="fx" id="fx2"></div>
-          <div><p class="ch-conte">Cendrillon</p><h3 class="ch-name">Le bal de Fantasyland</h3><p class="ch-epi">Un déjeuner avec les princesses.</p></div>
+          <div><p class="ch-conte">Cendrillon</p><h3 class="ch-name">Le bal de Fantasyland</h3><p class="ch-epi">Un dîner avec les princesses, puis le spectacle du soir.</p></div>
           <div class="ch-date"><span>Mardi</span><b>22 juin</b></div></div>
         <div class="ch-bd"><h3>Disneyland Park, du château à Fantasyland</h3>
           <ol class="tl">
             <li data-t="09:00"><time>Matin</time><div class="tl-b"><p>Big Thunder Mountain, Phantom Manor, Peter Pan's Flight</p></div></li>
-            <li data-t="12:30"><time>Midi</time><div class="tl-b"><p>Déjeuner ou dîner à l'Auberge de Cendrillon, avec les princesses <a class="tag" href="#tables">à réserver</a></p></div></li>
-            <li data-t="15:00"><time>15h</time><div class="tl-b"><p>Pause à l'hôtel en milieu de journée</p></div></li>
-            <li data-t="17:00"><time>17h</time><div class="tl-b"><p>Retour dans le parc, jusqu'au soir</p></div></li>
+            <li data-t="12:30"><time>Midi</time><div class="tl-b"><p>Déjeuner rapide dans le parc</p></div></li>
+            <li data-t="15:00"><time>15h</time><div class="tl-b"><p>Pause à l'hôtel</p></div></li>
+            <li data-t="17:30"><time>17h30</time><div class="tl-b"><p>Disney Stars on Parade, de Fantasyland vers Town Square</p></div></li>
+            <li data-t="18:30"><time>18h30</time><div class="tl-b"><p>Dîner à l'Auberge de Cendrillon, avec les princesses <a class="tag" href="#tables">à réserver</a></p></div></li>
+            <li data-t="22:40"><time>22h40</time><div class="tl-b"><p>Disney Tales of Magic sur le château, à la fermeture du parc</p></div></li>
           </ol>
+          <div class="show"><h4>Parade et spectacle du soir</h4><p><b>vers 17h30</b> Disney Stars on Parade, Disneyland Park</p><p><b>vers 22h40</b> Disney Tales of Magic, sur le château, à la fermeture du parc</p></div>
           <button type="button" class="secret" aria-pressed="false"><span class="sc-in"><span class="sc-f"><small>Le secret du jour</small><b>Touchez pour le découvrir ✦</b></span><span class="sc-b"><small>Le secret du jour</small><span>Allez voir le château éclairé en fin de soirée, main dans la main, avant de rentrer à l'hôtel.</span></span></span></button>
         </div>
       </article>
@@ -427,6 +444,7 @@ a.tag:hover{filter:brightness(.95)}
             <li data-t="15:00"><time>15h</time><div class="tl-b"><p>Soin à deux au Spa by Clarins <a class="tag" href="#tables">à réserver</a></p></div></li>
             <li data-t="19:00"><time>19h</time><div class="tl-b"><p>Dîner à La Forêt Secrète par Jean Imbert <a class="tag" href="#tables">à réserver</a></p></div></li>
           </ol>
+          <div class="show"><h4>Parade et spectacle du soir</h4><p><b>vers 17h30</b> Disney Stars on Parade, Disneyland Park</p><p><b>vers 22h40</b> Disney Tales of Magic, sur le château, à la fermeture du parc</p></div>
           <button type="button" class="secret" aria-pressed="false"><span class="sc-in"><span class="sc-f"><small>Le secret du jour</small><b>Touchez pour le découvrir ✦</b></span><span class="sc-b"><small>Le secret du jour</small><span>Au retour du spa, écrivez chacun trois mots sur ce que vous aimez chez l'autre, et lisez-les pendant le dîner.</span></span></span></button>
         </div>
       </article>
@@ -441,6 +459,7 @@ a.tag:hover{filter:brightness(.95)}
             <li data-t="16:00"><time>16h</time><div class="tl-b"><p>Goûter à l'hôtel, il est inclus avec la chambre</p></div></li>
             <li data-t="19:30"><time>Soir</time><div class="tl-b"><p>Dîner à La Table de Lumière <a class="tag" href="#tables">à réserver</a></p></div></li>
           </ol>
+          <div class="show"><h4>Parade et spectacle du soir</h4><p><b>vers 17h30</b> Disney Stars on Parade, Disneyland Park</p><p><b>vers 22h40</b> Disney Tales of Magic, sur le château, à la fermeture du parc</p></div>
           <button type="button" class="secret" aria-pressed="false"><span class="sc-in"><span class="sc-f"><small>Le secret du jour</small><b>Touchez pour le découvrir ✦</b></span><span class="sc-b"><small>Le secret du jour</small><span>Refaites l'attraction que vous avez préférée depuis lundi, et gardez-la pour la dernière heure de la journée.</span></span></span></button>
         </div>
       </article>
@@ -456,6 +475,7 @@ a.tag:hover{filter:brightness(.95)}
             <li data-t="17:30"><time>17h30</time><div class="tl-b"><p>Valises, puis gare de Chessy</p></div></li>
             <li data-t="18:13"><time>18h13</time><div class="tl-b"><p>TGV direct vers Lyon Part-Dieu</p></div></li>
           </ol>
+          <div class="show"><h4>Parade et spectacle du soir</h4><p><b>vers 17h30</b> Disney Stars on Parade, Disneyland Park</p><p><b>vers 22h40</b> Disney Tales of Magic, sur le château, à la fermeture du parc</p><p class="show-n">Vous serez déjà dans le train, c'est pour savoir.</p></div>
           <button type="button" class="secret" aria-pressed="false"><span class="sc-in"><span class="sc-f"><small>Le secret du jour</small><b>Touchez pour le découvrir ✦</b></span><span class="sc-b"><small>Le secret du jour</small><span>Écrivez-vous une carte postale à ouvrir à votre premier anniversaire de mariage, et postez-la avant de partir.</span></span></span></button>
         </div>
       </article>
@@ -480,12 +500,19 @@ a.tag:hover{filter:brightness(.95)}
   <section class="card" id="spa">
     <div class="orn" aria-hidden="true">✦ ✧ ✦</div>
     <h2>Le spa</h2>
-    <p class="lead">Un moment rien que pour nous</p>
+    <p class="lead">Spa by Clarins, Disneyland Hotel, ouvert de 10h à 20h</p>
     <div class="sep" aria-hidden="true"><i></i><b>✦</b><i></i></div>
-    <div class="grid">
-      <div class="tile"><h3>Spa by Clarins</h3><p>Dans le Disneyland Hotel, ouvert tous les jours de 10h à 20h. Soins signature Clarins, massages, manucures et pédicures, à partir de 75 €.</p></div>
-      <div class="tile"><h3>Le créneau prévu</h3><p class="big">Mercredi, 15h</p><p>Après deux jours de marche, et avant le dîner à La Forêt Secrète.</p><span class="pill">À réserver à l'avance</span><div class="acts"><a class="btn" href="tel:+33160456605">Appeler le spa</a><a class="btn" href="https://www.disneylandparis.com/fr-fr/" target="_blank" rel="noopener">Site Disney</a></div></div>
-      <div class="tile"><h3>À vérifier avec Disney</h3><p>Soin duo possible, durées, tarifs, et accès à la piscine, au sauna ou au hammam pour les clients de l'hôtel. Réservation en ligne ou au +33 1 60 45 66 05.</p></div>
+    <div class="spa">
+      <p class="spa-h">Le jour</p>
+      <div class="chips" id="spa-d" role="group" aria-label="Jour du soin">
+        <button type="button" data-v="lundi 21 juin">Lun 21</button><button type="button" data-v="mardi 22 juin">Mar 22</button><button type="button" data-v="mercredi 23 juin">Mer 23</button><button type="button" data-v="jeudi 24 juin">Jeu 24</button><button type="button" data-v="vendredi 25 juin">Ven 25</button>
+      </div>
+      <p class="spa-h">Le créneau</p>
+      <div class="chips" id="spa-h" role="group" aria-label="Heure du soin">
+        <button type="button" data-v="10h">10h</button><button type="button" data-v="11h">11h</button><button type="button" data-v="12h">12h</button><button type="button" data-v="13h">13h</button><button type="button" data-v="14h">14h</button><button type="button" data-v="15h">15h</button><button type="button" data-v="16h">16h</button><button type="button" data-v="17h">17h</button><button type="button" data-v="18h">18h</button>
+      </div>
+      <p class="spa-r" id="spa-r"></p>
+      <div class="acts" style="justify-content:center"><a class="btn" href="tel:+33160456605">Appeler le spa</a><a class="btn" href="https://www.disneylandparis.com/fr-fr/" target="_blank" rel="noopener">Réserver en ligne</a></div>
     </div>
   </section>
 
@@ -645,6 +672,14 @@ a.tag:hover{filter:brightness(.95)}
       fl.reduce(function(p,f){return p.then(function(){return shrink(f).then(function(b){return new Promise(function(r){var rq=db.transaction('ph','readwrite').objectStore('ph').add({day:d,blob:b,ts:Date.now()});rq.onsuccess=r;rq.onerror=r})},function(){})})},Promise.resolve()).then(render)})});
     render();
   },function(){document.querySelectorAll('.sv-add').forEach(function(a){a.hidden=true});var n=document.getElementById('sv-note');n.textContent='Les photos ne sont pas disponibles dans ce navigateur, les phrases restent enregistrées.'});
+
+  /* --- spa : créneau souhaité --- */
+  (function(){var sd=document.querySelectorAll('#spa-d button'),sh=document.querySelectorAll('#spa-h button'),out=document.getElementById('spa-r');
+    var st={d:'mercredi 23 juin',h:'15h'};try{var o=JSON.parse(ls('vdn-spa')||'null');if(o&&o.d&&o.h)st=o}catch(e){}
+    function draw(){sd.forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-v')===st.d?'true':'false')});sh.forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-v')===st.h?'true':'false')});out.textContent='Créneau souhaité : '+st.d+', '+st.h+'. À confirmer à la réservation.'}
+    sd.forEach(function(b){b.addEventListener('click',function(){st.d=b.getAttribute('data-v');ls('vdn-spa',JSON.stringify(st));draw()})});
+    sh.forEach(function(b){b.addEventListener('click',function(){st.h=b.getAttribute('data-v');ls('vdn-spa',JSON.stringify(st));draw()})});
+    draw()})();
   /* --- hors ligne --- */
   if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('voyage-sw.js',{scope:'./voyage-de-noces.html'}).catch(function(){})}
 })();
