@@ -100,3 +100,12 @@ html body .table-center:not(#zz){background:#fff!important;border:1.5px solid rg
 html body .table-center input:not(#zz){color:#A8647F!important}
 html body .pool-chip:not(#zz){background:#fdf0f3!important;border:1px solid rgba(235,169,191,.5)!important;color:#7A3F57!important}
 html body .seat-chip span:not(#zz){border-color:rgba(229,139,171,.5)!important;color:#C96F93!important}
+
+/* invites confirmes */
+#conte-conf{margin:2px 0 14px;padding:12px 16px;border-radius:14px;background:#fff;border:1px solid rgba(235,169,191,.6);box-shadow:0 4px 14px rgba(235,169,191,.14)}
+#conte-conf .cc-t{font:14px Poppins,sans-serif;color:#2B2A25;display:flex;align-items:baseline;gap:6px}
+#conte-conf .cc-t b{font:600 20px 'Cormorant Garamond',serif;color:#C96F93}
+#conte-conf .cc-t span{margin-left:auto;color:#A8647F;font-size:13px}
+#conte-conf .cc-b{height:7px;border-radius:99px;background:#FDEDF1;margin-top:8px;overflow:hidden}
+#conte-conf .cc-b i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#f7b6cd,#E58BAB);transition:width .6s ease}
+@media print{#conte-conf{display:none}}
